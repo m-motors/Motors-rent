@@ -44,7 +44,7 @@ CREATE TABLE vehicul(
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     brand VARCHAR(100) NOT NULL,
     model VARCHAR(100) NOT NULL,
-    annee INT(4) NOT NULL UNIQUE,
+    annee INT NOT NULL UNIQUE,
     horsepower INT(10) NOT NULL,
     price INT(50) NOT NULL,
     categorie VARCHAR(100) NOT NULL,
