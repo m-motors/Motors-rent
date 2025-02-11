@@ -24,9 +24,11 @@ CREATE TABLE application(
     id INT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id INT NOT NULL,
+    vehicul_id INT NOT NULL,
     'type' VARCHAR(50) NOT NULL,
     'status' VARCHAR(50) NOT NULL DEFAULT 'En cours de validation',
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+    FOREIGN KEY (vehicul_id) REFERENCES vehicul(id) ON DELETE CASCADE
 );
 
 -- Creation de la table Documents
