@@ -1,0 +1,90 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+      target: ${ENV_MODE}
+    ports:
+      - ${BACKEND_PORT}:5000
+      - ${BACKEND_DEBUG_PORT}:5678
+    volumes:
+      - ./:/backend
+    env_file:
+      - .env
+      - .env.local
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      target: ${ENV_MODE}
+    restart: always
+    ports:
+      - ${FRONTEND_PORT_DEV}:5173
+      - ${FRONTEND_PORT}:4173
+    env_file:
+      - .env
+      - .env.local
+    volumes:
+      - ./frontend:/var/www
+      - /var/www/node_modules
+
+  database:
+    container_name: database
+    image: mariadb:11.5.2
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    ports:
+      - ${DB_PORT}:3306
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized",
+        ]
+      start_period: 5s
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mariadb_network
+    env_file:
+      - .env
+      - .env.local
+
+  phpMyAdmin:
+    container_name: phpmyadmin
+    image: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: ${DB_HOST}
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSORD}
+    ports:
+      - ${PHPMYADMIN_PORT}:80
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - mariadb_network
+    env_file:
+      - .env
+      - .env.local
+
+networks:
+  back_network:
+    driver: bridge
+  mariadb_network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
