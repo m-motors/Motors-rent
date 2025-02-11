@@ -24,11 +24,11 @@ CREATE TABLE application(
     id INT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id INT NOT NULL,
-    vehicul_id INT NOT NULL,
+    vehicule_id INT NOT NULL,
     'type' VARCHAR(50) NOT NULL,
     'status' VARCHAR(50) NOT NULL DEFAULT 'En cours de validation',
     FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-    FOREIGN KEY (vehicul_id) REFERENCES vehicul(id) ON DELETE CASCADE
+    FOREIGN KEY (vehicule_id) REFERENCES vehicule(id) ON DELETE CASCADE
 );
 
 -- Creation de la table Documents
@@ -41,22 +41,22 @@ CREATE TABLE documents (
 );
 
 -- Creation de la table Vehicul
-CREATE TABLE vehicul(
+CREATE TABLE vehicule(
     id INT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     brand VARCHAR(100) NOT NULL,
     model VARCHAR(100) NOT NULL,
-    annee INT NOT NULL UNIQUE,
+    'year' INT(4) NOT NULL UNIQUE,
     horsepower INT(10) NOT NULL,
     price INT(50) NOT NULL,
-    categorie VARCHAR(100) NOT NULL,
-    motorisation VARCHAR(100) NOT NULL,
+    category VARCHAR(100) NOT NULL,
+    motor VARCHAR(100) NOT NULL,
     color VARCHAR(20) NOT NULL,
     mileage INT(20) NOT NULL,
 )
 
 -- insert vehicule 
-INSERT INTO vehicul (brand, model, annee, horsepower, price, categorie, motorisation, color, mileage) 
+INSERT INTO vehicule (brand, model, 'year', horsepower, price, category, motor, color, mileage) 
 VALUES
     ('Toyota', 'Corolla', 2021, 130, 20000, 'Compact', 'Essence', 'Rouge', 15000),
     ('Ford', 'Mustang', 2020, 450, 35000, 'Sport', 'Essence', 'Bleu', 20000),
