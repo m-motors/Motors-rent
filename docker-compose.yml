@@ -22,8 +22,7 @@ services:
       target: ${ENV_MODE}
     restart: always
     ports:
-      - ${FRONTEND_PORT_DEV}:5173
-      - ${FRONTEND_PORT}:4173
+      - ${FRONTEND_PORT}:5173
     env_file:
       - .env
       - .env.local
