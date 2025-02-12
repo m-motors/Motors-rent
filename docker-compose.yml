@@ -30,60 +30,44 @@ services:
       - ./frontend:/var/www
       - /var/www/node_modules
 
-  database:
-    container_name: database
-    image: mariadb:11.5.2
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSORD}
-      MYSQL_DATABASE: ${DB_DATABASE}
-    volumes:
-      - mariadb_data:/var/lib/mysql
-      - ./database:/docker-entrypoint-initdb.d
-    ports:
-      - ${DB_PORT}:3306
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "healthcheck.sh",
-          "--su-mysql",
-          "--connect",
-          "--innodb_initialized",
-        ]
-      start_period: 5s
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - mariadb_network
-    env_file:
-      - .env
-      - .env.local
-
-  phpMyAdmin:
-    container_name: phpmyadmin
-    image: phpmyadmin
+  postgres:
+    image: postgres:17.0-alpine3.20
+    container_name: postgres
     restart: always
-    environment:
-      PMA_HOST: ${DB_HOST}
-      PMA_USER: ${DB_USER}
-      PMA_PASSWORD: ${DB_PASSORD}
-    ports:
-      - ${PHPMYADMIN_PORT}:80
-    depends_on:
-      database:
-        condition: service_healthy
-    networks:
-      - mariadb_network
     env_file:
       - .env
       - .env.local
+    networks:
+      postgres_network:
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/postgres:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
 
+  postgres-admin-tool:
+    image: dpage/pgadmin4:8
+    container_name: pgadmin
+    restart: always
+    env_file:
+      - .env
+      - .env.local
+    ports:
+      - "8080:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./database/pgadmin/servers.json:/pgadmin4/servers.json
+    networks:
+      postgres_network:
+    depends_on:
+      - postgres
+      
 networks:
   back_network:
     driver: bridge
-  mariadb_network:
+  postgres_network:
     driver: bridge
 
 volumes:
-  mariadb_data:
+  postgres_data:
+  pgadmin_data:
