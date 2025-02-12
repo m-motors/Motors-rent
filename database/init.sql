@@ -1,5 +1,5 @@
 -- Utilisation de la base de données
--- Suppresion et recration
+-- Suppresion et recreation 
 DROP DATABASE app;
 CREATE DATABASE app;
 use app;
