@@ -1,8 +1,11 @@
 -- Utilisation de la base de données
+-- suppression et recreation 
+DROP DATABASE app;
+CREATE DATABASE app;
 use app;
 
 -- Création de la table user avec user_role en ENUM
-CREATE TABLE user (
+CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -14,7 +17,7 @@ CREATE TABLE user (
 );
 
 -- Insertion des utilisateurs
-INSERT INTO user (email, first_name, last_name, is_active, user_role, created_at, password) 
+INSERT INTO users (email, first_name, last_name, is_active, user_role, created_at, password) 
 VALUES
     ('user1@example.com', 'Alice', 'Dupont', TRUE, 'client', NOW(), 'alice'), 
     ('user2@example.com', 'Bob', 'Martin', TRUE, 'client', NOW(), 'bob'), 
@@ -23,9 +26,10 @@ VALUES
     ('user4@example.com', 'Emma', 'Morel', TRUE, 'client', NOW(), '$2y$10$abcdefghijklmnopqrstuv');
 
 -- Création de la table vehicule
-CREATE TABLE vehicule(
+CREATE TABLE vehicules(
     id INT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    available BOOLEAN NOT NULL DEFAULT TRUE,
     brand VARCHAR(100) NOT NULL,
     model VARCHAR(100) NOT NULL,
     `year` INT(4) NOT NULL,
@@ -37,29 +41,8 @@ CREATE TABLE vehicule(
     mileage INT(20) NOT NULL
 );
 
--- Création de la table application
-CREATE TABLE application (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    user_id INT NOT NULL,
-    vehicule_id INT NOT NULL,
-    `type` VARCHAR(50) NOT NULL,
-    `status` VARCHAR(50) NOT NULL DEFAULT 'En cours de validation',
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE,
-    FOREIGN KEY (vehicule_id) REFERENCES vehicule(id) ON DELETE CASCADE
-);
-
--- Création de la table documents
-CREATE TABLE documents (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    application_id INT NOT NULL,
-    document_type VARCHAR(50) NOT NULL, 
-    FOREIGN KEY (application_id) REFERENCES application(id) ON DELETE CASCADE
-);
-
 -- Insertion des véhicules
-INSERT INTO vehicule (brand, model, `year`, horsepower, price, category, motor, color, mileage) 
+INSERT INTO vehicules (brand, model, `year`, horsepower, price, category, motor, color, mileage) 
 VALUES
     ('Toyota', 'Corolla', 2021, 130, 20000, 'Compact', 'Essence', 'Rouge', 15000),
     ('Ford', 'Mustang', 2020, 450, 35000, 'Sport', 'Essence', 'Bleu', 20000),
@@ -71,3 +54,25 @@ VALUES
     ('Nissan', 'Leaf', 2021, 150, 35000, 'Hatchback', 'Électrique', 'Bleu', 10000),
     ('Peugeot', '208', 2021, 100, 20000, 'Compact', 'Essence', 'Jaune', 8000),
     ('Honda', 'Civic', 2020, 180, 22000, 'Compact', 'Essence', 'Rouge', 22000);
+
+-- Création de la table application
+CREATE TABLE applications (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT NOT NULL,
+    vehicule_id INT NOT NULL,
+    `type` VARCHAR(50) NOT NULL,
+    `status` VARCHAR(50) NOT NULL DEFAULT 'En cours de validation',
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (vehicule_id) REFERENCES vehicules(id) ON DELETE CASCADE
+);
+
+-- Création de la table documents
+CREATE TABLE documents (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    application_id INT NOT NULL,
+    document_type VARCHAR(50) NOT NULL, 
+    link VARCHAR(255) NOT NULL,
+    FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+);
