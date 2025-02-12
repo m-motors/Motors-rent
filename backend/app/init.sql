@@ -1,5 +1,5 @@
 --Creation de la table user
-CREATE TABLE user (
+CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     email VARCHAR(100) NOT NULL UNIQUE,
@@ -11,7 +11,7 @@ CREATE TABLE user (
 );
 
 -- insert user 
-INSERT INTO user (email, first_name, last_name, is_active, user_role, created_at, password) 
+INSERT INTO users (email, first_name, last_name, is_active, user_role, created_at, password) 
 VALUES
     ('user1@example.com', 'Alice', 'Dupont', TRUE, 'client', NOW(), 'alice'), 
     ('user2@example.com', 'Bob', 'Martin', TRUE, 'client', NOW(), 'bob'), 
@@ -20,30 +20,32 @@ VALUES
     ('user4@example.com', 'Emma', 'Morel', TRUE, 'client', NOW(), '$2y$10$abcdefghijklmnopqrstuv');
 
 -- Creation de la table application 
-CREATE TABLE application(
+CREATE TABLE applications(
     id INT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_id INT NOT NULL,
     vehicule_id INT NOT NULL,
     'type' VARCHAR(50) NOT NULL,
     'status' VARCHAR(50) NOT NULL DEFAULT 'En cours de validation',
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
-    FOREIGN KEY (vehicule_id) REFERENCES vehicule(id) ON DELETE CASCADE
+    FOREIGN KEY (users_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (vehicules_id) REFERENCES vehicules(id) ON DELETE CASCADE
 );
 
 -- Creation de la table Documents
 CREATE TABLE documents (
     id INT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    application_id INT NOT NULL,
-    document_type VARCHAR(50) NOT NULL, 
-    FOREIGN KEY (application_id) REFERENCES application(id) ON DELETE CASCADE
+    applications_id INT NOT NULL,
+    document_type VARCHAR(50) NOT NULL,
+    link VARCHAR(255) NOT NULL,
+    FOREIGN KEY (applications_id) REFERENCES applications(id) ON DELETE CASCADE
 );
 
 -- Creation de la table Vehicul
-CREATE TABLE vehicule(
+CREATE TABLE vehicules(
     id INT PRIMARY KEY AUTO_INCREMENT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    avalable BOOLEAN NOT NULL DEFAULT TRUE,
     brand VARCHAR(100) NOT NULL,
     model VARCHAR(100) NOT NULL,
     'year' INT(4) NOT NULL UNIQUE,
@@ -56,7 +58,7 @@ CREATE TABLE vehicule(
 )
 
 -- insert vehicule 
-INSERT INTO vehicule (brand, model, 'year', horsepower, price, category, motor, color, mileage) 
+INSERT INTO vehicules (brand, model, 'year', horsepower, price, category, motor, color, mileage) 
 VALUES
     ('Toyota', 'Corolla', 2021, 130, 20000, 'Compact', 'Essence', 'Rouge', 15000),
     ('Ford', 'Mustang', 2020, 450, 35000, 'Sport', 'Essence', 'Bleu', 20000),
