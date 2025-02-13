@@ -7,7 +7,7 @@ function Filters(){
                 <li>
                     <label htmlFor="Brand">brend : </label>
                     <select name="Brand" id="Brand">
-                        <option value="choice_your_brand">Choice your brand</option>
+                        <option value="choose_your_brand">Choose your brand</option>
                         <option value="toyota">Toyota</option>
                         <option value="volkswagen">Volkswagen</option>
                         <option value="hyundai">Hyundai</option>
@@ -23,7 +23,7 @@ function Filters(){
                 <li>
                     <label htmlFor="category">category : </label>
                     <select name="category" id="category">
-                        <option value="sedan">coose the categor</option>
+                        <option value="sedan">choose the categor</option>
                         <option value="sedan">Sedan</option>
                         <option value="sedan">Sedan</option>
                         <option value="suv">SUV</option>
@@ -50,7 +50,7 @@ function Filters(){
                 <li>
                     <label htmlFor="horsPower">horsPower: </label>
                     <select name="horsPower" id="horsPower">
-                    <option value="stepChoos">choice your power gamme</option>
+                    <option value="stepChoos">choose your power gamme</option>
                     <option value="step1">130 - 160</option>
                     <option value="step2">161 - 200</option>
                         <option value="step3">201 - 2030</option>
@@ -60,7 +60,7 @@ function Filters(){
                 <li>
                     <label htmlFor="price">price: </label>
                     <select name="price" id="price">
-                    <option value="stepChoos">choice your price gamme</option>
+                    <option value="stepChoos">choose your price gamme</option>
                     <option value="step1">1900 - 2400</option>
                     <option value="step2">2401 - 2900</option>
                         <option value="step3">2901 - 3400</option>
@@ -70,7 +70,7 @@ function Filters(){
                 <li>
                     <label htmlFor="motore">motore: </label>
                     <select name="motore" id="motore">
-                    <option value="motoreCoose">choice the motore</option>
+                    <option value="motoreCoose">choose the motore</option>
                     <option value="gasoline">gasoline</option>
                     <option value="essance">essance</option>
                         <option value="electric">electric</option>
@@ -80,7 +80,7 @@ function Filters(){
                 <li>
                     <label htmlFor="Mileage">Mileage: </label>
                     <select name="Mileage" id="Mileage">
-                    <option value="MileageChoos">choice the Mileage maximal</option>
+                    <option value="MileageChoos">choose the Mileage maximal</option>
                     <option value="Mileage1">500</option>
                     <option value="Mileage2">1000</option>
                         <option value="Mileage3">1500</option>
