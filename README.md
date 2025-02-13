@@ -1,3 +1,6 @@
+### Créer le fichier .env.local avec les secrets ###
+
+
 # M-Motors : Une Success Story
 
 M-Motors a été créée en 1987 comme un spécialiste en vente des véhicules d’occasion. L’entreprise a gagné beaucoup de succès et de réputation. Elle est devenue, après 30 ans de création, une des 10 entreprises au niveau national. Ce succès vient de plusieurs aspects, mais tous centrés autour de la satisfaction client.
@@ -129,10 +132,10 @@ Dans **.env**  set => ENV_MODE="development"
 
 ### Set les varibles d'environnement 
 
-.env = variable par default sans secret  => versionner 
-.env.local = secret => non versonner 
+.env = variable par default sans secret  => versionné
+.env.local = secret => non versoinné
 Lors de la création des container les variables d'environement du .env son réécrite par celle du .env.local
 
-Créer le fichier .env.local avec les secrets 
+### Créer le fichier .env.local avec les secrets ###
 
 
