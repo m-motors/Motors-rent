@@ -139,3 +139,17 @@ Lors de la création des container les variables d'environement du .env son ré�
 ### Créer le fichier .env.local avec les secrets ###
 
 
+## Connecting to PGAdmin via Web
+
+If you don’t have the PGAdmin application installed, you can access it directly from your web browser.
+
+### Web Interface Access:
+- **URL**: [localhost:8080](http://localhost:8080)
+- **Email / Username**: `admin@admin.fr`
+- **Password**: `ChangeMe`
+
+### Navigating in PGAdmin:
+1. In the left panel, expand `Servers`.
+2. When prompted for a password, use: **`ChangeMe`**.
+3. To view tables:
+   - **Servers** → **Databases** → **groupe11** → **Schemas** → **Tables**.
