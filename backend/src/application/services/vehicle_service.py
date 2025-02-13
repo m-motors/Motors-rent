@@ -1,6 +1,6 @@
-from domain.models.vehicle import Vehicle
-from application.ports.input.vehicle_use_cases import VehicleUseCase
-from application.ports.output.vehicle_repository import VehicleRepository
+from src.domain.models.vehicle import Vehicle
+from src.application.ports.input.vehicle_use_cases import VehicleUseCase
+from src.application.ports.output.vehicle_repository import VehicleRepository
 
 class VehicleService(VehicleUseCase):
     def __init__(self, vehicle_repository: VehicleRepository):

@@ -1,6 +1,6 @@
 import os
-
 from dotenv import load_dotenv
+
 load_dotenv()
 
 class Config:
@@ -16,9 +16,6 @@ class Config:
 
     CACHE_TYPE = 'simple'  # Can be "memcached", "redis", etc.
     CSRF_ENABLED = True,
-    CORS_ORIGIN_WHITELIST = [
-        'http://0.0.0.0'
-    ]
 
     def __setitem__(self, key, item):
         self.__dict__[key] = item

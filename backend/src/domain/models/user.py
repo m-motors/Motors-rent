@@ -1,6 +1,6 @@
-from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import Optional
+from datetime import datetime, timezone
+from dataclasses import dataclass, field
 
 @dataclass
 class User:

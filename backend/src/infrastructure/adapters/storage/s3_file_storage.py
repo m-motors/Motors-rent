@@ -1,8 +1,9 @@
-import boto3
-from botocore.exceptions import ClientError
-from application.ports.output.file_storage import DocumentStorage
-from typing import BinaryIO
 import os
+import boto3
+from typing import BinaryIO
+from botocore.exceptions import ClientError
+
+from src.application.ports.output.file_storage import DocumentStorage
 
 class S3DocumentStorage(DocumentStorage):
     def __init__(self):
