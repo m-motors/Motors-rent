@@ -52,19 +52,19 @@ function Filters(){
                     <select name="horsPower" id="horsPower">
                     <option value="stepChoos">choice your power gamme</option>
                     <option value="step1">130 - 160</option>
-                    <option value="step2">161-200</option>
-                        <option value="step3">201-2030</option>
-                        <option value="step4">2031-2060</option>
+                    <option value="step2">161 - 200</option>
+                        <option value="step3">201 - 2030</option>
+                        <option value="step4">2031 - 2060</option>
                     </select>
                 </li>
                 <li>
-                    <label htmlFor="prace">prace: </label>
+                    <label htmlFor="price">price: </label>
                     <select name="price" id="price">
-                    <option value="stepChoos">choice your prace gamme</option>
-                    <option value="step1">1900-2400</option>
-                    <option value="step2">2401-2900</option>
-                        <option value="step3">2901-3400</option>
-                        <option value="step4">3401-4000</option>
+                    <option value="stepChoos">choice your price gamme</option>
+                    <option value="step1">1900 - 2400</option>
+                    <option value="step2">2401 - 2900</option>
+                        <option value="step3">2901 - 3400</option>
+                        <option value="step4">3401 - 4000</option>
                     </select>
                 </li>
                 <li>
