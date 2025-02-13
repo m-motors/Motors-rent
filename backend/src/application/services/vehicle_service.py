@@ -20,3 +20,6 @@ class VehicleService(VehicleUseCase):
     
     def delete_vehicle(self, id: int) -> bool:
         return self.vehicle_repository.delete(id)
+
+    def toggle_vehicle_status(self, id: int) -> Vehicle | None:
+        return self.vehicle_repository.toggle_vehicle_status(id)
