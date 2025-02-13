@@ -1,10 +1,11 @@
-from flask import Flask
+import logging
 
-app = Flask(__name__)
+from backend.src.infrastructure.config.config import Config
+from src.infrastructure.web.create_app import create_app
 
-@app.route('/')
-def home():
-    return "Hello, Flask!"
+logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+
+    app = create_app(Config)
+    app.run(host='0.0.0.0')
