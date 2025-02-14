@@ -5,16 +5,15 @@ from src.application.services.user_service import UserService
 
 user_routes = Blueprint('user_routes', __name__)
 
-def create_user_routes(user_service: UserService) -> Blueprint:
     
-    @user_routes.route('/users', methods=['GET'])
-    def get_users():         
-        try:
-            user = "toto"
-            return jsonify({"message": "Get users", "content": "toto", "error": None}), 200
-        except Exception as e:
-            current_app.logger.error(f"Upload failed: {str(e)}")
-            return jsonify({"message": "Get users failed", "content": "toto is not here", "error": {str(e)} }), 200
+@user_routes.route('/users', methods=['GET'])
+def get_users():         
+    try:
+        user = "toto"
+        return jsonify({"message": "Get users", "content": "toto", "error": None}), 200
+    except Exception as e:
+        current_app.logger.error(f"Upload failed: {str(e)}")
+        return jsonify({"message": "Get users failed", "content": "toto is not here", "error": {str(e)} }), 200
 
     # @document_routes.route('/documents/<int:document_id>', methods=['GET'])
     # def get_document(document_id: int):
@@ -37,4 +36,3 @@ def create_user_routes(user_service: UserService) -> Blueprint:
     #         return '', 204
     #     return jsonify({"error": "Document not found"}), 404
 
-    return user_routes
