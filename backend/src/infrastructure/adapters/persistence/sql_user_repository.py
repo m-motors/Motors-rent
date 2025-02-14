@@ -4,7 +4,7 @@ from src.application.ports.output.user_repository import UserRepository
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-class MySQLUserRepository(UserRepository):
+class SQLUserRepository(UserRepository):
     def __init__(self, db: SQLAlchemy):
         self.db = db
     
@@ -57,3 +57,24 @@ class MySQLUserRepository(UserRepository):
             "user_role": user.user_role,
             "password": user.password
         }
+
+    def update(self, user: User) -> User:
+        query = """
+            UPDATE users SET email=:email, first_name=:first_name, last_name=:last_name, 
+            is_active=:is_active, user_role=:user_role, password=:password
+            WHERE id=:id
+            RETURNING *
+        """
+        params = self._map_to_params(user)
+        result = self.db.session.execute(query, params)
+        self.db.session.commit()
+
+        return self._map_to_user(result.fetchone()._asdict())
+
+    def delete(self, id: int) -> bool:
+        query = "DELETE FROM users WHERE id = :id"
+        result = self.db.session.execute(query, {"id": id})
+        self.db.session.commit()
+
+        return result.rowcount > 0
+

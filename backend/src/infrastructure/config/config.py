@@ -17,6 +17,22 @@ class Config:
     CACHE_TYPE = 'simple'  # Can be "memcached", "redis", etc.
     CSRF_ENABLED = True,
 
+    DATABASE_CONFIG = {
+    "dbname": "groupe11",
+    "user": "admin",
+    "password": "ChangeMe",
+    "host": "postgres",  
+    "port": "5432"
+}
+
+    SQLALCHEMY_DATABASE_URI = (
+        f"postgresql+psycopg2://{DATABASE_CONFIG['user']}:"
+        f"{DATABASE_CONFIG['password']}@{DATABASE_CONFIG['host']}:"
+        f"{DATABASE_CONFIG['port']}/{DATABASE_CONFIG['dbname']}"
+    )
+
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
     def __setitem__(self, key, item):
         self.__dict__[key] = item
 
