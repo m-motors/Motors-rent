@@ -22,3 +22,4 @@ class UserRepository(ABC):
     @abstractmethod
     def delete(self, id: int) -> bool:
         pass
+    
