@@ -1,8 +1,9 @@
 from typing import List
-from domain.models.vehicle import Vehicle
-from application.ports.output.vehicle_repository import VehicleRepository
-from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+
+from src.domain.models.vehicle import Vehicle
+from src.application.ports.output.vehicle_repository import VehicleRepository
 
 class MySQLVehicleRepository(VehicleRepository):
     def __init__(self, db: SQLAlchemy):

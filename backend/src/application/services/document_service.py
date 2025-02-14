@@ -1,8 +1,9 @@
-from typing import BinaryIO, List, Optional
-from domain.models.document import Document
-from application.ports.output.document_repository import DocumentRepository
-from application.ports.output.file_storage import DocumentStorage
 import uuid
+from typing import BinaryIO, List, Optional
+
+from src.domain.models.document import Document
+from src.application.ports.output.file_storage import DocumentStorage
+from src.application.ports.output.document_repository import DocumentRepository
 
 class DocumentService:
     def __init__(
