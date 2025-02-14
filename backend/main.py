@@ -4,8 +4,11 @@ import logging
 from flask_cors import CORS
 from flask import Flask, jsonify, Blueprint
 
+
 from src.infrastructure.config.config import Config
 from src.infrastructure.web.api.version_routes import version_routes_blueprint
+from src.infrastructure.web.api.user_routes import user_routes
+
 from src.infrastructure.web.api.document_routes import document_routes
 
 logger = logging.getLogger(__name__)
@@ -18,6 +21,8 @@ CORS(app, supports_credentials=True)
 
 # Ajouter les blueprint ici 
 app.register_blueprint(version_routes_blueprint, url_prefix='/api')
+app.register_blueprint(user_routes, url_prefix='/api')
+
 app.register_blueprint(document_routes, url_prefix='/api')
 
 @app.errorhandler(404)

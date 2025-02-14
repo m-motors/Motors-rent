@@ -18,6 +18,7 @@ RUN pip install --upgrade pip setuptools wheel \
     && pip install flask-debugtoolbar debugpy
 
 EXPOSE 3000
+ENV PYTHONPATH=/app/src
 
 CMD ["flask", "--app", "./main.py", "run", "--host=0.0.0.0", "--reload"]
 

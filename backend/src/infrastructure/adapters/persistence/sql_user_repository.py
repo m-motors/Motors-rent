@@ -1,6 +1,6 @@
 from typing import List, Optional
-from domain.models.user import User
-from application.ports.output.user_repository import UserRepository
+from src.domain.models.user import User
+from src.application.ports.output.user_repository import UserRepository
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 

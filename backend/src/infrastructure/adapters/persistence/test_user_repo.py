@@ -1,13 +1,14 @@
 import os
 import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
+sys.path.append('/app/src')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../..")))
 
 from src.infrastructure.adapters.persistence.mysql_user_repository import MySQLUserRepository
+# from .mysql_user_repository import MySQLUserRepository
 
 from flask_sqlalchemy import SQLAlchemy
 # from sql_user_repository import MySQLUserRepository
-from domain.models.user import User
+from src.domain.models.user import User
 
 db = SQLAlchemy()
 user_repo = MySQLUserRepository(db)

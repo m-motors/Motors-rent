@@ -1,6 +1,6 @@
-from domain.models.vehicle import User
-from application.ports.input.vehicle_use_cases import UserUseCase
-from application.ports.output.vehicle_repository import UserRepository
+from src.domain.models.user import User
+from src.application.ports.input.user_use_case import UserUseCase
+from src.application.ports.output.user_repository import UserRepository
 from typing import List
 
 
