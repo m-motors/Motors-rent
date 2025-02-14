@@ -7,12 +7,14 @@ services:
       target: ${ENV_MODE}
     ports:
       - ${BACKEND_PORT}:5000
-      - ${BACKEND_DEBUG_PORT}:5678
     volumes:
-      - ./:/backend
+      - ./backend:/app
     env_file:
       - .env
       - .env.local
+    networks:
+      postgres_network:
+      back_network:
 
   frontend:
     container_name: frontend
@@ -29,9 +31,11 @@ services:
     volumes:
       - ./frontend:/var/www
       - /var/www/node_modules
+    networks:
+      back_network:
 
   postgres:
-    image: postgres:17.0-alpine3.20
+    image: postgres:17.2-alpine3.21
     container_name: postgres
     restart: always
     env_file:
@@ -46,7 +50,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   postgres-admin-tool:
-    image: dpage/pgadmin4:8
+    image: dpage/pgadmin4
     container_name: pgadmin
     restart: always
     env_file:

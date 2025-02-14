@@ -1,6 +1,7 @@
-from flask import Blueprint, jsonify, request, current_app
 from werkzeug.utils import secure_filename
-from application.services.document_service import DocumentService
+from flask import Blueprint, jsonify, request, current_app
+
+from src.application.services.document_service import DocumentService
 
 document_routes = Blueprint('document_routes', __name__)
 

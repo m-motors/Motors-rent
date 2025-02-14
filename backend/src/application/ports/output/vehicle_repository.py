@@ -1,6 +1,7 @@
-from abc import ABC, abstractmethod
 from typing import List
-from domain.models.vehicle import Vehicle
+from abc import ABC, abstractmethod
+
+from src.domain.models.vehicle import Vehicle
 
 class VehicleRepository(ABC):
     @abstractmethod

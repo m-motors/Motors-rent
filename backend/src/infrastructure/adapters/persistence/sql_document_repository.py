@@ -1,7 +1,8 @@
 from typing import List, Optional
-from domain.models.document import Document
-from application.ports.output.document_repository import DocumentRepository
 from flask_sqlalchemy import SQLAlchemy
+
+from src.domain.models.document import Document
+from src.application.ports.output.document_repository import DocumentRepository
 
 class MySQLDocumentRepository(DocumentRepository):
     def __init__(self, db: SQLAlchemy):

@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
 from typing import BinaryIO
+from abc import ABC, abstractmethod
 
 class DocumentStorage(ABC):
     @abstractmethod
