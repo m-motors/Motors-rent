@@ -1,94 +1,61 @@
 import '../../styles/globals.css'
 
-function Filters(){
+const Filters: React.FC = () => {
+
+    const data = {
+        brands: [
+            {
+                name: "Toyota",
+                origin: "Japon"
+            },
+            {
+                name: "Volkswagen",
+                origin: "Allemagne"
+            },
+            {
+                name: "Renault",
+                origin: "France"
+            }
+        ],
+        categories: [
+            {
+                name: "SUV"
+            },
+            {
+                name: "Citadine"
+            }
+        ]
+    };
+    
     return(
-        <div>
-            <ul>
-                <li>
-                    <label htmlFor="Brand">brend : </label>
-                    <select name="Brand" id="Brand">
-                        <option value="choose_your_brand">Choose your brand</option>
-                        <option value="toyota">Toyota</option>
-                        <option value="volkswagen">Volkswagen</option>
-                        <option value="hyundai">Hyundai</option>
-                        <option value="general-motors">General Motors</option>
-                        <option value="ford">Ford</option>
-                        <option value="honda">Honda</option>
-                        <option value="nissan">Nissan</option>
-                        <option value="bmw">BMW</option>
-                        <option value="mercedes">Mercedes-Benz</option>
-                        <option value="tesla">Tesla</option>
-                    </select>
-                </li>
-                <li>
-                    <label htmlFor="category">category : </label>
-                    <select name="category" id="category">
-                        <option value="sedan">choose the categor</option>
-                        <option value="sedan">Sedan</option>
-                        <option value="sedan">Sedan</option>
-                        <option value="suv">SUV</option>
-                        <option value="hatchback">Hatchback</option>
-                        <option value="coupe">Coupe</option>
-                        <option value="convertible">Convertible</option>
-                        <option value="wagon">Wagon</option>
-                        <option value="pickup">Pickup Truck</option>
-                        <option value="van">Van</option>
-                        <option value="crossover">Crossover</option>
-                        <option value="off-road">Off-Road</option>
-                    </select>
-                </li>
-                <li>
-                    <label htmlFor="year">year: </label>
-                    <select name="year" id="year">
-                        <option value="chooseYear">Choose the year</option>
-                        <option value="2021">2021</option>
-                        <option value="2020">2020</option>
-                        <option value="2019">2019</option>
-                        <option value="2018">2018</option>
-                    </select>
-                </li>
-                <li>
-                    <label htmlFor="horsPower">horsPower: </label>
-                    <select name="horsPower" id="horsPower">
-                    <option value="stepChoos">choose your power gamme</option>
-                    <option value="step1">130 - 160</option>
-                    <option value="step2">161 - 200</option>
-                        <option value="step3">201 - 2030</option>
-                        <option value="step4">2031 - 2060</option>
-                    </select>
-                </li>
-                <li>
-                    <label htmlFor="price">price: </label>
-                    <select name="price" id="price">
-                    <option value="stepChoos">choose your price gamme</option>
-                    <option value="step1">1900 - 2400</option>
-                    <option value="step2">2401 - 2900</option>
-                        <option value="step3">2901 - 3400</option>
-                        <option value="step4">3401 - 4000</option>
-                    </select>
-                </li>
-                <li>
-                    <label htmlFor="motore">motore: </label>
-                    <select name="motore" id="motore">
-                    <option value="motoreCoose">choose the motore</option>
-                    <option value="gasoline">gasoline</option>
-                    <option value="essance">essance</option>
-                        <option value="electric">electric</option>
-                        <option value="hybride">hybride</option>
-                    </select>
-                </li>
-                <li>
-                    <label htmlFor="Mileage">Mileage: </label>
-                    <select name="Mileage" id="Mileage">
-                    <option value="MileageChoos">choose the Mileage maximal</option>
-                    <option value="Mileage1">500</option>
-                    <option value="Mileage2">1000</option>
-                        <option value="Mileage3">1500</option>
-                        <option value="Mileage4">2000</option>
-                    </select>
-                </li>
-            </ul>
-        </div>
+       <div className='filter'>
+        <ul>
+            <li>
+                <label htmlFor="brand">Brand : </label>
+                <select name="brand" id="brand">
+                    {
+                        data.brands.map((brand) => (
+                            <option key={brand.name} value={brand.name}>
+                                {brand.name} - {brand.origin}
+                            </option>
+                        ))
+                    }
+                </select>
+            </li>
+            <li>
+                <label htmlFor="categories">Categories : </label>
+                <select name="categories" id="categories">
+                    {
+                        data.categories.map((category) => (
+                            <option key={category.name} value={category.name}>
+                                {category.name}
+                            </option>
+                        ))
+                    }
+                </select>
+            </li>
+        </ul>
+       </div>
     )}
 
 export default Filters
