@@ -104,3 +104,4 @@ INSERT INTO "documents" ("created_at", "application_id", "document_type", "link"
 ('2025-02-11 22:02:12', 3, 'Insurance', 'http://example.com/doc3.pdf'),
 ('2025-02-11 22:02:12', 4, 'Registration', 'http://example.com/doc4.pdf'),
 ('2025-02-11 22:02:12', 5, 'Proof of Address', 'http://example.com/doc5.pdf');
+('2025-02-11 22:02:12', 5, 'Proof of Address', 'http://example.com/doc5.pdf');
