@@ -1,5 +1,5 @@
 from typing import List, Optional
-from src.domain.models.user import User
+from src.domain.models.user import User, UserRole
 from src.application.ports.output.user_repository import UserRepository
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -16,12 +16,20 @@ class SQLUserRepository(UserRepository):
         result = self.db.session.execute(query, {"id": id}).fetchone()
         return self._map_to_user(result._asdict()) if result else None
     
+    def find_by_email(self, email: str) -> Optional[User]:
+        query = text("""
+            SELECT * FROM users WHERE email = :email
+        """)
+        result = self.db.session.execute(query, {"email": email}).fetchone()
+        return self._map_to_user(result._asdict()) if result else None
+    
     def find_all(self) -> List[User]:
         query = text("""
             SELECT * FROM users
         """)
         results = self.db.session.execute(query).fetchall()
         return [self._map_to_user(row._asdict()) for row in results]
+
 
     def save(self, user: User) -> User:
         query = text("""
@@ -65,7 +73,7 @@ class SQLUserRepository(UserRepository):
             first_name=row["first_name"],
             last_name=row["last_name"],
             is_active=row["is_active"],
-            user_role=row["user_role"],
+            user_role=UserRole(row["user_role"]),
             password=row["password"]
         )
 

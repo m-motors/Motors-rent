@@ -22,3 +22,14 @@ ENV PYTHONPATH=/app/src
 
 CMD ["flask", "--app", "./main.py", "run", "--host=0.0.0.0", "--reload"]
 
+
+
+FROM base AS debug
+
+RUN pip install --upgrade pip setuptools wheel \
+    && pip install flask-debugtoolbar debugpy
+
+EXPOSE 3000
+EXPOSE 5678
+
+CMD ["python", "-Xfrozen_modules=off", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "flask", "--app", "./main.py", "run", "--host=0.0.0.0", "--reload"]

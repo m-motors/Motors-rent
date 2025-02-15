@@ -6,6 +6,10 @@ class UserRepository(ABC):
     @abstractmethod
     def find_by_id(self, id: int) -> User | None:
         pass
+
+    @abstractmethod
+    def find_by_email(self, email: str) -> User | None:
+        pass
     
     @abstractmethod
     def find_all(self) -> List[User]:
