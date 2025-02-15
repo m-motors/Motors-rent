@@ -6,9 +6,9 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from src.domain.models.user import UserRole
 
 def create_authorize(user_repository):
-    def authorize(required_roles: List[UserRole] = None):
-        # if isinstance(required_roles, UserRole):
-        #     required_roles = [required_roles]
+    def authorize(required_roles: Union[UserRole, List[UserRole]] = None):
+        if isinstance(required_roles, UserRole):
+            required_roles = [required_roles]
 
         def decorator(fn):
             @wraps(fn)

@@ -16,7 +16,7 @@ def create_tools_routes(authorize : authorize) -> Blueprint:
             return jsonify({"message": "Get version failed", "content": None, "error": "Upload failed"}), 500
         
     @tools_routes.route('/tools/identity/client', methods=['GET'])
-    @authorize([UserRole.CLIENT])
+    @authorize(UserRole.CLIENT)
     def get_identity_client(user):
         try:
             return jsonify({"message": "Get identity", "content": user.to_dict(), "error": None}), 200
