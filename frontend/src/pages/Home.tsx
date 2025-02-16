@@ -1,9 +1,10 @@
 import Filters from "../components/vehicles/filters";
+import DropdownMenu from "../components/common/DropdownMenu";
 
 const Home: React.FC = () => {
   return (
     <div className="home">
-      <h1>HOME</h1>
+      <DropdownMenu />
       <Filters />
     </div>
   );
