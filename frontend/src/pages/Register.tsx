@@ -1,8 +1,10 @@
 import "../styles/register.css";
+import DropdownMenu from "../components/common/DropdownMenu";
 
 function Register() {
   return (
     <div>
+      <DropdownMenu />
       <form id="registerForm">
         FirstName:
         <input type="text" id="name" placeholder="Name" required />
