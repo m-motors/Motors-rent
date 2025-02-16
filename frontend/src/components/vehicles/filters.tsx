@@ -1,13 +1,12 @@
-<<<<<<< HEAD
-import { data } from 'react-router-dom';
-import '../../styles/globals.css'
-const data: any = [
-    { id: 1, created_at: "2025-02-11 22:02:12", available: true, brand: "Toyota", model: "Corolla", year: 2020, horsepower: 132, price: 20000, category: "Sedan", motor: "Gasoline", color: "White", mileage: 15000 },
-    { id: 2, created_at: "2025-02-11 22:02:12", available: true, brand: "Honda", model: "Civic", year: 2019, horsepower: 158, price: 22000, category: "Sedan", motor: "Gasoline", color: "Black", mileage: 12000 },
-    { id: 3, created_at: "2025-02-11 22:02:12", available: true, brand: "Ford", model: "Mustang", year: 2021, horsepower: 450, price: 35000, category: "Coupe", motor: "Gasoline", color: "Red", mileage: 5000 },
-    { id: 4, created_at: "2025-02-11 22:02:12", available: true, brand: "Chevrolet", model: "Camaro", year: 2020, horsepower: 275, price: 33000, category: "Coupe", motor: "Gasoline", color: "Blue", mileage: 8000 },
-    { id: 5, created_at: "2025-02-11 22:02:12", available: true, brand: "BMW", model: "3 Series", year: 2018, horsepower: 255, price: 28000, category: "Sedan", motor: "Gasoline", color: "Gray", mileage: 20000 }
-];    
+
+function Filters(){
+    const data: any = [
+        { id: 1, created_at: "2025-02-11 22:02:12", available: true, brand: "Toyota", model: "Corolla", year: 2020, horsepower: 132, price: 20000, category: "Sedan", motor: "Gasoline", color: "White", mileage: 15000 },
+        { id: 2, created_at: "2025-02-11 22:02:12", available: true, brand: "Honda", model: "Civic", year: 2019, horsepower: 158, price: 22000, category: "Sedan", motor: "Gasoline", color: "Black", mileage: 12000 },
+        { id: 3, created_at: "2025-02-11 22:02:12", available: true, brand: "Ford", model: "Mustang", year: 2021, horsepower: 450, price: 35000, category: "Coupe", motor: "Gasoline", color: "Red", mileage: 5000 },
+        { id: 4, created_at: "2025-02-11 22:02:12", available: true, brand: "Chevrolet", model: "Camaro", year: 2020, horsepower: 275, price: 33000, category: "Coupe", motor: "Gasoline", color: "Blue", mileage: 8000 },
+        { id: 5, created_at: "2025-02-11 22:02:12", available: true, brand: "BMW", model: "3 Series", year: 2018, horsepower: 255, price: 28000, category: "Sedan", motor: "Gasoline", color: "Gray", mileage: 20000 }
+    ];    
     
     return(
        <div className='filter'>
@@ -68,6 +67,6 @@ const data: any = [
             </li>
         </ul>
     </div>
-    )}
-
+    )
+}
 export default Filters;
