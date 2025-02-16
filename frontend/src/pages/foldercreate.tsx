@@ -1,6 +1,6 @@
 import DropdownMenu from "../components/common/DropdownMenu";
 
-function Folder() {
+function folderCreate() {
   return (
     <div>
       <DropdownMenu />
@@ -9,4 +9,4 @@ function Folder() {
   );
 }
 
-export default Folder;
+export default folderCreate;

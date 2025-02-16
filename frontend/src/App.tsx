@@ -4,6 +4,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Folder from "./pages/folder";
 import FolderCreate from "./pages/foldercreate.tsx";
+import Profile from "./pages/Profile.tsx";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,11 @@ const router = createBrowserRouter([
   {
     path: "/foldercreate",
     element: <FolderCreate />,
+    errorElement: <div>ERROR</div>,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
     errorElement: <div>ERROR</div>,
   },
 ]);

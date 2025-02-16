@@ -40,6 +40,11 @@ export default function DropdownMenu() {
                 Create Folder
               </button>
             </li>
+            <li>
+              <button onClick={() => handleNavigation("/Profile")}>
+                Profile
+              </button>
+            </li>
           </ul>
         </div>
       )}
