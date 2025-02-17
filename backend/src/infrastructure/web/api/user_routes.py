@@ -11,7 +11,7 @@ def create_user_routes(user_service: UserService) -> Blueprint:
     def get_users():         
         try:
             users = user_service.list_users()
-            return jsonify({"message": "Liste des utilisateurs récupérée", "content": [vars(user) for user in users], "error": None}), 200
+            return jsonify({"message": "Liste des utilisateurs récupérée", "content": [user.to_dict() for user in users], "error": None}), 200
         except Exception as e:
             current_app.logger.error(f"Erreur récupération utilisateurs: {str(e)}")
             return jsonify({"message": "Erreur serveur", "content": None, "error": str(e)}), 500
@@ -20,7 +20,7 @@ def create_user_routes(user_service: UserService) -> Blueprint:
     def get_user(id):
         try:
             user = user_service.get_user(id)
-            return jsonify({"message": "User", "content": vars(user), "error": None}), 200
+            return jsonify({"message": "User", "content": user.to_dict(), "error": None}), 200
         except Exception as e:
             current_app.logger.error(f"Erreur récupération utilisateurs: {str(e)}")
             return jsonify({"message": "Erreur serveur", "content": None, "error": str(e)}), 500
@@ -56,7 +56,7 @@ def create_user_routes(user_service: UserService) -> Blueprint:
         try:
             data = request.get_json()
             updated_user = user_service.update_user(id, data)
-            return jsonify({"message": "User updated", "content": vars(updated_user), "error": None}), 200
+            return jsonify({"message": "User updated", "content": updated_user.to_dict(), "error": None}), 200
         except Exception as e:
             current_app.logger.error(f"Erreur mise à jour utilisateur: {str(e)}")
             return jsonify({"message": "Erreur serveur", "content": None, "error": str(e)}), 500
