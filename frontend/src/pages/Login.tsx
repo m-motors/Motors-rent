@@ -1,5 +1,4 @@
 import { useState } from "react";
-import DropdownMenu from "../components/common/DropdownMenu";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -37,7 +36,6 @@ function Login() {
 
   return (
     <div>
-      <DropdownMenu />
       <form onSubmit={handleSubmit}>
         {/*<label>Email :</label>*/}
         <input
