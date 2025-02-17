@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-import DropdownMenu from "../common/DropdownMenu";
+
+const isAdmin = false
+const isLogged = true
 
 export default function Header() {
   return (
@@ -10,13 +12,23 @@ export default function Header() {
       
       <nav className="hidden md:flex gap-6 text-sm uppercase">
         <Link to="/" className="hover:text-gray-400">Accueil</Link>
-        <Link to="/voitures" className="hover:text-gray-400">Véhicules</Link>
-        <Link to="/location" className="hover:text-gray-400">Location</Link>
-        <Link to="/contact" className="hover:text-gray-400">Contact</Link>
+        {!isAdmin && isLogged && (
+          <Link to="/user" className="hover:text-gray-400">Mon compte</Link>
+          )}
+        {isAdmin && isLogged && (
+          <Link to="/admin" className="hover:text-gray-400">Mon compte</Link>
+          )}
+        {!isLogged && (
+          <Link to="/register" className="hover:text-gray-400">Mon compte</Link>
+        )}
+        <Link to="/folder" className="hover:text-gray-400">Mes dossiers</Link>
+        <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
       </nav>
       
-      <div className="flex items-center">
-        <DropdownMenu />
+      <div className="flex items-center gap-2">
+        {isAdmin && (
+          <span className="bg-green-100 text-green-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm dark:bg-green-900 dark:text-green-300">Admin</span>
+        )}
       </div>
     </header>
   );
