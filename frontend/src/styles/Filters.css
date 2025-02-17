@@ -1,11 +1,13 @@
+@import "tailwindcss";
+
 .filters_container {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px 0;
     background: #f8f9fa;
     border-radius: 10px;
     box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
   }
   
   .filters_list {
@@ -27,7 +29,6 @@
     background: #fff;
     cursor: pointer;
     transition: all 0.3s ease;
-    appearance: none;
     min-width: 140px;
     position: relative;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.05);

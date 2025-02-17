@@ -1,61 +1,76 @@
-body {
-  font-family: Arial, sans-serif;
+@import "tailwindcss";
+
+/* Styles pour Register et Login */
+.auth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: #EFF3F7;
+}
+.auth-box {
+  border: 1px solid black;
+  padding: 1rem;
+  border-radius: 30px;
+  background-color: white;
+  width: 40%;
+}
+
+.auth-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  background-color: #f4f4f4;
-  margin: 0;
+  margin: auto;
+  text-align: center;
 }
 
-.wrapper {
-  position: relative;
+.toggle-button {
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 30px;
+  width: 100%;
 }
 
-.shadow-box {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 320px;
-  height: 420px;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
 }
 
-.container {
-  position: relative;
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
-}
-
-form {
+.auth-form {
   display: flex;
   flex-direction: column;
 }
 
-input {
+.auth-form input {
   width: 100%;
   padding: 10px;
-  margin: 5px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
 }
 
-button {
-  width: 100%;
-  padding: 10px;
-  background: blue;
+.auth-button {
+  background: #ff5a5f;
   color: white;
   border: none;
-  border-radius: 5px;
+  padding: 10px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 1rem;
   margin-top: 10px;
+  transition: background 0.3s;
 }
 
-button:hover {
-  background: darkblue;
+.auth-button:hover {
+  background: #e0484d;
 }
