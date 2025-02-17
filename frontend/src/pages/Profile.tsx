@@ -1,6 +1,6 @@
 import DropdownMenu from "../components/common/DropdownMenu";
 
-function profile() {
+function Profile() {
   return (
     <div>
       <DropdownMenu />
@@ -9,4 +9,4 @@ function profile() {
   );
 }
 
-export default profile;
+export default Profile;
