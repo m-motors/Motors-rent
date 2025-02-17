@@ -23,15 +23,15 @@ function Login() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Connexion réussie !");
+        alert("Connexion successful !");
         localStorage.setItem("token", data.content?.token);
         window.location.href = "/";
       } else {
         setError(data.message);
       }
     } catch (error) {
-      console.error("Erreur de connexion :", error);
-      setError("Problème de connexion au serveur.");
+      console.error("connexion Failed !:", error);
+      setError("Problem connecting to server.");
     }
   };
 
@@ -42,7 +42,7 @@ function Login() {
         {/*<label>Email :</label>*/}
         <input
           type="email"
-          placeholder="Votre email"
+          placeholder="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
