@@ -4,7 +4,7 @@ import DropdownMenu from "../components/common/DropdownMenu";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null); 
+  const [error, setError] = useState<string | null>(null);
 
   const API_URL = "http://localhost:3000/api/authentication/login";
 
@@ -46,7 +46,7 @@ function Login() {
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-        /> 
+        />
         {/*<label>Password :</label>*/}
         <input
           type="password"
@@ -54,7 +54,7 @@ function Login() {
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-        /> 
+        />
         {error && <p style={{ color: "red" }}>{error}</p>}
         <button type="submit">log in</button>
       </form>
