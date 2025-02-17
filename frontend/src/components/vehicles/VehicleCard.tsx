@@ -1,4 +1,4 @@
-import "../../styles/VahiculeCard.css"
+import "../../styles/VehicleCard.css"
 import { useNavigate } from "react-router-dom";
 function VehiculeCard() {
     const navigate = useNavigate();
@@ -15,7 +15,6 @@ function VehiculeCard() {
   
     return (
       <div className="vehicule_cards">
-        <h2>🚗 Vehicule List 🚗</h2>
         
         <div className="vehicule_list">
           {data.map((vehicule: any) => (

@@ -1,10 +1,12 @@
+@import "tailwindcss";
+
 .vehicule_cards {
     padding: 20px;
 }
 .vehicule_cards h2 {
     display: flex;
     justify-content: center;
-    font-size: 24px;
+    /* font-size: 24px; */
     margin-bottom: 20px;
 }
 .vehicule_cards h3 {

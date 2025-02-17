@@ -1,13 +1,14 @@
+@import "tailwindcss";
+
 .dropdown-container {
   margin-top: 20px;
 }
 
-.menu-button {
+.menu_button_dropdown {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: auto;
-  max-width: 300px;
+  width: 300px;
   border: 1px solid #ccc;
   padding: 8px 12px;
   border-radius: 4px;
@@ -16,20 +17,12 @@
   color: black;
 }
 
-.menu-button:hover {
-  background: #f1f1f1;
-}
-
 .dropdown-menu {
   position: absolute;
-  left: 0;
-  width: 180px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 10px;
   background: white;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 8px 0;
-  color: black;
+  z-index: 999;
 }
 
 .dropdown-menu ul {
