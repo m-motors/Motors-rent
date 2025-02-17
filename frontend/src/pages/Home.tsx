@@ -1,4 +1,5 @@
-import Header from "../components/common/Header"
+import Header from "../components/layout/Header"
+import Footer from "../components/layout/Footer"
 import Filters from "../components/vehicles/filters";
 import VehiculeCard from "../components/vehicles/VehicleCard";
 
@@ -8,6 +9,7 @@ const Home: React.FC = () => {
       <Header />
       <Filters />
       <VehiculeCard />
+      <Footer />
     </div>
   );
 };

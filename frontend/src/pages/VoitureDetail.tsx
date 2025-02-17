@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom";
-import Header from "../components/common/Header";
+import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
 import "../../src/styles/VoitureDetail.css"
 
 const VoitureDetail = () => {
@@ -95,6 +96,7 @@ const VoitureDetail = () => {
           )}
 
           <p className="mt-4 text-md">Statut du dossier: <span className="font-bold">{voitureData.dossierStatus}</span></p>
+          <Footer />
     </div>
   );
 };
