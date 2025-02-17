@@ -1,14 +1,15 @@
+from src.infrastructure.common.regex import Regex
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request, current_app
-from src.domain.models.user import User
-
+from src.domain.models.user import User, UserRole
+from src.infrastructure.web.middleware.validator import Validator, Field
 from src.application.services.user_service import UserService
 
 user_routes = Blueprint('user_routes', __name__)
 
 def create_user_routes(user_service: UserService) -> Blueprint:
     @user_routes.route('/users', methods=['GET'])
-    def get_users():         
+    def get_users():
         try:
             users = user_service.list_users()
             return jsonify({"message": "Liste des utilisateurs récupérée", "content": [user.to_dict() for user in users], "error": None}), 200
@@ -26,14 +27,17 @@ def create_user_routes(user_service: UserService) -> Blueprint:
             return jsonify({"message": "Erreur serveur", "content": None, "error": str(e)}), 500
         
     @user_routes.route('/users', methods=['POST'])
+    @Validator(
+        json_fields=[
+            Field("email", "str", required=True, match=Regex.email, message="Must be an email"),
+            Field("password", "str", required=True, message="Password is not valid"),
+            Field("first_name", "str", required=True, message="First name is not valid"),
+            Field("last_name", "str", required=True, message="Last name is not valid")
+        ]
+    )
     def create_user():
         try:
             data = request.get_json()
-
-            print(data)
-
-            if not all(k in data for k in ["email", "first_name", "last_name", "password"]):
-                return jsonify({"message": "Données manquantes", "content": None, "error": "Champ(s) requis absent(s)"}), 400
 
             new_user = User(
                 email=data["email"],
@@ -41,12 +45,12 @@ def create_user_routes(user_service: UserService) -> Blueprint:
                 last_name=data["last_name"],
                 password=data["password"],
                 is_active=data.get("is_active", True),
-                user_role=data.get("user_role", "client")
+                user_role=UserRole('admin')
             )
 
             saved_user = user_service.create_user(new_user)
 
-            return jsonify({"message": "Utilisateur créé", "content": vars(saved_user), "error": None}), 201
+            return jsonify({"message": "Utilisateur créé", "content": saved_user.to_dict(), "error": None}), 201
         except Exception as e:
             current_app.logger.error(f"Erreur création utilisateur: {str(e)}")
             return jsonify({"message": "Erreur serveur", "content": None, "error": str(e)}), 500

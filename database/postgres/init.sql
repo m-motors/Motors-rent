@@ -67,12 +67,12 @@ ALTER TABLE "documents"
     ADD CONSTRAINT fk_documents_application FOREIGN KEY ("application_id") REFERENCES "applications"("id") ON DELETE CASCADE;
 
 -- Insertion des données pour la table `user`
-INSERT INTO "users" ("id", "created_at", "email", "first_name", "last_name", "is_active", "user_role", "password") VALUES
-(1, '2025-02-11 22:02:12', 'user1@example.com', 'Alice', 'Dupont', TRUE, 'client', 'alice'),
-(2, '2025-02-11 22:02:12', 'user2@example.com', 'Bob', 'Martin', TRUE, 'client', 'bob'),
-(3, '2025-02-11 22:02:12', 'admin@example.com', 'Charlie', 'Durand', TRUE, 'admin', 'charlie'),
-(4, '2025-02-11 22:02:12', 'user3@example.com', 'David', 'Lemoine', TRUE, 'client', 'david'),
-(5, '2025-02-11 22:02:12', 'user4@example.com', 'Emma', 'Morel', TRUE, 'client', '$2y$10$abcdefghijklmnopqrstuv');
+INSERT INTO "users" ("created_at", "email", "first_name", "last_name", "is_active", "user_role", "password") VALUES
+('2025-02-11 22:02:12', 'user1@example.com', 'Alice', 'Dupont', TRUE, 'client', 'alice'),
+('2025-02-11 22:02:12', 'user2@example.com', 'Bob', 'Martin', TRUE, 'client', 'bob'),
+('2025-02-11 22:02:12', 'admin@example.com', 'Charlie', 'Durand', TRUE, 'admin', 'charlie'),
+('2025-02-11 22:02:12', 'user3@example.com', 'David', 'Lemoine', TRUE, 'client', 'david'),
+('2025-02-11 22:02:12', 'user4@example.com', 'Emma', 'Morel', TRUE, 'client', '$2y$10$abcdefghijklmnopqrstuv');
 
 -- Insertion des données pour la table `vehicules`
 INSERT INTO "vehicules" ("created_at", "brand", "model", "year", "horsepower", "price", "category", "motor", "color", "mileage") VALUES
