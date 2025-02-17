@@ -1,5 +1,7 @@
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from flask_sqlalchemy import SQLAlchemy
+db = SQLAlchemy()
 
 DATABASE_CONFIG = {
     "dbname": "groupe11",

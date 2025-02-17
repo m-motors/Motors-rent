@@ -1,6 +1,7 @@
 from src.domain.models.vehicle import Vehicle
 from src.application.ports.input.vehicle_use_cases import VehicleUseCase
 from src.application.ports.output.vehicle_repository import VehicleRepository
+from typing import List
 
 class VehicleService(VehicleUseCase):
     def __init__(self, vehicle_repository: VehicleRepository):
