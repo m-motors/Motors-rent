@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
-from application.ports.input.vehicle_use_cases import VehicleUseCase
-from domain.models.vehicle import Vehicle
+
+from src.domain.models.vehicle import Vehicle
+from src.application.ports.input.vehicle_use_cases import VehicleUseCase
 
 vehicle_routes = Blueprint('vehicle_routes', __name__)
 

@@ -1,0 +1,414 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 17.2
+-- Dumped by pg_dump version 17.2
+
+-- Started on 2025-02-13 16:22:19 UTC
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- TOC entry 222 (class 1259 OID 16409)
+-- Name: applications; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.applications (
+    id integer NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    user_id integer NOT NULL,
+    vehicule_id integer NOT NULL,
+    type character varying(50) NOT NULL,
+    status character varying(50) DEFAULT 'En cours de validation'::character varying NOT NULL
+);
+
+
+ALTER TABLE public.applications OWNER TO admin;
+
+--
+-- TOC entry 221 (class 1259 OID 16408)
+-- Name: applications_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.applications_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.applications_id_seq OWNER TO admin;
+
+--
+-- TOC entry 3451 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: applications_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.applications_id_seq OWNED BY public.applications.id;
+
+
+--
+-- TOC entry 224 (class 1259 OID 16418)
+-- Name: documents; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.documents (
+    id integer NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    application_id integer NOT NULL,
+    document_type character varying(50) NOT NULL,
+    link character varying(255) NOT NULL
+);
+
+
+ALTER TABLE public.documents OWNER TO admin;
+
+--
+-- TOC entry 223 (class 1259 OID 16417)
+-- Name: documents_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.documents_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.documents_id_seq OWNER TO admin;
+
+--
+-- TOC entry 3452 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: documents_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.documents_id_seq OWNED BY public.documents.id;
+
+
+--
+-- TOC entry 218 (class 1259 OID 16386)
+-- Name: users; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.users (
+    id integer NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    email character varying(100) NOT NULL,
+    first_name character varying(50) NOT NULL,
+    last_name character varying(50) NOT NULL,
+    is_active boolean DEFAULT true NOT NULL,
+    user_role text NOT NULL,
+    password character varying(255) NOT NULL,
+    CONSTRAINT users_user_role_check CHECK ((user_role = ANY (ARRAY['client'::text, 'admin'::text])))
+);
+
+
+ALTER TABLE public.users OWNER TO admin;
+
+--
+-- TOC entry 217 (class 1259 OID 16385)
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.users_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.users_id_seq OWNER TO admin;
+
+--
+-- TOC entry 3453 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
+
+
+--
+-- TOC entry 220 (class 1259 OID 16400)
+-- Name: vehicules; Type: TABLE; Schema: public; Owner: admin
+--
+
+CREATE TABLE public.vehicules (
+    id integer NOT NULL,
+    created_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    available boolean DEFAULT true NOT NULL,
+    brand character varying(100) NOT NULL,
+    model character varying(100) NOT NULL,
+    year integer NOT NULL,
+    horsepower integer NOT NULL,
+    price integer NOT NULL,
+    category character varying(100) NOT NULL,
+    motor character varying(100) NOT NULL,
+    color character varying(20) NOT NULL,
+    mileage integer NOT NULL
+);
+
+
+ALTER TABLE public.vehicules OWNER TO admin;
+
+--
+-- TOC entry 219 (class 1259 OID 16399)
+-- Name: vehicules_id_seq; Type: SEQUENCE; Schema: public; Owner: admin
+--
+
+CREATE SEQUENCE public.vehicules_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.vehicules_id_seq OWNER TO admin;
+
+--
+-- TOC entry 3454 (class 0 OID 0)
+-- Dependencies: 219
+-- Name: vehicules_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: admin
+--
+
+ALTER SEQUENCE public.vehicules_id_seq OWNED BY public.vehicules.id;
+
+
+--
+-- TOC entry 3274 (class 2604 OID 16412)
+-- Name: applications id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.applications ALTER COLUMN id SET DEFAULT nextval('public.applications_id_seq'::regclass);
+
+
+--
+-- TOC entry 3277 (class 2604 OID 16421)
+-- Name: documents id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.documents ALTER COLUMN id SET DEFAULT nextval('public.documents_id_seq'::regclass);
+
+
+--
+-- TOC entry 3268 (class 2604 OID 16389)
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
+
+
+--
+-- TOC entry 3271 (class 2604 OID 16403)
+-- Name: vehicules id; Type: DEFAULT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.vehicules ALTER COLUMN id SET DEFAULT nextval('public.vehicules_id_seq'::regclass);
+
+
+--
+-- TOC entry 3443 (class 0 OID 16409)
+-- Dependencies: 222
+-- Data for Name: applications; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.applications (id, created_at, user_id, vehicule_id, type, status) FROM stdin;
+1	2025-02-11 22:02:12	1	1	Rental	En cours de validation
+2	2025-02-11 22:02:12	2	2	Buy	refuse
+3	2025-02-11 22:02:12	3	8	Rental	En cours de validation
+4	2025-02-11 22:02:12	4	4	Rental	validate
+5	2025-02-11 22:02:12	5	5	Buy	En cours de validation
+\.
+
+
+--
+-- TOC entry 3445 (class 0 OID 16418)
+-- Dependencies: 224
+-- Data for Name: documents; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.documents (id, created_at, application_id, document_type, link) FROM stdin;
+1	2025-02-11 22:02:12	1	ID Card	http://example.com/doc1.pdf
+2	2025-02-11 22:02:12	1	Driving license	http://example.com/doc6.pdf
+3	2025-02-11 22:02:12	1	Proof of Address	http://example.com/doc7.pdf
+4	2025-02-11 22:02:12	2	Driver License	http://example.com/doc2.pdf
+5	2025-02-11 22:02:12	3	Insurance	http://example.com/doc3.pdf
+6	2025-02-11 22:02:12	4	Registration	http://example.com/doc4.pdf
+7	2025-02-11 22:02:12	5	Proof of Address	http://example.com/doc5.pdf
+\.
+
+
+--
+-- TOC entry 3439 (class 0 OID 16386)
+-- Dependencies: 218
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.users (id, created_at, email, first_name, last_name, is_active, user_role, password) FROM stdin;
+1	2025-02-11 22:02:12	user1@example.com	Alice	Dupont	t	client	alice
+2	2025-02-11 22:02:12	user2@example.com	Bob	Martin	t	client	bob
+3	2025-02-11 22:02:12	admin@example.com	Charlie	Durand	t	admin	charlie
+4	2025-02-11 22:02:12	user3@example.com	David	Lemoine	t	client	david
+5	2025-02-11 22:02:12	user4@example.com	Emma	Morel	t	client	$2y$10$abcdefghijklmnopqrstuv
+\.
+
+
+--
+-- TOC entry 3441 (class 0 OID 16400)
+-- Dependencies: 220
+-- Data for Name: vehicules; Type: TABLE DATA; Schema: public; Owner: admin
+--
+
+COPY public.vehicules (id, created_at, available, brand, model, year, horsepower, price, category, motor, color, mileage) FROM stdin;
+1	2025-02-11 22:02:12	t	Toyota	Corolla	2020	132	20000	Sedan	Gasoline	White	15000
+2	2025-02-11 22:02:12	t	Honda	Civic	2019	158	22000	Sedan	Gasoline	Black	12000
+3	2025-02-11 22:02:12	t	Ford	Mustang	2021	450	35000	Coupe	Gasoline	Red	5000
+4	2025-02-11 22:02:12	t	Chevrolet	Camaro	2020	275	33000	Coupe	Gasoline	Blue	8000
+5	2025-02-11 22:02:12	t	BMW	3 Series	2018	255	28000	Sedan	Gasoline	Gray	20000
+6	2025-02-11 22:02:12	t	Audi	A4	2019	248	30000	Sedan	Gasoline	Silver	18000
+7	2025-02-11 22:02:12	t	Mercedes-Benz	C-Class	2021	255	40000	Sedan	Gasoline	White	7000
+8	2025-02-11 22:02:12	t	Tesla	Model 3	2021	283	45000	Sedan	Electric	Black	3000
+9	2025-02-11 22:02:12	t	Nissan	Altima	2020	188	24000	Sedan	Gasoline	Blue	16000
+10	2025-02-11 22:02:12	t	Hyundai	Elantra	2019	147	19000	Sedan	Gasoline	Red	14000
+\.
+
+
+--
+-- TOC entry 3455 (class 0 OID 0)
+-- Dependencies: 221
+-- Name: applications_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.applications_id_seq', 5, true);
+
+
+--
+-- TOC entry 3456 (class 0 OID 0)
+-- Dependencies: 223
+-- Name: documents_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.documents_id_seq', 7, true);
+
+
+--
+-- TOC entry 3457 (class 0 OID 0)
+-- Dependencies: 217
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.users_id_seq', 1, false);
+
+
+--
+-- TOC entry 3458 (class 0 OID 0)
+-- Dependencies: 219
+-- Name: vehicules_id_seq; Type: SEQUENCE SET; Schema: public; Owner: admin
+--
+
+SELECT pg_catalog.setval('public.vehicules_id_seq', 10, true);
+
+
+--
+-- TOC entry 3287 (class 2606 OID 16416)
+-- Name: applications applications_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.applications
+    ADD CONSTRAINT applications_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3289 (class 2606 OID 16424)
+-- Name: documents documents_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.documents
+    ADD CONSTRAINT documents_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3281 (class 2606 OID 16398)
+-- Name: users users_email_key; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_email_key UNIQUE (email);
+
+
+--
+-- TOC entry 3283 (class 2606 OID 16396)
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3285 (class 2606 OID 16407)
+-- Name: vehicules vehicules_pkey; Type: CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.vehicules
+    ADD CONSTRAINT vehicules_pkey PRIMARY KEY (id);
+
+
+--
+-- TOC entry 3290 (class 2606 OID 16425)
+-- Name: applications fk_application_user; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.applications
+    ADD CONSTRAINT fk_application_user FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3291 (class 2606 OID 16430)
+-- Name: applications fk_application_vehicule; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.applications
+    ADD CONSTRAINT fk_application_vehicule FOREIGN KEY (vehicule_id) REFERENCES public.vehicules(id) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 3292 (class 2606 OID 16435)
+-- Name: documents fk_documents_application; Type: FK CONSTRAINT; Schema: public; Owner: admin
+--
+
+ALTER TABLE ONLY public.documents
+    ADD CONSTRAINT fk_documents_application FOREIGN KEY (application_id) REFERENCES public.applications(id) ON DELETE CASCADE;
+
+
+-- Completed on 2025-02-13 16:22:19 UTC
+
+--
+-- PostgreSQL database dump complete
+--
+
