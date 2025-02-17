@@ -6,14 +6,14 @@ function Register() {
     <div>
       <DropdownMenu />
       <form id="registerForm">
-        FirstName:
+        FirstName :
         <input type="text" id="name" placeholder="Name" required />
-        LastName:
+        LastName :
         <input type="text" id="lastname" placeholder="Lastname" required />
-        email: <input type="email" id="email" placeholder="Email" required />
-        password:
+        email : <input type="email" id="email" placeholder="Email" required />
+        password :
         <input type="password" id="password" placeholder="Password" required />
-        confirm password:
+        confirm password :
         <input type="password" id="password" placeholder="Password" required />
         <button type="submit">Register</button>
       </form>
