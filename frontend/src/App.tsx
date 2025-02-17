@@ -6,6 +6,9 @@ import Folder from "./pages/Folder";
 import FolderCreate from "./pages/foldercreate.tsx";
 import Profile from "./pages/Profile.tsx";
 import VoitureDetail from "./pages/VoitureDetail.tsx";
+import User from "./pages/UserDetail.tsx"
+import Admin from "./pages/AdminDetail.tsx"
+import AddVehicle from "./components/vehicles/AddVehicle.tsx";
 
 const router = createBrowserRouter([
   {
@@ -42,7 +45,24 @@ const router = createBrowserRouter([
     path: "voitures/:id",
     element: <VoitureDetail />,
     errorElement: <div>ERROR</div>
-  }
+  },
+  {
+    // path: "user/:id",
+    path: "/user",
+    element: <User />,
+    errorElement: <div>ERROR</div>
+  },
+  {
+    // path: "/admin/:id"
+    path: "/admin",
+    element: <Admin />,
+    errorElement: <div>Error</div>
+  },
+  {
+    path: "/addVehicle",
+    element: <AddVehicle />,
+    errorElement: <div>Error</div>
+  },
 ]);
 
 const App: React.FC = () => {
