@@ -38,28 +38,25 @@ function Login() {
   return (
     <div>
       <DropdownMenu />
-      <h2>Connexion</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
       <form onSubmit={handleSubmit}>
-        <label>Email :</label>
+        {/*<label>Email :</label>*/}
         <input
           type="email"
           placeholder="Votre email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-        />
-        <br />
-        <label>Mot de passe :</label>
+        /> 
+        {/*<label>Password :</label>*/}
         <input
           type="password"
-          placeholder="Votre mot de passe"
+          placeholder="password"
           required
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-        />
-        <br />
-        <button type="submit">Se connecter</button>
+        /> 
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <button type="submit">log in</button>
       </form>
     </div>
   );
