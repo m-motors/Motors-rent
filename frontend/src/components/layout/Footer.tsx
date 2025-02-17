@@ -2,7 +2,7 @@ import { FiFacebook, FiTwitter, FiInstagram } from "react-icons/fi";
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-6 mt-10">
+    <footer className="bg-gray-900 text-white py-6">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-6">
         <div className="text-lg font-semibold">M-Motors</div>
         
