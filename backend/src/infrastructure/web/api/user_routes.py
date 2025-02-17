@@ -65,12 +65,14 @@ def create_user_routes(user_service: UserService) -> Blueprint:
     def delete_user(id):
         try:
             success = user_service.delete_user(id)
-            if not success:
-                return jsonify({"message": "User not find", "content": None, "error": None}), 404
             
-            return jsonify({"message": "User deleted", "content": None, "error": None}), 204
+            if not success:
+                return jsonify({"message": "User not found", "content": None, "error": None}), 404
+            
+            return '', 204
         except Exception as e:
             current_app.logger.error(f"Erreur suppression utilisateur: {str(e)}")
             return jsonify({"message": "Erreur serveur", "content": None, "error": str(e)}), 500
+
 
     return user_routes
