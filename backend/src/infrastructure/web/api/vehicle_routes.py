@@ -27,7 +27,7 @@ def create_vehicle_routes(vehicle_service: VehicleUseCase) -> Blueprint:
     @vehicle_routes.route('/vehicles/<int:id>/toggle-status', methods=['PUT'])
     def toggle_vehicle_status(id: int):
         """
-        Change le statut du véhicule entre 'FOR_RENT' et 'FOR_SALE'.
+        Change le statut du véhicule entre 'rent' et 'sale'.
         """
         vehicle = vehicle_service.toggle_vehicle_status(id)
         if not vehicle:

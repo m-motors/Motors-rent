@@ -107,4 +107,4 @@ class MySQLVehicleRepository(VehicleRepository):
             "mileage": vehicle.mileage,
             "available": vehicle.available,
             "status": vehicle.status.value 
-        }
+        } 

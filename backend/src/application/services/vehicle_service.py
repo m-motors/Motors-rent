@@ -23,6 +23,6 @@ class VehicleService(VehicleUseCase):
 
     def toggle_vehicle_status(self, id: int) -> Vehicle | None:
         """
-        Bascule un véhicule entre 'FOR_RENT' et 'FOR_SALE'.
+        Bascule un véhicule entre 'rent' et 'sale'.
         """
         return self.vehicle_repository.toggle_vehicle_status(id)

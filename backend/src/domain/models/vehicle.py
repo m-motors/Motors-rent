@@ -1,27 +1,30 @@
-# src/domain/models/vehicle.py
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 
 class VehicleStatus(str, Enum):
-    FOR_RENT = "FOR_RENT"
-    FOR_SALE = "FOR_SALE"
+    FOR_RENT = "rent"
+    FOR_SALE = "sale"
 
 @dataclass
 class Vehicle:
     id: int | None
-    brand: str
-    model: str
-    year: int
-    horsepower: int
-    price: int
-    category: str
-    motor: str
-    color: str
+    brand: str = ""
+    model: str = ""
+    year: int = 0
+    horsepower: int = 0
+    price: int = 0
+    category: str = ""
+    motor: str = ""
+    color: str = ""
+    mileage: int = 0
+    available: bool = True
+    created_at: datetime = None
     mileage: int
     available: bool
-    status: VehicleStatus  # Ajout du statut
+    status: VehicleStatus
     created_at: datetime | None = None
+
 
     def toggle_status(self):
         """Bascule entre location et vente."""
