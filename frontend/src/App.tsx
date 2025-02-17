@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Folder from "./pages/Folder";
 import FolderCreate from "./pages/foldercreate.tsx";
 import Profile from "./pages/Profile.tsx";
+import VoitureDetail from "./pages/VoitureDetail.tsx";
 
 const router = createBrowserRouter([
   {
@@ -37,10 +38,15 @@ const router = createBrowserRouter([
     element: <Profile />,
     errorElement: <div>ERROR</div>,
   },
+  {
+    path: "voitures/:id",
+    element: <VoitureDetail />,
+    errorElement: <div>ERROR</div>
+  }
 ]);
 
 const App: React.FC = () => {
-  return <RouterProvider router={router} />; // Fournir le routeur à l'application
+  return <RouterProvider router={router} />;
 };
 
 export default App;

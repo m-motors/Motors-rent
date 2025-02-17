@@ -2,6 +2,9 @@ import "../../styles/VahiculeCard.css"
 import { useNavigate } from "react-router-dom";
 function VehiculeCard() {
     const navigate = useNavigate();
+    const handleClick = (id: number) => {
+      navigate(`voitures/${id}`);
+    }
     const data: any = [
       { id: 1, created_at: "2025-02-11 22:02:12", available: true, brand: "Toyota", model: "Corolla", year: 2020, horsepower: 132, price: 20000, category: "Sedan", motor: "Gasoline", color: "White", mileage: 15000 },
       { id: 2, created_at: "2025-02-11 22:02:12", available: true, brand: "Honda", model: "Civic", year: 2019, horsepower: 158, price: 22000, category: "Sedan", motor: "Gasoline", color: "Black", mileage: 12000 },
@@ -19,8 +22,8 @@ function VehiculeCard() {
             <div 
               key={vehicule.id} 
               className="vehicule_card"
-              onClick={() => navigate("/blabla")}
-            style={{ cursor: "pointer" }}
+              onClick={() => handleClick(vehicule.id)}
+              style={{ cursor: "pointer" }}
             >
               <img 
                 src="https://image.web.stellantis.com/lib/fe34117175640475711d70/m/1/5bebd465-e526-406f-b012-45faeee97c5a.jpg" 
