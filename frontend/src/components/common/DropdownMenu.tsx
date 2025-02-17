@@ -3,6 +3,9 @@ import { useState } from "react";
 import { FiUser, FiFolder, FiHome, FiLogIn, FiPlusCircle } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
+const isAdmin = true
+const isLogged = true
+
 export default function DropdownMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
@@ -29,16 +32,21 @@ export default function DropdownMenu() {
                 <FiHome className="inline mr-2" color="black" /> Accueil
               </button>
             </li>
+            {isLogged && (
+              <li>
+                {/* <button onClick={() => handleNavigation("/user/:id")} className="dropdown-item"> */}
+                <button onClick={() => handleNavigation("/user/")} className="dropdown-item">
+                  <FiUser className="inline mr-2" color="black" /> Mon compte
+                </button>
+              </li>
+            )}
+            {!isLogged && (
             <li>
               <button onClick={() => handleNavigation("/register")} className="dropdown-item">
-                <FiUser className="inline mr-2" color="black" /> S'inscrire
+                <FiUser className="inline mr-2" color="black" /> Mon compte
               </button>
             </li>
-            <li>
-              <button onClick={() => handleNavigation("/login")} className="dropdown-item">
-                <FiLogIn className="inline mr-2" color="black" /> Connexion
-              </button>
-            </li>
+            )}
             <li>
               <button onClick={() => handleNavigation("/folder")} className="dropdown-item">
                 <FiFolder className="inline mr-2" color="black" /> Dossiers
@@ -49,6 +57,13 @@ export default function DropdownMenu() {
                 <FiPlusCircle className="inline mr-2" color="black" /> Nouveau Dossier
               </button>
             </li>
+            {isAdmin && (
+              <li>
+                <button onClick={() => handleNavigation("/admin")} className="dropdown-item">
+                  <FiPlusCircle className="inline mr-2" color="black" /> Admin Panel
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       )}
