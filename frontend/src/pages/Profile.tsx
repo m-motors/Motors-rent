@@ -1,10 +1,12 @@
-import DropdownMenu from "../components/common/DropdownMenu";
+import Header from "../components/layout/Header"
+import Footer from "../components/layout/Footer"
 
 function Profile() {
   return (
     <div>
-      <DropdownMenu />
-      <h1>Page profile</h1>
+      <Header />
+      <h1>Page profil de l'utilisateur</h1>
+      <Footer />
     </div>
   );
 }

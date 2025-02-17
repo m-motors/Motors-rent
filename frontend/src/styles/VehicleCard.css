@@ -20,16 +20,22 @@
 }
 .vehicule_list {
     display: flex;
+    justify-content: center;
     flex-wrap: wrap;
-    gap: 20px
+    gap: 20px;
+    min-height: 100vh;
 }
 .vehicule_card {
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease-in-out;
-        background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+    background-color: white;
+    max-height: fit-content;
+}
+.vehicule_card:hover {
+    transform: scale(1.05);
 }
 .vehicule_img {
      width: 100%;

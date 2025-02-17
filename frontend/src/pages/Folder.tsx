@@ -1,10 +1,12 @@
-import DropdownMenu from "../components/common/DropdownMenu";
+import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
 
 function Folder() {
   return (
     <div>
-      <DropdownMenu />
-      <h1>Page folder</h1>
+      <Header />
+      <h1>Page qui reprend tous les dossiers</h1>
+      <Footer />
     </div>
   );
 }
