@@ -1,6 +1,7 @@
 from src.domain.models.user import User
 from src.application.ports.input.user_use_case import UserUseCase
 from src.application.ports.output.user_repository import UserRepository
+from src.application.services.password_hachage import hash_password
 from typing import List
 
 
@@ -15,9 +16,11 @@ class UserService(UserUseCase):
         return self.user_repository.find_all()
     
     def create_user(self, user: User) -> User:
+        user.password = hash_password(user.password)
         return self.user_repository.save(user)
     
     def update_user(self, user: User) -> User:
+        user.password = hash_password(user.password)
         return self.user_repository.update(user)
     
     def delete_user(self, id: int) -> bool:
