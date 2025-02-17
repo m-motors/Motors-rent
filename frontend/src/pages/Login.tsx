@@ -25,7 +25,7 @@ function Login() {
       if (response.ok) {
         alert("Connexion réussie !");
         localStorage.setItem("token", data.content?.token);
-        window.location.href = "/dashboard";
+        window.location.href = "/";
       } else {
         setError(data.message);
       }
