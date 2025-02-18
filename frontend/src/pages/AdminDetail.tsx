@@ -1,6 +1,7 @@
 // src/AdminPage.js
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
+import { Link } from "react-router-dom";
 
 const AdminPage = () => {
   const users = [
@@ -37,21 +38,18 @@ const AdminPage = () => {
                 <p><strong>Dossiers Partagés:</strong> {stats.sharedFolders}</p>
                 <p><strong>Activité Récente:</strong> {stats.recentActivity}</p>
             </div>
-            {/* Actions Rapides */}
             <div className="bg-gray-100 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold mb-2">Actions Rapides</h3>
-                <button className="block mt-2 text-blue-500 hover:underline">Ajouter un nouvel utilisateur</button>
-                <button className="block mt-2 text-blue-500 hover:underline">Ajouter une nouvelle annonce</button>
+                <Link to="/addUser"> <button className="block mt-2 text-blue-500 hover:underline">Ajouter un nouvel utilisateur</button> </Link>
+                <Link to="addVehicle"> <button className="block mt-2 text-blue-500 hover:underline">Ajouter une nouvelle annonce</button> </Link>
                 <button className="block mt-2 text-blue-500 hover:underline">Exporter les données des utilisateurs</button>
             </div>
-            {/* Paramètres de Gestion */}
             <div className="bg-gray-100 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold mb-2">Paramètres de Gestion</h3>
                 <button className="block mt-2 text-blue-500 hover:underline">Gérer les rôles et permissions</button>
                 <button className="block mt-2 text-blue-500 hover:underline">Configurer les notifications globales</button>
             </div>
             </div>
-            {/* Tableau des Comptes Clients */}
             <div className="bg-gray-100 p-4 rounded-lg shadow mb-6">
             <h3 className="text-lg font-semibold mb-2">Comptes Clients</h3>
             <table className="min-w-full bg-white">

@@ -29,7 +29,7 @@
     justify-content: center;
     position: relative;
     color: white;
-    bottom: 9rem;
+    bottom: -10rem;
 }
 .voiture_detail_description p {
     font-size: 25px;

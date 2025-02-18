@@ -2,12 +2,14 @@
 
 .filters_container {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     background: #f8f9fa;
     border-radius: 10px;
     box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
     padding: 10px;
+    gap: 1rem
   }
   
   .filters_list {

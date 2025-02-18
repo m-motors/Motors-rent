@@ -1,14 +1,11 @@
 import Header from "../components/layout/Header"
 import Footer from "../components/layout/Footer"
-import Filters from "../components/vehicles/filters";
-import VehicleCard from "../components/vehicles/VehicleCard";
-
+import Content from "../components/vehicles/Content";
 const Home: React.FC = () => {
   return (
     <div className="home" style={{ height: '100vh' }}>
       <Header />
-      <Filters />
-      <VehicleCard />
+      <Content />
       <Footer />
     </div>
   );

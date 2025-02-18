@@ -23,7 +23,17 @@
     justify-content: center;
     flex-wrap: wrap;
     gap: 20px;
-    min-height: 100vh;
+}
+.vehicule_card button {
+    border-radius: 30px;
+    color: white;
+    gap: .5rem;
+    display: flex;
+    align-items: center;
+    padding: .25rem;
+    font-size: smaller;
+    position: relative;
+    cursor: p;
 }
 .vehicule_card {
     border: 1px solid #ddd;
@@ -44,6 +54,10 @@
 }
 .vehicule_card_description {
     padding: 15px;
+}
+.vehicule_card_description_header {
+    display: flex;
+    justify-content: space-between;
 }
 .vehicule_card_bottom {
     display: flex;
