@@ -3,6 +3,6 @@ POST {{protocol}}://{{host}}:{{port}}/api/authentication/login
 Content-Type: application/json
 
 {
-  "identification" : "user1@example.com",
-  "password": "ChangeMe"
+  "identification" : "user39@example.com",
+  "password": "ChangeMe45/*"
 }
