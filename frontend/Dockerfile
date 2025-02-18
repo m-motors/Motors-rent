@@ -12,6 +12,13 @@ COPY . .
 RUN npm install --only=development
 CMD ["npm", "run", "dev"]
 
+#production
+FROM base AS production
+RUN echo "ENV_MODE: production"
+COPY . .  
+RUN npm install --only=development
+CMD ["npm", "run", "dev"]
+
 # Environnement de développement
 FROM base AS debug
 RUN echo "ENV_MODE: development"
