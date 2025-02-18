@@ -18,8 +18,8 @@ class AuthenticationService(AuthenticationUseCase):
             if not user: 
                 return {"message": "Authentification failed", "content": None, "error": 'Authentification service : user not found'}
             
-            # if not check_password_hash(user.password, password):
-            #     return {"message": "Authentification failed", "content": None, "error": 'Authentification service : wrong password'}
+            if not check_password_hash(user.password, password):
+                return {"message": "Authentification failed", "content": None, "error": 'Authentification service : wrong password'}
 
             access_token = create_access_token(identity=str(user.id), additional_claims={"role": user.user_role.value})
             refresh_token = create_refresh_token(identity=str(user.id), additional_claims={"role": user.user_role.value})
