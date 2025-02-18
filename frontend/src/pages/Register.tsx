@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/layout/Header";
-import "../styles/Register.css";
+import "../styles/register.css";
 
 function AuthPage() {
   const [isRegister, setIsRegister] = useState(true);
