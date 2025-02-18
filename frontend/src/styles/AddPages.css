@@ -1,0 +1,48 @@
+.add_page {
+    min-height: 100%;
+    background-color: #f3f4f6;
+    padding: 1.5rem;
+}
+.add_page_card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 30px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.add_page_card h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+.add_page_card .add_user_label {
+    display: block;
+    font-size: .875rem;
+    font-weight: bold;
+    margin-bottom: .5rem;
+    margin-top: .5rem;
+    color: #364153;
+}
+.add_page_card input {
+    appearance: none;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding-top: 1rem;
+    color: #364153;
+    width: 100%;
+}
+.add_page_card .div_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.add_page_card button {
+    background-color: #2b7fff;
+    color: white;
+    font-weight: bold;
+    padding: .5rem 1rem;
+    border-radius: 10px;
+
+}

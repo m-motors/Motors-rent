@@ -2,6 +2,7 @@
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
 import React, { useState } from "react";
+import "../../styles/AddPages.css"
 
 const AddVehicle = () => {
   const [vehicleData, setVehicleData] = useState({
@@ -33,12 +34,12 @@ const AddVehicle = () => {
   return (
     <div>
         <Header />
-        <div className="min-h-screen bg-gray-100 p-6">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6 text-center">Créer une Annonce de Voiture</h2>
+        <div className="add_page">
+        <div className="add_page_card shadow-2xl max-w-2xl">
+            <h2>Créer une Annonce de Voiture</h2>
             <form onSubmit={handleSubmit}>
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="brand">
+                <label className="add_user_label" htmlFor="brand">
                 Marque
                 </label>
                 <input
@@ -47,12 +48,12 @@ const AddVehicle = () => {
                 name="brand"
                 value={vehicleData.brand}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow focus:outline-none focus:shadow-outline"
                 required
                 />
             </div>
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="model">
+                <label className="add_user_label" htmlFor="model">
                 Modèle
                 </label>
                 <input
@@ -61,12 +62,12 @@ const AddVehicle = () => {
                 name="model"
                 value={vehicleData.model}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow focus:outline-none focus:shadow-outline"
                 required
                 />
             </div>
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="year">
+                <label className="add_user_label" htmlFor="year">
                 Année
                 </label>
                 <input
@@ -75,12 +76,12 @@ const AddVehicle = () => {
                 name="year"
                 value={vehicleData.year}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow focus:outline-none focus:shadow-outline"
                 required
                 />
             </div>
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="horsepower">
+                <label className="add_user_label" htmlFor="horsepower">
                 Puissance (CV)
                 </label>
                 <input
@@ -89,12 +90,12 @@ const AddVehicle = () => {
                 name="horsepower"
                 value={vehicleData.horsepower}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow focus:outline-none focus:shadow-outline"
                 required
                 />
             </div>
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="price">
+                <label className="add_user_label" htmlFor="price">
                 Prix (€)
                 </label>
                 <input
@@ -103,12 +104,12 @@ const AddVehicle = () => {
                 name="price"
                 value={vehicleData.price}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow focus:outline-none focus:shadow-outline"
                 required
                 />
             </div>
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="category">
+                <label className="add_user_label" htmlFor="category">
                 Catégorie
                 </label>
                 <input
@@ -117,12 +118,12 @@ const AddVehicle = () => {
                 name="category"
                 value={vehicleData.category}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow focus:outline-none focus:shadow-outline"
                 required
                 />
             </div>
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="motor">
+                <label className="add_user_label" htmlFor="motor">
                 Moteur
                 </label>
                 <input
@@ -131,12 +132,12 @@ const AddVehicle = () => {
                 name="motor"
                 value={vehicleData.motor}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow focus:outline-none focus:shadow-outline"
                 required
                 />
             </div>
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="color">
+                <label className="add_user_label" htmlFor="color">
                 Couleur
                 </label>
                 <input
@@ -145,12 +146,12 @@ const AddVehicle = () => {
                 name="color"
                 value={vehicleData.color}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow focus:outline-none focus:shadow-outline"
                 required
                 />
             </div>
             <div className="mb-4">
-                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mileage">
+                <label className="add_user_label" htmlFor="mileage">
                 Kilométrage (km)
                 </label>
                 <input
@@ -159,14 +160,14 @@ const AddVehicle = () => {
                 name="mileage"
                 value={vehicleData.mileage}
                 onChange={handleChange}
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                className="shadow focus:outline-none focus:shadow-outline"
                 required
                 />
             </div>
-            <div className="flex items-center justify-between">
+            <div className="div_button">
                 <button
                 type="submit"
-                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                className="hover:bg-blue-700 focus:outline-none focus:shadow-outline"
                 >
                 Créer l'Annonce
                 </button>

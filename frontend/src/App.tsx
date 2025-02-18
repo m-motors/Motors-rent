@@ -9,6 +9,7 @@ import VoitureDetail from "./pages/VoitureDetail.tsx";
 import User from "./pages/UserDetail.tsx"
 import Admin from "./pages/AdminDetail.tsx"
 import AddVehicle from "./components/vehicles/AddVehicle.tsx";
+import AddUser from "./pages/AddUser.tsx";
 
 const router = createBrowserRouter([
   {
@@ -63,6 +64,11 @@ const router = createBrowserRouter([
     element: <AddVehicle />,
     errorElement: <div>Error</div>
   },
+  {
+    path: "/addUser",
+    element: <AddUser />,
+    errorElement: <div>Error</div>
+  }
 ]);
 
 const App: React.FC = () => {
