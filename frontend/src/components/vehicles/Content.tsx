@@ -128,9 +128,9 @@ function Filters() {
         {filteredData.map((vehicule) => (
           <div key={vehicule.id} onClick={() => handleClick(vehicule.id)} className="vehicule_card relative">
             {isAdmin && (
-              <div className="absolute flex justify-between m-2 text-gray-400 text-sm">
+              <div className="absolute flex justify-between m-2 text-sm" style={{ width: "95%"}}>
                 <button className="bg-blue-700">Modifier</button>
-                <button className="bg-red-700 right-[-150px]"> Supprimer </button>
+                <button className="bg-red-700"> Supprimer </button>
               </div>
             )}
             <img
