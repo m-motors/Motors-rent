@@ -15,6 +15,7 @@ def create_tools_routes(authorize : authorize) -> Blueprint:
         except Exception as e:
             return jsonify({"message": "Get version failed", "content": None, "error": "Upload failed"}), 500
         
+
     @tools_routes.route('/tools/identity/client', methods=['GET'])
     @authorize(UserRole.CLIENT)
     def get_identity_client(user):
@@ -39,5 +40,6 @@ def create_tools_routes(authorize : authorize) -> Blueprint:
         except Exception as e:
             return jsonify({"message": "Error fetching identity", "content": None, "error": str(e)}), 500
         
+            
             
     return tools_routes

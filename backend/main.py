@@ -9,13 +9,20 @@ from flask_jwt_extended import JWTManager
 from src.infrastructure.config.config import Config
 from src.infrastructure.common.logger import logger
 from src.application.services.user_service import UserService
+from src.infrastructure.scripts.migrate import apply_migrations
+from src.application.services.option_service import OptionService
 from src.infrastructure.web.api.user_routes import create_user_routes
 from src.infrastructure.web.api.document_routes import document_routes
 from src.infrastructure.web.api.tools_routes import create_tools_routes
 from src.infrastructure.web.middleware.authorize import create_authorize
+from src.infrastructure.web.api.option_routes import create_option_routes
+from src.application.services.client_folder_service import ClientFolderService
 from src.application.services.authentication_service import AuthenticationService
+from src.infrastructure.web.api.client_folder_routes import create_client_folder_routes
 from src.infrastructure.web.api.authentication_routes import create_authentication_routes
 from src.infrastructure.adapters.persistence.sql_user_repository import SQLUserRepository
+from src.infrastructure.adapters.persistence.sql_option_repository import SQLOptionRepository
+from src.infrastructure.adapters.persistence.sql_client_folder_repository import SQLClientFolderRepository
 
 app = Flask(__name__)
 
@@ -42,6 +49,15 @@ authentication_service = AuthenticationService(user_repository)
 authentication_routes = create_authentication_routes(authentication_service)
 app.register_blueprint(authentication_routes, url_prefix='/api')
 
+Client_folder_repository = SQLClientFolderRepository(db)
+client_folder_service = ClientFolderService(user_repository, Client_folder_repository)
+client_folder_routes = create_client_folder_routes(client_folder_service, authorize)
+app.register_blueprint(client_folder_routes, url_prefix='/api')
+
+option_repository = SQLOptionRepository(db)
+option_service = OptionService(option_repository)
+option_routes = create_option_routes(option_service, authorize)
+app.register_blueprint(option_routes, url_prefix='/api')
 
 app.register_blueprint(document_routes, url_prefix='/api')
 

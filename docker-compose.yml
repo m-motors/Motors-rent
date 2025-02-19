@@ -16,6 +16,9 @@ services:
     networks:
       postgres_network:
       back_network:
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   frontend:
     container_name: frontend
@@ -49,6 +52,11 @@ services:
     volumes:
       - ./database/postgres:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "admin", "-d", "groupe11"]
+      interval: 5s
+      retries: 5
+
 
   postgres-admin-tool:
     image: dpage/pgadmin4

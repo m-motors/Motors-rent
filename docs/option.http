@@ -1,0 +1,48 @@
+###
+# @name login
+POST {{protocol}}://{{host}}:{{port}}/api/authentication/login
+Content-Type: application/json
+
+{
+  "identification" : "user1@example.com",
+  "password": "ChangeMe"
+}
+
+###
+@access_token = {{login.response.body.content.access_token}}
+@refresh_token = {{login.response.body.content.refresh_token}}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/option
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name": "Rental"
+}
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/option
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/option/1
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+
+###
+DELETE {{protocol}}://{{host}}:{{port}}/api/option/5
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+###
+PUT {{protocol}}://{{host}}:{{port}}/api/option/5
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "name" : "test"
+}
+
