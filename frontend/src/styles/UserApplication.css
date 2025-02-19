@@ -28,16 +28,18 @@
     background-color: white;
     max-height: fit-content;
     cursor: pointer;
+    padding: 1.5rem;
   }
   
   .application_card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
-  
-  .application_details {
-    padding: 1.5rem;
-  }
+.application_details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
   
   .application_details h2 {
     font-size: 1.25rem;

@@ -146,7 +146,7 @@ function Filters() {
             )}
             <div className="absolute flex justify-center m-2 text-sm" style={{ width: "95%"}}>
               {vehicule.status === "Location" ? (
-                <span className="bg-red-500 text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm">Location</span>
+                <span className="bg-yellow-500 text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm">Location</span>
               ) : vehicule.status === "Achat" ? (
                 <span className="bg-blue-500 text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm">Achat</span>
               ) : null }

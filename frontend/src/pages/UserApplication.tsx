@@ -39,14 +39,14 @@ const UserApplications = () => {
                         ) : null}
                       </div>
                     <p><strong>Date de soumission :</strong> {new Date(app.created_at).toLocaleDateString()}</p>
-                  </div>
-                  <div className="application_buttons">
-                    <Link to={`/voitures/${app.vehicule_id}`}>
-                      <button>Offre</button>
-                    </Link>
-                    <Link to={`/applications/${app.id}`}>
-                        <button>Application</button>
-                    </Link>
+                    <div className="application_buttons">
+                      <Link to={`/voitures/${app.vehicule_id}`}>
+                      <button className="border px-2 py-1 rounded-xl cursor-pointer">Offre</button>
+                      </Link>
+                      <Link to={`/applications/${app.id}`}>
+                          <button className="border px-2 py-1 rounded-xl cursor-pointer">Application</button>
+                      </Link>
+                    </div>
                   </div>
               </li>
             ))}

@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
-const isAdmin = false
-const isLogged = false
+const isAdmin = true
+const isLogged = true
 
 export default function Header() {
   return (

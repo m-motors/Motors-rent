@@ -16,14 +16,21 @@
   
   .voiture_detail_title {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     color: white;
     font-size: 30px;
+    margin-top: 3rem;
+    margin-left: 1.5rem;
+    gap: 20px;
+  }
+  .voiture_detail_title button {
+    font-size: 16px;
+    padding: .5rem;
   }
   
   .voiture_detail_title h1 {
-    position: relative;
-    top: 3rem;
-    left: 1.5rem;
     font-size: 3rem;
   }
   
@@ -37,15 +44,12 @@
   
   .voiture_detail_buttons {
     display: flex;
-    flex-direction: column;
-    gap: 30px;
+    gap: 20px;
     position: relative;
     color: white;
     top: 7rem;
     left: 1.5rem;
-    max-width: fit-content;
   }
-  
   .voiture_detail_description {
     position: absolute;
     bottom: 15%;

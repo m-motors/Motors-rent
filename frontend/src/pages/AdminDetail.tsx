@@ -97,7 +97,7 @@ const AdminPage = () => {
                     <tbody>
                     {vehicle.map(vehicle => (
                         <tr key={vehicle.id}>
-                        <Link to={`/voitures/${vehicle.id}}`}><td className="py-2 px-4 border-b">{vehicle.id}</td></Link>
+                        <Link to={`/voitures/${vehicle.id}}`} className="text-blue-500 cursor-pointer underline "><td className="py-2 px-4 border-b">{vehicle.id}</td></Link>
                         <td className="py-2 px-4 border-b">{vehicle.available ? "Oui" : "Non"}</td>
                         <td className="py-2 px-4 border-b">{vehicle.brand}</td>
                         <td className="py-2 px-4 border-b">{vehicle.model}</td>
