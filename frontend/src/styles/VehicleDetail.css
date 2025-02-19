@@ -1,0 +1,68 @@
+/* src/styles/Vehicle.css */
+
+.voiture_detail {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+  
+  .voiture_detail_image {
+    position: absolute;
+    width: 100vw;
+    height: 90vh;
+    object-fit: cover;
+  }
+  
+  .voiture_detail_title {
+    position: relative;
+    color: white;
+    font-size: 30px;
+  }
+  
+  .voiture_detail_title h1 {
+    position: relative;
+    top: 3rem;
+    left: 1.5rem;
+    font-size: 3rem;
+  }
+  
+  .options_list {
+    position: relative;
+    top: 4rem;
+    left: 1.5rem;
+    color: white;
+    gap: 2;
+  }
+  
+  .voiture_detail_buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    position: relative;
+    color: white;
+    top: 7rem;
+    left: 1.5rem;
+    max-width: fit-content;
+  }
+  
+  .voiture_detail_description {
+    position: absolute;
+    bottom: 15%;
+    left: 0;
+    width: 100%;
+    color: white;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+  }
+  
+  .voiture_detail_description p {
+    font-size: 25px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
