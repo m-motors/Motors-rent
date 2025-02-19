@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 
 const isAdmin = false
-const isLogged = true
+const isLogged = false
 
 export default function Header() {
   return (
@@ -21,7 +21,8 @@ export default function Header() {
         {!isLogged && (
           <Link to="/register" className="hover:text-gray-400">Mon compte</Link>
         )}
-        <Link to="/folder" className="hover:text-gray-400">Mes dossiers</Link>
+        
+        <Link to={`/users/${1}/applications`} > Mes dossiers </Link>
         <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
       </nav>
       

@@ -1,73 +1,80 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./pages/Home";
+import Error from "./pages/Error.tsx"
 import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Folder from "./pages/Folder";
-import FolderCreate from "./pages/foldercreate.tsx";
+import ApplicationForm from "./pages/ApplicationForm.tsx";
 import Profile from "./pages/Profile.tsx";
-import VoitureDetail from "./pages/VoitureDetail.tsx";
+import VehicleDetail from "./pages/VehicleDetail.tsx";
 import User from "./pages/UserDetail.tsx"
 import Admin from "./pages/AdminDetail.tsx"
 import AddVehicle from "./components/vehicles/AddVehicle.tsx";
 import AddUser from "./pages/AddUser.tsx";
+import UserApplications from "./pages/UserApplication.tsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <Home />,
-    errorElement: <div>ERROR</div>,
+    errorElement: <Error />
   },
   {
     path: "/register",
     element: <Register />,
-    errorElement: <div>ERROR</div>,
+    errorElement: <Error />
   },
   {
     path: "/login",
     element: <Login />,
-    errorElement: <div>ERROR</div>,
+    errorElement: <Error />
   },
   {
     path: "/folder",
     element: <Folder />,
-    errorElement: <div>ERROR</div>,
+    errorElement: <Error />
   },
   {
-    path: "/foldercreate",
-    element: <FolderCreate />,
-    errorElement: <div>ERROR</div>,
+    path: "/voitures/:id/apply",
+    element: <ApplicationForm />,
+    errorElement: <Error />
   },
   {
     path: "/profile",
     element: <Profile />,
-    errorElement: <div>ERROR</div>,
+    errorElement: <Error />
   },
   {
     path: "voitures/:id",
-    element: <VoitureDetail />,
-    errorElement: <div>ERROR</div>
+    element: <VehicleDetail />,
+    errorElement: < Error />
   },
   {
     // path: "user/:id",
     path: "/user",
     element: <User />,
-    errorElement: <div>ERROR</div>
+    errorElement: < Error />
   },
   {
     // path: "/admin/:id"
     path: "/admin",
     element: <Admin />,
-    errorElement: <div>Error</div>
+    errorElement: < Error />
   },
   {
     path: "/addVehicle",
     element: <AddVehicle />,
-    errorElement: <div>Error</div>
+    errorElement: < Error />
   },
   {
     path: "/addUser",
     element: <AddUser />,
-    errorElement: <div>Error</div>
+    errorElement: < Error />
+  },
+  {
+    path: "/users/:userId/applications",
+    element: <UserApplications />,
+    errorElement: < Error />
   }
 ]);
 
