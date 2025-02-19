@@ -45,7 +45,7 @@ const AddUser = () => {
             <Header />
         <div className="add_page">
             <div className="add_page_card shadow-2xl max-w-2xl">
-                <h2>Créer une Annonce de Voiture</h2>
+                <h2>Ajouter un utilisateur</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="add_user_label" htmlFor="username">Nom d'utilisateur :</label>
