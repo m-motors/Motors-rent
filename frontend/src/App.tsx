@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./pages/Home";
 import Error from "./pages/Error.tsx"
-import Register from "./pages/Register";
+import Auth from "./pages/Auth.tsx";
 import Login from "./pages/Login";
 import Folder from "./pages/Folder";
 import ApplicationForm from "./pages/ApplicationForm.tsx";
@@ -12,6 +12,7 @@ import Admin from "./pages/AdminDetail.tsx"
 import AddVehicle from "./components/vehicles/AddVehicle.tsx";
 import AddUser from "./pages/AddUser.tsx";
 import UserApplications from "./pages/UserApplication.tsx";
+import ModifyUser from "./pages/ModifyUser.tsx"
 
 const router = createBrowserRouter([
   {
@@ -20,8 +21,8 @@ const router = createBrowserRouter([
     errorElement: <Error />
   },
   {
-    path: "/register",
-    element: <Register />,
+    path: "/auth",
+    element: <Auth />,
     errorElement: <Error />
   },
   {
@@ -75,6 +76,11 @@ const router = createBrowserRouter([
     path: "/users/:userId/applications",
     element: <UserApplications />,
     errorElement: < Error />
+  },
+  {
+    path: "/modifyUser/:id",
+    element : <ModifyUser />,
+    errorElement: <Error />
   }
 ]);
 

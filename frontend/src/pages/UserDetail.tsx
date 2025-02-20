@@ -37,7 +37,7 @@ const UserPage = () => {
                     <p><strong>Date d'anniversaire:</strong> {userData.birthdate}</p>
                     <p><strong>Date d’inscription:</strong> {userData.registrationDate}</p>
                     <p><strong>Statut:</strong> {userData.status}</p>
-                    <button className="mt-2 text-blue-500 hover:underline cursor-pointer">Modifier les informations</button>
+                    <Link to={`/modifyUser/${userData.id}`}><button className="mt-2 text-blue-500 hover:underline cursor-pointer">Modifier les informations</button></Link>
                 </div>
                 </div>
             </div>
