@@ -27,3 +27,7 @@ logs:
 	docker-compose logs -f backend frontend
 
 rebuild: clean build run
+
+restart: 
+	docker compose down -v
+	docker compose up --build

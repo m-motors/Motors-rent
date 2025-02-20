@@ -27,7 +27,9 @@ class Field:
             "str": str,
             "int": int,
             "float": float,
-            "bool": bool
+            "bool": bool, 
+            "dict" : dict,
+            "list" : list,
         }
         return type_mapping.get(self.field_type, str)
     

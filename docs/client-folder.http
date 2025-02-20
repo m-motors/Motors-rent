@@ -1,0 +1,60 @@
+###
+# @name login
+POST {{protocol}}://{{host}}:{{port}}/api/authentication/login
+Content-Type: application/json
+
+{
+  "identification" : "user1@example.com",
+  "password": "ChangeMe"
+}
+
+###
+@access_token = {{login.response.body.content.access_token}}
+@refresh_token = {{login.response.body.content.refresh_token}}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/clientfolders
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "type": "Rental", 
+  "vehicule_id" : 1,
+  "client_id" : 2,
+  "document_ids": [1, 2],
+  "option_ids": [1, 2]
+}
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/clientfolders
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/clientfolders/21
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/clientfolders/client/2
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+###
+DELETE {{protocol}}://{{host}}:{{port}}/api/clientfolders/19
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+###
+PUT {{protocol}}://{{host}}:{{port}}/api/clientfolders/19
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "vehicule_id" : 2
+}
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/clientfolders/info
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
