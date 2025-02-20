@@ -30,9 +30,29 @@ def create_vehicle_routes(vehicle_service: VehicleUseCase) -> Blueprint:
         """
         Change le statut du véhicule entre 'rent' et 'sale'.
         """
+        
         vehicle = vehicle_service.toggle_vehicle_status(id)
         if not vehicle:
             return jsonify({"error": "Vehicle not found"}), 404
         return jsonify(vars(vehicle)), 200
+
+    
+    @vehicle_routes.route('/vehicles/<int:id>', methods=['PUT'])
+    def update_vehicle(id: int):
+        """
+        Màjles informations d'un véhicule (prix, date et autres).
+        """
+        data = request.get_json()
+        vehicle = vehicle_service.get_vehicle(id)
+        if not vehicle:
+            return jsonify({"error": "Vehicle not found"}), 404
+        
+        if "price" in data:
+            vehicle.price = data["price"]
+        if "date" in data:
+            vehicle.date = data["date"]
+        
+        updated_vehicle = vehicle_service.update_vehicle(vehicle)
+        return jsonify(vars(updated_vehicle)), 200
 
     return vehicle_routes
