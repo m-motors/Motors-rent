@@ -1,6 +1,6 @@
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const AddUser = () => {
     const [formData, setFormData] = useState({
@@ -11,7 +11,7 @@ const AddUser = () => {
     });
     const [message, setMessage] = useState('');
 
-    const handleChange = (e) => {
+    const handleChange = (e: any) => {
         const { name, value } = e.target;
         setFormData({
             ...formData,
@@ -19,7 +19,7 @@ const AddUser = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: any) => {
         e.preventDefault();
 
         fetch('/api/add-user', {

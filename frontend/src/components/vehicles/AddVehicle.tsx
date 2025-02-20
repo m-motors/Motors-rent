@@ -17,7 +17,7 @@ const AddVehicle = () => {
     mileage: '',
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     const { name, value } = e.target;
     setVehicleData({
       ...vehicleData,
@@ -25,7 +25,7 @@ const AddVehicle = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     // Logique de soumission du formulaire
     console.log('Annonce créée :', vehicleData);

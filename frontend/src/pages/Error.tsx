@@ -1,4 +1,3 @@
-// src/components/NotFoundPage.tsx
 import { Link } from 'react-router-dom';
 import '../styles/Error.css';
 

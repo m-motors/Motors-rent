@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import "../styles/ApplicationForm.css"
@@ -7,7 +7,7 @@ import vehicleData from '../components/data/vehicleData.json';
 
 const ApplicationForm = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [formData, setFormData] = useState({
     type: 'Rental', // Par défaut, le type est "Rental"
     documents: {
@@ -17,13 +17,13 @@ const ApplicationForm = () => {
     },
   });
 
-  const voiture = vehicleData.find((car) => car.id === parseInt(id));
+  const voiture = vehicleData.find((car) => car.id === (id ? parseInt(id) : 0));
 
   if (!voiture) {
     return <h2>Véhicule non trouvé</h2>;
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: any) => {
     e.preventDefault();
     // Logique de soumission du formulaire
     console.log('Annonce créée :', vehicleData);

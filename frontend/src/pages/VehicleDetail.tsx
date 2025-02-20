@@ -9,7 +9,7 @@ const VoitureDetail = () => {
   const { id } = useParams<{ id: string }>();
 
   // Trouver le véhicule correspondant à l'ID
-  const voiture = vehicleData.find((car) => car.id === parseInt(id));
+  const voiture = vehicleData.find((car) => car.id === (id ? parseInt(id) : 0));
 
   if (!voiture) {
     return <h2>Véhicule non trouvé</h2>;
