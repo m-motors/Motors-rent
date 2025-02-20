@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiPlus, FiRefreshCcw } from "react-icons/fi";
+import { FiPlus, FiRefreshCcw, FiX } from "react-icons/fi";
 import vehicleData from "../data/vehicleData.json";
 import "../../styles/Filters.css";
 import "../../styles/VehicleCard.css"
@@ -16,7 +16,7 @@ function Filters() {
     status: ""
   });
 
-  const isAdmin = false;
+  const isAdmin = true;
   const navigate = useNavigate();
 
   const handleClick = (id: number) => {
@@ -138,12 +138,11 @@ function Filters() {
       <div className="vehicule_list">
         {filteredData.map((vehicule) => (
           <div key={vehicule.id} onClick={() => handleClick(vehicule.id)} className="vehicule_card relative">
-            {isAdmin && (
-              <div className="absolute flex justify-between m-2 text-sm" style={{ width: "95%"}}>
-                <button className="bg-blue-700">Modifier</button>
-                <button className="bg-red-700"> Supprimer </button>
+            {/* {isAdmin && (
+              <div className="absolute flex justify-end m-2 text-sm" style={{ width: "95%"}}>
+                <button className="bg-red-700 w-[20px] h-[20px]" title="Supprimer l'annonce"> <FiX /> </button>
               </div>
-            )}
+            )} */}
             <div className="absolute flex justify-center m-2 text-sm" style={{ width: "95%"}}>
               {vehicule.status === "Location" ? (
                 <span className="bg-yellow-500 text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm">Location</span>

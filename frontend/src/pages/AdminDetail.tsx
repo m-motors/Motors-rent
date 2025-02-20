@@ -2,8 +2,10 @@
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import users from "../components/data/userData.json"
 import vehicle from "../components/data/vehicleData.json"
+import application from "../components/data/userApplication.json"
 
 const AdminPage = () => {
 
@@ -35,7 +37,7 @@ const AdminPage = () => {
                 <p><strong>Activité Récente:</strong> {stats.recentActivity}</p>
             </div>
             <div className="bg-gray-100 p-4 rounded-lg shadow">
-                <h3 className="text-lg font-semibold mb-2">Actions Rapides</h3>
+                <h3 className="text-lg font-semibold mb-2">Actionps Rapides</h3>
                 <Link to="/addUser"> <button className="block mt-2 text-blue-500 hover:underline cursor-pointer">Ajouter un nouvel utilisateur</button> </Link>
                 <Link to="/addVehicle"> <button className="block mt-2 text-blue-500 hover:underline cursor-pointer">Ajouter une nouvelle annonce</button> </Link>
                 <button className="block mt-2 text-blue-500 hover:underline cursor-pointer">Exporter les données des utilisateurs</button>
@@ -107,6 +109,33 @@ const AdminPage = () => {
                         <td className="py-2 px-4 border-b">
                             <button className="text-red-500 hover:underline">Supprimer</button>
                         </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+            <div className="bg-gray-100 p-4 rounded-lg shadow mb-6">
+                <h3 className="text-lg font-semibold mb-2">Offres</h3>
+                <table className="min-w-full bg-white">
+                    <thead>
+                    <tr>
+                        <th className="py-2 px-4 border-b">ID</th>
+                        <th className="py-2 px-4 border-b">Status</th>
+                        <th className="py-2 px-4 border-b">Utilisateur</th>
+                        <th className="py-2 px-4 border-b">Voiture</th>
+                        <th className="py-2 px-4 border-b">Type</th>
+                        <th className="py-2 px-4 border-b">Date de création</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {application.map(application => (
+                        <tr key={application.id}>
+                        <td className="py-2 px-4 border-b">{application.id}</td>
+                        <td className="py-2 px-4 border-b">{application.status}</td>
+                        <td className="py-2 px-4 border-b">{application.user_id}</td>
+                        <td className="py-2 px-4 border-b">{application.vehicule_id}</td>
+                        <td className="py-2 px-4 border-b">{application.type}</td>
+                        <td className="py-2 px-4 border-b">{application.created_at}</td>
                         </tr>
                     ))}
                     </tbody>
