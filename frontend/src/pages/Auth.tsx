@@ -33,7 +33,8 @@ function AuthPage() {
     }
 
     // const url = isRegister ? '/api/users' : '/api/authentication/login';
-    const url = '/api/authentication/login';
+    const host = import.meta.env.VITE_API_HOST
+    const url = `${host}/api/authentication/login`;
     const data = isRegister ? formData : { identification: formData.email, password: formData.password };
 
     try {
