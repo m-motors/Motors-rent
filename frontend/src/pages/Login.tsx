@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axiosConfig"; // <-- Utiliser notre axios configuré
 import "../styles/register.css";
 
 function Login() {
@@ -12,15 +12,19 @@ function Login() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const host = import.meta.env.VITE_API_HOST;
-    const url = `${host}/api/authentication/login`;
-
     try {
-      const response = await axios.post(url, { identification: email, password });
+      const response = await api.post("/api/authentication/login", {
+        identification: email,
+        password,
+      });
+
+      console.log("Réponse du serveur :", response.data); // ✅ Affiche la réponse
+
       if (response.status === 200) {
         alert("Connexion réussie !");
-        localStorage.setItem("token", response.data.content?.token);
-        navigate("/dashboard");
+        localStorage.setItem("token", response.data.content.access_token);
+        console.log("Token stocké :", localStorage.getItem("token"));
+        navigate("/");
       } else {
         setError(response.data.message);
       }
