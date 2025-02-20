@@ -12,7 +12,6 @@ function Register() {
     password: '',
   });
   const [error, setError] = useState<string | null>(null);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -20,11 +19,11 @@ function Register() {
       [name]: value,
     }));
   };
-
+  const confirmPassword = ("")
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("formdata", formData)
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
     }
@@ -92,7 +91,7 @@ function Register() {
           required
           id="confirmPassword"
           name="confirmPassword"
-          value={formData.confirmPassword}
+          value={confirmPassword}
           onChange={handleChange}
         />
         <button className="auth-button" type="submit">

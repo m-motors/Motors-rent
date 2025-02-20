@@ -1,4 +1,3 @@
-// src/components/AuthPage.tsx
 import { useState } from "react";
 import Header from "../components/layout/Header";
 import Register from "./Register";
