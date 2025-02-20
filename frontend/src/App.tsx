@@ -10,7 +10,6 @@ import VehicleDetail from "./pages/VehicleDetail.tsx";
 import User from "./pages/UserDetail.tsx"
 import Admin from "./pages/AdminDetail.tsx"
 import AddVehicle from "./components/vehicles/AddVehicle.tsx";
-import AddUser from "./pages/AddUser.tsx";
 import UserApplications from "./pages/UserApplication.tsx";
 import ModifyUser from "./pages/ModifyUser.tsx"
 
@@ -65,11 +64,6 @@ const router = createBrowserRouter([
   {
     path: "/addVehicle",
     element: <AddVehicle />,
-    errorElement: < Error />
-  },
-  {
-    path: "/addUser",
-    element: <AddUser />,
     errorElement: < Error />
   },
   {
