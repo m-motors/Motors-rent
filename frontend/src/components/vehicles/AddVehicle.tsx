@@ -1,7 +1,8 @@
 // src/CreateAdPage.js
+import { useState } from "react";
+
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
-import React, { useState } from "react";
 import "../../styles/AddPages.css"
 
 const AddVehicle = () => {

@@ -5,13 +5,24 @@ import Footer from "../components/layout/Footer";
 import "../styles/UserApplication.css";
 import applicationData from "../../src/components/data/userApplication.json"
 
+type Application = {
+  id: number;
+  created_at: string;
+  user_id: number;
+  vehicule_id: number;
+  type: string;
+  status: string;
+};
+
+
 const UserApplications = () => {
   const { userId } = useParams<{ userId: string }>();
-  const [applications, setApplications] = useState([]);
+  const [applications, setApplications] = useState<Application[]>([]);
 
   useEffect(() => {
     // Filtrer les applications pour l'utilisateur spécifié
-    const userApplications = applicationData.filter(app => app.user_id === parseInt(userId));
+
+    const userApplications = userId ? applicationData.filter(app => app.user_id === parseInt(userId)) : [];
     setApplications(userApplications);
   }, [userId]);
 
