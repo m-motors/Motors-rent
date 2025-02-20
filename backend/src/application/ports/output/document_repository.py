@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 
 from src.domain.models.document import Document
 
+
 class DocumentRepository(ABC):
     @abstractmethod
     def save(self, document: Document) -> Document:
@@ -18,4 +19,8 @@ class DocumentRepository(ABC):
 
     @abstractmethod
     def delete(self, document_id: int) -> bool:
+        pass
+
+    @abstractmethod
+    def update(self, document: Document) -> Document:
         pass
