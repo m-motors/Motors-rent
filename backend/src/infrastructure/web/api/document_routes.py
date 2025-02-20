@@ -54,4 +54,22 @@ def create_document_routes(document_service: DocumentService) -> Blueprint:
             return '', 204
         return jsonify({"error": "Document not found"}), 404
 
+    @document_routes.route('/documents/<int:document_id>/view', methods=['GET'])
+    def view_document(document_id: int):
+        url = document_service.get_document_url(document_id)
+        if url:
+            return jsonify({"url": url}), 200
+        return jsonify({"error": "Document not found"}), 404
+
+    @document_routes.route('/documents/<int:document_id>/metadata', methods=['PATCH'])
+    def update_document_metadata(document_id: int):
+        new_metadata = request.json
+        if not new_metadata:
+            return jsonify({"error": "No metadata provided"}), 400
+
+        updated_document = document_service.update_document_metadata(document_id, new_metadata)
+        if updated_document:
+            return jsonify(vars(updated_document)), 200
+        return jsonify({"error": "Document not found"}), 404
+
     return document_routes
