@@ -5,23 +5,23 @@ from src.application.services.document_service import DocumentService
 
 document_routes = Blueprint('document_routes', __name__)
 
+
 def create_document_routes(document_service: DocumentService) -> Blueprint:
-    
     @document_routes.route('/documents/upload', methods=['POST'])
     def upload_document():
         if 'file' not in request.files:
             return jsonify({"error": "No file provided"}), 400
-            
+
         file = request.files['file']
         application_id = request.form.get('application_id')
         document_type = request.form.get('document_type')
-        
+
         if not file.filename:
             return jsonify({"error": "No file selected"}), 400
-            
+
         if not application_id or not document_type:
             return jsonify({"error": "Missing required fields"}), 400
-            
+
         try:
             document = document_service.upload_document(
                 file,
