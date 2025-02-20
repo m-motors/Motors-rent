@@ -1,0 +1,52 @@
+/* src/styles/NotFoundPage.css */
+.error_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f8f9fa;
+    text-align: center;
+  }
+  
+  .error_content {
+    max-width: 600px;
+  }
+  
+  .error_title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #343a40;
+  }
+  
+  .error_image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 1.5rem;
+  }
+  
+  .error_message {
+    font-size: 1.25rem;
+    color: #6c757d;
+    margin-bottom: 2rem;
+  }
+  
+  .error_buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .error_button {
+    background-color: #007bff;
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+  }
+  
+  .error_button:hover {
+    background-color: #0056b3;
+  }
+  

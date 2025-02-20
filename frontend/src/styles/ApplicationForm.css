@@ -1,0 +1,47 @@
+.application_form {
+    min-height: 100%;
+    background-color: #f3f4f6;
+    padding: 1.5rem;
+}
+.application_form_card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 30px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+.application_form_card h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+.application_form_label {
+    display: block;
+    font-size: .875rem;
+    font-weight: bold;
+    margin-bottom: .5rem;
+    margin-top: .5rem;
+    color: #364153;
+}
+.application_form_card input, .application_form_card select {
+    appearance: none;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: .2rem;
+    color: #364153;
+    width: 100%;
+}
+.application_form_card .div_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.application_form_card button {
+    background-color: #2b7fff;
+    color: white;
+    font-weight: bold;
+    padding: .5rem 1rem;
+    border-radius: 10px;
+}
