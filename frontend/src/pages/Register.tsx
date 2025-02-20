@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/layout/Header";
-import "../styles/auth.css";
+import "../styles/Register.css";
 import axios from 'axios';
 
 function AuthPage() {
@@ -10,7 +10,7 @@ function AuthPage() {
   const [formData, setFormData] = useState({
     firstname: '',
     lastname: '',
-    email: '',
+    identification: '',
     password: '',
     confirmPassword: '',
   });
@@ -26,19 +26,21 @@ function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("coucou")
     console.log("formData", formData)
     if (isRegister && formData.password !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
     }
 
-    // const url = isRegister ? '/api/users' : '/api/authentication/login';
     const host = import.meta.env.VITE_API_HOST
-    const url = `${host}/api/authentication/login`;
+    const url = isRegister ? `${host}/api/users` : `${host}/api/authentication/login`;
     const data = isRegister ? formData : { identification: formData.email, password: formData.password };
 
     try {
       const response = await axios.post(url, data);
+      console.log("response", response)
+      console.log("dans le try")
       if (response.status === 200 || response.status === 201) {
         if (isRegister) {
           alert("Inscription réussie !");
@@ -48,10 +50,11 @@ function AuthPage() {
           navigate("/dashboard");
         }
       } else {
-        console.log("error lol")
+        console.log("dans le else")
         setError(response.data.message);
       }
     } catch (error) {
+      console.log("dans l'erreur")
       console.error("Erreur :", error);
       setError("Problème de connexion au serveur.");
     }

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../components/layout/Header";
-import "../styles/auth.css";
+import "../styles/Register.css";
 import axios from 'axios';
 
 function ModifyUser() {
