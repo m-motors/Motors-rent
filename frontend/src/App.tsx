@@ -2,8 +2,6 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./pages/Home";
 import Error from "./pages/Error.tsx"
 import AuthPage from "./pages/AuthPage.tsx";
-import Auth from "./pages/Register.tsx";
-import Login from "./pages/Login";
 import Folder from "./pages/Folder";
 import ApplicationForm from "./pages/ApplicationForm.tsx";
 import Profile from "./pages/Profile.tsx";
@@ -23,16 +21,6 @@ const router = createBrowserRouter([
   {
     path: "/AuthPage",
     element: <AuthPage />,
-    errorElement: <Error />
-  },
-  {
-    path: "/auth",
-    element: <Auth />,
-    errorElement: <Error />
-  },
-  {
-    path: "/login",
-    element: <Login />,
     errorElement: <Error />
   },
   {
