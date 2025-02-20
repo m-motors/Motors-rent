@@ -11,7 +11,8 @@
       "category": "Sedan",
       "motor": "Gasoline",
       "color": "White",
-      "mileage": 15000
+      "mileage": 15000,
+      "status": "Location"
     },
     {
       "id": 2,
@@ -25,7 +26,8 @@
       "category": "Sedan",
       "motor": "Gasoline",
       "color": "Black",
-      "mileage": 12000
+      "mileage": 12000,
+      "status": "Location"
     },
     {
       "id": 3,
@@ -39,12 +41,13 @@
       "category": "Coupe",
       "motor": "Gasoline",
       "color": "Red",
-      "mileage": 5000
+      "mileage": 5000,
+      "status": "Location"
     },
     {
       "id": 4,
       "created_at": "2025-02-11 22:02:12",
-      "available": true,
+      "available": false,
       "brand": "Chevrolet",
       "model": "Camaro",
       "year": 2020,
@@ -53,7 +56,8 @@
       "category": "Coupe",
       "motor": "Gasoline",
       "color": "Blue",
-      "mileage": 8000
+      "mileage": 8000,
+      "status": "Location"
     },
     {
       "id": 5,
@@ -67,7 +71,8 @@
       "category": "Sedan",
       "motor": "Gasoline",
       "color": "Gray",
-      "mileage": 20000
+      "mileage": 20000,
+      "status": "Location"
     },
     {
       "id": 6,
@@ -81,12 +86,13 @@
       "category": "Sedan",
       "motor": "Gasoline",
       "color": "Silver",
-      "mileage": 18000
+      "mileage": 18000,
+      "status": "Location"
     },
     {
       "id": 7,
       "created_at": "2025-02-11 22:02:12",
-      "available": true,
+      "available": false,
       "brand": "Audi",
       "model": "A4",
       "year": 2020,
@@ -95,7 +101,8 @@
       "category": "Sedan",
       "motor": "Gasoline",
       "color": "Black",
-      "mileage": 15000
+      "mileage": 15000,
+      "status": "Location"
     },
     {
       "id": 8,
@@ -109,7 +116,8 @@
       "category": "Sedan",
       "motor": "Electric",
       "color": "White",
-      "mileage": 10000
+      "mileage": 10000,
+      "status": "Location"
     },
     {
       "id": 9,
@@ -123,7 +131,8 @@
       "category": "Hatchback",
       "motor": "Gasoline",
       "color": "Blue",
-      "mileage": 25000
+      "mileage": 25000,
+      "status": "Location"
     },
     {
       "id": 10,
@@ -137,7 +146,8 @@
       "category": "SUV",
       "motor": "Gasoline",
       "color": "Green",
-      "mileage": 22000
+      "mileage": 22000,
+      "status": "Location"
     },
     {
       "id": 11,
@@ -151,12 +161,13 @@
       "category": "Sedan",
       "motor": "Gasoline",
       "color": "Gray",
-      "mileage": 16000
+      "mileage": 16000,
+      "status": "Achat"
     },
     {
       "id": 12,
       "created_at": "2025-02-11 22:02:12",
-      "available": true,
+      "available": false,
       "brand": "Hyundai",
       "model": "Tucson",
       "year": 2021,
@@ -165,12 +176,13 @@
       "category": "SUV",
       "motor": "Gasoline",
       "color": "Red",
-      "mileage": 12000
+      "mileage": 12000,
+      "status": "Achat"
     },
     {
       "id": 13,
       "created_at": "2025-02-11 22:02:12",
-      "available": true,
+      "available": false,
       "brand": "Kia",
       "model": "Sportage",
       "year": 2019,
@@ -179,7 +191,8 @@
       "category": "SUV",
       "motor": "Gasoline",
       "color": "Black",
-      "mileage": 19000
+      "mileage": 19000,
+      "status": "Achat"
     },
     {
       "id": 14,
@@ -193,7 +206,8 @@
       "category": "SUV",
       "motor": "Gasoline",
       "color": "White",
-      "mileage": 15000
+      "mileage": 15000,
+      "status": "Achat"
     },
     {
       "id": 15,
@@ -207,7 +221,8 @@
       "category": "SUV",
       "motor": "Gasoline",
       "color": "Yellow",
-      "mileage": 8000
+      "mileage": 8000,
+      "status": "Achat"
     },
     {
       "id": 16,
@@ -221,7 +236,8 @@
       "category": "SUV",
       "motor": "Gasoline",
       "color": "Silver",
-      "mileage": 28000
+      "mileage": 28000,
+      "status": "Achat"
     },
     {
       "id": 17,
@@ -235,7 +251,8 @@
       "category": "Truck",
       "motor": "Gasoline",
       "color": "Blue",
-      "mileage": 20000
+      "mileage": 20000,
+      "status": "Achat"
     },
     {
       "id": 18,
@@ -249,7 +266,8 @@
       "category": "Truck",
       "motor": "Gasoline",
       "color": "Black",
-      "mileage": 15000
+      "mileage": 15000,
+      "status": "Achat"
     },
     {
       "id": 19,
@@ -263,7 +281,8 @@
       "category": "Truck",
       "motor": "Gasoline",
       "color": "Red",
-      "mileage": 10000
+      "mileage": 10000,
+      "status": "Achat"
     },
     {
       "id": 20,
@@ -277,7 +296,8 @@
       "category": "Coupe",
       "motor": "Gasoline",
       "color": "White",
-      "mileage": 5000
+      "mileage": 5000,
+      "status": "Achat"
     }
   ]
   

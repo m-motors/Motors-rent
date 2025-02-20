@@ -1,7 +1,6 @@
-// src/AddUser.js
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const AddUser = () => {
     const [formData, setFormData] = useState({
@@ -12,7 +11,7 @@ const AddUser = () => {
     });
     const [message, setMessage] = useState('');
 
-    const handleChange = (e) => {
+    const handleChange = (e: any) => {
         const { name, value } = e.target;
         setFormData({
             ...formData,
@@ -20,7 +19,7 @@ const AddUser = () => {
         });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: any) => {
         e.preventDefault();
 
         fetch('/api/add-user', {
@@ -45,7 +44,7 @@ const AddUser = () => {
             <Header />
         <div className="add_page">
             <div className="add_page_card shadow-2xl max-w-2xl">
-                <h2>Créer une Annonce de Voiture</h2>
+                <h2>Ajouter un utilisateur</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label className="add_user_label" htmlFor="username">Nom d'utilisateur :</label>

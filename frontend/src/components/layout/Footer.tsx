@@ -1,6 +1,21 @@
 import { FiFacebook, FiTwitter, FiInstagram } from "react-icons/fi";
 
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+
 export default function Footer() {
+  const [version, setVersion] = useState("0.0.0");
+  const host = import.meta.env.VITE_API_HOST  ?? "error";
+
+  useEffect(() => {
+    const fetchVersion = async () => {
+        const response = await axios.get(`${host}/api/tools/version`);
+        setVersion(response.data.content);
+    }
+    fetchVersion();
+  }, [host]); 
+
   return (
     <footer className="bg-gray-900 text-white py-6">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center px-6">
@@ -36,7 +51,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="text-center text-sm mt-4">&copy; 2025 M-Motors. Tous droits réservés.</div>
+      <div className="text-center text-sm mt-4">&copy; 2025 M-Motors. Tous droits réservés. V{version}</div>
     </footer>
   );
 }

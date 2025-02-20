@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiPlus, FiRefreshCcw, FiXCircle } from "react-icons/fi";
-import vehicleData from "../data/vehicleCards.json";
+import { FiPlus, FiRefreshCcw } from "react-icons/fi";
+import vehicleData from "../data/vehicleData.json";
 import "../../styles/Filters.css";
 import "../../styles/VehicleCard.css"
 
@@ -13,9 +13,10 @@ function Filters() {
     horsepower: "",
     price: "",
     motor: "",
+    status: ""
   });
 
-  const isAdmin = true;
+  const isAdmin = false;
   const navigate = useNavigate();
 
   const handleClick = (id: number) => {
@@ -32,6 +33,7 @@ function Filters() {
       horsepower: "",
       price: "",
       motor: "",
+      status: ""
     });
   };
 
@@ -39,6 +41,7 @@ function Filters() {
     const filterVehicles = () => {
       return vehicleData.filter((car) => {
         return (
+          (filters.status === "" || car.status === filters.status) &&
           (filters.brand === "" || car.brand === filters.brand) &&
           (filters.category === "" || car.category === filters.category) &&
           (filters.year === "" || car.year === parseInt(filters.year)) &&
@@ -63,6 +66,14 @@ function Filters() {
   return (
     <div className="filters_container">
       <ul className="filters_list">
+        <li>
+          <select name="status" id="status" className="filter_select" onChange={handleFilterChange}>
+            <option value="">Status</option>
+            {[...new Set(vehicleData.map((car) => car.status))].map((status) => (
+              <option key={status} value={status}>{status}</option>
+            ))}
+          </select>
+        </li>
         <li>
           <select name="brand" id="brand" className="filter_select" onChange={handleFilterChange}>
             <option value="">Marque</option>
@@ -111,7 +122,7 @@ function Filters() {
             ))}
           </select>
         </li>
-        <button onClick={() => resetFilters()}>
+        <button onClick={() => resetFilters()} className="cursor-pointer" title="Réinitialiser les filtres">
           <FiRefreshCcw />
         </button>
       </ul>
@@ -133,6 +144,13 @@ function Filters() {
                 <button className="bg-red-700"> Supprimer </button>
               </div>
             )}
+            <div className="absolute flex justify-center m-2 text-sm" style={{ width: "95%"}}>
+              {vehicule.status === "Location" ? (
+                <span className="bg-yellow-500 text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm">Location</span>
+              ) : vehicule.status === "Achat" ? (
+                <span className="bg-blue-500 text-white text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm">Achat</span>
+              ) : null }
+            </div>
             <img
               src="https://image.web.stellantis.com/lib/fe34117175640475711d70/m/1/5bebd465-e526-406f-b012-45faeee97c5a.jpg"
               alt={`${vehicule.brand} ${vehicule.model}`}
