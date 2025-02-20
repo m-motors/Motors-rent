@@ -1,4 +1,3 @@
-// src/components/Register.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -7,11 +6,10 @@ import "../styles/Register.css";
 function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    firstname: '',
-    lastname: '',
+    first_name: '',
+    last_name: '',
     email: '',
     password: '',
-    confirmPassword: '',
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -25,6 +23,7 @@ function Register() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log("formdata", formData)
     if (formData.password !== formData.confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
@@ -57,7 +56,7 @@ function Register() {
           required
           id="firstname"
           name="firstname"
-          value={formData.firstname}
+          value={formData.first_name}
           onChange={handleChange}
         />
         <input
@@ -66,7 +65,7 @@ function Register() {
           required
           id="lastname"
           name="lastname"
-          value={formData.lastname}
+          value={formData.last_name}
           onChange={handleChange}
         />
         <input
