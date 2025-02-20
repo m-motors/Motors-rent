@@ -1,3 +1,4 @@
+// src/components/Register.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -11,18 +12,23 @@ function Register() {
     email: '',
     password: '',
   });
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+    if (name === 'confirmPassword') {
+      setConfirmPassword(value);
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
-  const confirmPassword = ("")
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("formdata", formData)
     if (formData.password !== confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
@@ -53,8 +59,8 @@ function Register() {
           type="text"
           placeholder="Prénom"
           required
-          id="firstname"
-          name="firstname"
+          id="first_name"
+          name="first_name"
           value={formData.first_name}
           onChange={handleChange}
         />
@@ -62,8 +68,8 @@ function Register() {
           type="text"
           placeholder="Nom"
           required
-          id="lastname"
-          name="lastname"
+          id="last_name"
+          name="last_name"
           value={formData.last_name}
           onChange={handleChange}
         />

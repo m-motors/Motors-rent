@@ -19,7 +19,7 @@ export default function Header() {
           <Link to="/admin" className="hover:text-gray-400">Mon compte</Link>
           )}
         {!isLogged && (
-          <Link to="/auth" className="hover:text-gray-400">Mon compte</Link>
+          <Link to="/authpage" className="hover:text-gray-400">Mon compte</Link>
         )}
         
         <Link to={`/users/${1}/applications`} > Mes dossiers </Link>
