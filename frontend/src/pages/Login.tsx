@@ -9,6 +9,8 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -18,16 +20,15 @@ function Login() {
         password,
       });
 
-      console.log("Réponse du serveur :", response.data); // ✅ Affiche la réponse
-
-      if (response.status === 200) {
-        alert("Connexion réussie !");
-        localStorage.setItem("token", response.data.content.access_token);
-        console.log("Token stocké :", localStorage.getItem("token"));
-        navigate("/");
-      } else {
-        setError(response.data.message);
+      if (response.data.erorr) {
+        throw new Error()
       }
+
+      const token = response.data.content.access_token
+      localStorage.setItem("jwt-token", token);
+      navigate("/");
+
+
     } catch (error) {
       console.error("Erreur de connexion :", error);
       setError("Problème de connexion au serveur.");
