@@ -8,7 +8,6 @@ END $$;
 -- Connexion à la base de données
 \c groupe11;
 
-
 -- Table: user
 CREATE TABLE "users" (
     "id" SERIAL PRIMARY KEY,
@@ -37,34 +36,58 @@ CREATE TABLE "vehicules" (
     "mileage" INTEGER NOT NULL
 );
 
--- Table: application
-CREATE TABLE "applications" (
-    "id" SERIAL PRIMARY KEY,
-    "created_at" TIMESTAMP DEFAULT current_timestamp,
-    "user_id" INTEGER NOT NULL,
-    "vehicule_id" INTEGER NOT NULL,
-    "type" VARCHAR(50) NOT NULL,
-    "status" VARCHAR(50) NOT NULL DEFAULT 'En cours de validation'
+CREATE TYPE client_folder_status AS ENUM (
+    'created', 
+    'in_validation', 
+    'validated', 
+    'rejected', 
+    'deleted'
 );
 
--- Table: documents
-CREATE TABLE "documents" (
-    "id" SERIAL PRIMARY KEY,
-    "created_at" TIMESTAMP DEFAULT current_timestamp,
-    "application_id" INTEGER NOT NULL,
-    "document_type" VARCHAR(50) NOT NULL,
-    "link" VARCHAR(255) NOT NULL
-
+-- Création de la table client_folders après l'ENUM
+CREATE TABLE client_folders (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    user_id INTEGER NOT NULL,
+    vehicule_id INTEGER DEFAULT NULL,
+    type VARCHAR(50) NOT NULL,
+    status client_folder_status DEFAULT 'created'
 );
 
+-- Création du type ENUM pour le statut des documents
+CREATE TYPE document_status AS ENUM (
+    'created',
+    'in_validation', 
+    'validated', 
+    'rejected', 
+    'expired'
+);
+
+-- Création de la table documents
+CREATE TABLE documents (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP DEFAULT current_timestamp,
+    client_folder_id INTEGER NOT NULL,
+    document_type VARCHAR(50) NOT NULL,
+    link VARCHAR(255) NOT NULL,
+    status document_status NOT NULL DEFAULT 'created',
+    user_id INTEGER,
+    expired_at TIMESTAMP DEFAULT NULL
+);
+
+CREATE TABLE IF NOT EXISTS migrations (
+    version VARCHAR(255) PRIMARY KEY,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 -- Ajout des clés étrangères
-ALTER TABLE "applications"
-    ADD CONSTRAINT fk_application_user FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE,
-    ADD CONSTRAINT fk_application_vehicule FOREIGN KEY ("vehicule_id") REFERENCES "vehicules"("id") ON DELETE CASCADE;
+ALTER TABLE "client_folders"
+    ADD CONSTRAINT fk_client_folder_user FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE,
+    ADD CONSTRAINT fk_client_folder_vehicule FOREIGN KEY ("vehicule_id") REFERENCES "vehicules"("id") ON DELETE CASCADE;
 
 ALTER TABLE "documents"
-    ADD CONSTRAINT fk_documents_application FOREIGN KEY ("application_id") REFERENCES "applications"("id") ON DELETE CASCADE;
+    ADD CONSTRAINT fk_documents_user FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE,
+    ADD CONSTRAINT fk_documents_client_folder FOREIGN KEY ("client_folder_id") REFERENCES "client_folders"("id") ON DELETE CASCADE;
 
 -- Insertion des données pour la table `user`
 INSERT INTO "users" ("created_at", "email", "first_name", "last_name", "is_active", "user_role", "password") VALUES
@@ -87,16 +110,16 @@ INSERT INTO "vehicules" ("created_at", "brand", "model", "year", "horsepower", "
 ('2025-02-11 22:02:12', 'Nissan', 'Altima', 2020, 188, 24000, 'Sedan', 'Gasoline', 'Blue', 16000),
 ('2025-02-11 22:02:12','Hyundai', 'Elantra', 2019, 147, 19000, 'Sedan', 'Gasoline', 'Red', 14000);
 
--- Insertion des données pour la table `applications`
-INSERT INTO "applications" ("created_at", "user_id", "vehicule_id", "type", "status") VALUES
-('2025-02-11 22:02:12', 1, 1, 'Rental', 'En cours de validation'),
-('2025-02-11 22:02:12', 2, 2, 'Buy', 'refuse'),
-('2025-02-11 22:02:12', 3, 8, 'Rental', 'En cours de validation'),
-('2025-02-11 22:02:12', 4, 4, 'Rental', 'validate'),
-('2025-02-11 22:02:12', 5, 5, 'Buy', 'En cours de validation');
+-- Insertion des données pour la table `client_folders`
+INSERT INTO "client_folders" ("created_at", "user_id", "vehicule_id", "type", "status") VALUES
+('2025-02-11 22:02:12', 1, 1, 'Rental', 'in_validation'),
+('2025-02-11 22:02:12', 2, 2, 'Buy', 'rejected'),
+('2025-02-11 22:02:12', 3, 8, 'Rental', 'in_validation'),
+('2025-02-11 22:02:12', 4, 4, 'Rental', 'validated'),
+('2025-02-11 22:02:12', 5, 5, 'Buy', 'in_validation');
 
 -- Insertion des données pour la table `documents`
-INSERT INTO "documents" ("created_at", "application_id", "document_type", "link") VALUES
+INSERT INTO "documents" ("created_at", "client_folder_id", "document_type", "link") VALUES
 ('2025-02-11 22:02:12', 1, 'ID Card', 'http://example.com/doc1.pdf'),
 ('2025-02-11 22:02:12', 1, 'Driving license', 'http://example.com/doc6.pdf'),
 ('2025-02-11 22:02:12', 1, 'Proof of Address', 'http://example.com/doc7.pdf'),

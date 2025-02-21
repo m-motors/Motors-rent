@@ -14,6 +14,7 @@ WORKDIR /app
 COPY ./requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
+
 FROM base AS development
 LABEL stage=development
 
@@ -21,9 +22,9 @@ RUN pip install --upgrade pip setuptools wheel \
 && pip install flask-debugtoolbar debugpy
 
 EXPOSE 3000
-ENV PYTHONPATH=/app/src
 
-CMD ["flask", "--app", "./main.py", "run", "--host=0.0.0.0", "--reload"]
+#debug
+CMD ["sh", "-c", "python ./src/infrastructure/scripts/migrate.py && flask --app ./main.py run --host=0.0.0.0 --reload"]
 
 # production
 FROM base AS production
@@ -36,7 +37,8 @@ EXPOSE 5000
 
 CMD ["gunicorn", "--config", "./gunicorn.conf.py", "main:app"]
 
-#debug
+
+
 FROM base AS debug
 LABEL stage=debug
 
@@ -46,4 +48,4 @@ RUN pip install --upgrade pip setuptools wheel \
 EXPOSE 3000
 EXPOSE 5678
 
-CMD ["python", "-Xfrozen_modules=off", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "flask", "--app", "./main.py", "run", "--host=0.0.0.0", "--reload"]
+CMD ["sh", "-c", "python ./src/infrastructure/scripts/migrate.py && python -m debugpy --listen 0.0.0.0:5678 -m flask --app ./main.py run --host=0.0.0.0 --reload"]

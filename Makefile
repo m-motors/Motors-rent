@@ -12,7 +12,7 @@ help:
 	@echo "  run   => Run app with Docker Compose"
 	@echo "  stop  => Stop Docker services"
 	@echo "  logs  => See backend and frontend logs"
-
+	@echo "  llm   => Run app with Docker Compose + LLM"
 
 build:
 	docker-compose build
@@ -27,3 +27,10 @@ logs:
 	docker-compose logs -f backend frontend
 
 rebuild: clean build run
+
+restart: 
+	docker compose down -v
+	docker compose up --build
+
+llm:
+	docker-compose -f docker-compose.yml -f docker-compose.llm.yml up -d

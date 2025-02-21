@@ -31,7 +31,3 @@ class AuthenticationService(AuthenticationUseCase):
     
     def logout(self, id: int) -> bool:
         pass
-    
-    def verify(self, id: int) -> User:
-        pass
-    

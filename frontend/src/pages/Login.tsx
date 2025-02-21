@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+
+import api from "../api/axiosConfig"; // <-- Utiliser notre axios configuré
+
 import "../styles/Register.css";
 
 function Login() {
@@ -9,21 +11,26 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const host = import.meta.env.VITE_API_HOST;
-    const url = `${host}/api/authentication/login`;
-
     try {
-      const response = await axios.post(url, { identification: email, password });
-      if (response.status === 200) {
-        alert("Connexion réussie !");
-        localStorage.setItem("token", response.data.content?.token);
-        navigate("/dashboard");
-      } else {
-        setError(response.data.message);
+      const response = await api.post("/api/authentication/login", {
+        identification: email,
+        password,
+      });
+
+      if (response.data.erorr) {
+        throw new Error()
+
       }
+
+      const token = response.data.content.access_token
+      localStorage.setItem("jwt-token", token);
+      navigate("/");
+
+
     } catch (error) {
       console.error("Erreur de connexion :", error);
       setError("Problème de connexion au serveur.");

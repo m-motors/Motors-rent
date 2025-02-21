@@ -59,7 +59,7 @@ Une réunion a été organisée entre la direction, le service commercial et le 
 - Recherche de véhicules selon deux options : **achat** ou **location**  
 - Inscription et dépôt de dossier d’achat ou de location  
 - Téléchargement des documents depuis l’interface (dossier **100% dématérialisé**)  
-- Suivi de l’avancement du dossier depuis un **espace client**  
+- Suivi de l’avancement du dossier depuis un **espace client**
 
 #### Côté Back Office  
 
@@ -138,6 +138,17 @@ Lors de la création des container les variables d'environement du .env son ré�
 
 ### Créer le fichier .env.local avec les secrets ###
 
+## Démarer l'aplication 
+
+docker compose up --build 
+
+Le plus long a creer est le backend on attend que la base soit dispo avant la création ajout de fichier de migrations pour pas avoir de regression dans la base
+
+OR WITH LLM (OLLAMA)
+
+docker-compose -f docker-compose.yml -f docker-compose.llm.yml up -d
+
+PLEASE READ THE MAKEFILE : make help
 
 ## Connecting to PGAdmin via Web
 
