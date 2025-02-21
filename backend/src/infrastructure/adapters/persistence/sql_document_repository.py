@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from src.domain.models.document import Document
 from src.application.ports.output.document_repository import DocumentRepository
 
+
 class MySQLDocumentRepository(DocumentRepository):
     def __init__(self, db: SQLAlchemy):
         self.db = db
@@ -21,6 +22,22 @@ class MySQLDocumentRepository(DocumentRepository):
         result = self.db.session.execute(query, params)
         self.db.session.commit()
         document.id = result.lastrowid
+        return document
+
+    def update(self, document: Document) -> Document:
+        query = """
+            UPDATE documents
+            SET application_id = %s, document_type = %s, link = %s
+            WHERE id = %s
+        """
+        params = {
+            "application_id": document.application_id,
+            "document_type": document.document_type,
+            "link": document.link,
+            "id": document.id
+        }
+        self.db.session.execute(query, params)
+        self.db.session.commit()
         return document
 
     def find_by_id(self, document_id: int) -> Optional[Document]:

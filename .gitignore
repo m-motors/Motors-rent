@@ -67,4 +67,5 @@ migrations/
 # Coverage reports
 coverage/
 
-
+# Ollama modules
+ollama/

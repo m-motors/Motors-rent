@@ -2,6 +2,7 @@ from typing import Optional
 from datetime import datetime
 from dataclasses import dataclass
 
+
 @dataclass
 class Document:
     id: Optional[int]
