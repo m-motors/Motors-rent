@@ -1,0 +1,27 @@
+FROM python:3.11-slim AS base
+LABEL stage=base
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY ./requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir gunicorn
+
+
+FROM base AS production
+LABEL stage=production
+
+COPY ./gunicorn.conf.py /app/gunicorn.conf.py
+COPY ./src /app/src
+COPY ./main.py /app/main.py
+
+EXPOSE 80
+
+CMD ["gunicorn", "-b", "0.0.0.0:80", "--config", "./gunicorn.conf.py", "main:app"]

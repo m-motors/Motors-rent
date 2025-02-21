@@ -62,6 +62,9 @@ option_service = OptionService(option_repository)
 option_routes = create_option_routes(option_service, authorize)
 app.register_blueprint(option_routes, url_prefix='/api')
 
+@app.route('/')
+def hello():
+    return "hello", 200
 
 @app.errorhandler(404)
 def page_not_found(error):
