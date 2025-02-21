@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import api from "../api/axiosConfig"; // <-- Utiliser notre axios configuré
-import "../styles/register.css";
+
+import "../styles/Register.css";
 
 function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-
 
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -22,6 +23,7 @@ function Login() {
 
       if (response.data.erorr) {
         throw new Error()
+
       }
 
       const token = response.data.content.access_token

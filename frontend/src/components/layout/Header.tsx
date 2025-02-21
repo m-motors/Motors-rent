@@ -1,8 +1,10 @@
+
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Header() {
+    const isAdmin = false
   const [isLogged, setIsLogged] = useState(false);
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
 
@@ -24,7 +26,6 @@ export default function Header() {
         });
     }
   }, []);
-
   return (
     <header className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center shadow-md">
       <div className="text-xl font-bold">
@@ -32,6 +33,8 @@ export default function Header() {
       </div>
 
       <nav className="hidden md:flex gap-6 text-sm uppercase">
+      
+
         <Link to="/" className="hover:text-gray-400">
           Accueil
         </Link>
@@ -54,6 +57,22 @@ export default function Header() {
         <Link to="/addVehicle" className="hover:text-gray-400">
           Nouvelle offre
         </Link>
+
+        <Link to="/" className="hover:text-gray-400">Accueil</Link>
+        {!isAdmin && tokenExist && (
+          <Link to="/user" className="hover:text-gray-400">Mon compte</Link>
+          )}
+        {isAdmin && tokenExist && (
+          <Link to="/admin" className="hover:text-gray-400">Mon compte</Link>
+          )}
+        {!tokenExist && (
+          <Link to="/authpage" className="hover:text-gray-400">Mon compte</Link>
+        )}
+        
+        <Link to={`/users/${1}/applications`} > Mes dossiers </Link>
+        {/* <Link to={`/users/${user.id}/applications`} > Mes dossiers </Link> */}
+        <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
+
       </nav>
 
       <div className="flex items-center gap-2">

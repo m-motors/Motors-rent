@@ -41,7 +41,8 @@ function Register() {
       const response = await axios.post(url, formData);
       if (response.status === 201) {
         alert("Inscription réussie !");
-        navigate("/login");
+
+        navigate("/");
       } else {
         setError(response.data.message);
       }
