@@ -1,4 +1,8 @@
+import { Link, useNavigate } from "react-router-dom";
+import { Messages } from 'primereact/messages';
 
+const isAdmin = false;
+const tokenExist = localStorage.getItem("token") !== null;
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
@@ -32,6 +36,7 @@ export default function Header() {
         <Link to="/">M-Motors</Link>
       </div>
 
+
       <nav className="hidden md:flex gap-6 text-sm uppercase">
       
 
@@ -60,19 +65,21 @@ export default function Header() {
 
         <Link to="/" className="hover:text-gray-400">Accueil</Link>
         {!isAdmin && tokenExist && (
-          <Link to="/user" className="hover:text-gray-400">Mon compte</Link>
-          )}
-        {isAdmin && tokenExist && (
-          <Link to="/admin" className="hover:text-gray-400">Mon compte</Link>
-          )}
-        {!tokenExist && (
-          <Link to="/authpage" className="hover:text-gray-400">Mon compte</Link>
+          <Link to='/users' className="hover:text-gray-400">Mon compte</Link>
+          // <Link to={`/users/${id}`} className="hover:text-gray-400">Mon compte</Link>
         )}
-        
-        <Link to={`/users/${1}/applications`} > Mes dossiers </Link>
-        {/* <Link to={`/users/${user.id}/applications`} > Mes dossiers </Link> */}
+        {isAdmin && tokenExist && (
+          // <Link to={`/admin/${:id}`} className="hover:text-gray-400">Admin</Link>
+          <Link to="/admin" className="hover:text-gray-400">Admin</Link>
+        )}
+        {!tokenExist && (
+          <Link to="/authpage" className="hover:text-gray-400">Connexion</Link>
+        )}
+        <Link to={`/users/${1}/applications`} className="hover:text-gray-400">Mes dossiers</Link>
         <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
-
+        {tokenExist && (
+          <button onClick={handleLogout} className="hover:text-gray-400">Déconnexion</button>
+        )}
       </nav>
 
       <div className="flex items-center gap-2">

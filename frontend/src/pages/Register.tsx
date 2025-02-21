@@ -54,7 +54,6 @@ function Register() {
 
   return (
     <div>
-      <h2>Inscription</h2>
       <form className="auth-form" onSubmit={handleSubmit}>
         <input
           type="text"

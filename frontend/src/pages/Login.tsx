@@ -39,8 +39,7 @@ function Login() {
 
   return (
     <div>
-      <h2>Connexion</h2>
-      <form onSubmit={handleSubmit}>
+      <form className="auth-form" onSubmit={handleSubmit}>
         <input
           type="email"
           placeholder="Email"
@@ -55,7 +54,7 @@ function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">Se connecter</button>
+        <button className="auth-button" type="submit">Se connecter</button>
       </form>
       {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
