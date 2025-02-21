@@ -12,6 +12,7 @@ from src.application.services.user_service import UserService
 from src.infrastructure.scripts.migrate import apply_migrations
 from src.application.services.option_service import OptionService
 from src.infrastructure.web.api.user_routes import create_user_routes
+from src.infrastructure.web.api.client_folder_routes import create_client_folder_routes
 from src.infrastructure.web.api.document_routes import document_routes
 from src.infrastructure.web.api.tools_routes import create_tools_routes
 from src.infrastructure.web.middleware.authorize import create_authorize
@@ -56,17 +57,11 @@ client_folder_service = ClientFolderService(user_repository, Client_folder_repos
 client_folder_routes = create_client_folder_routes(client_folder_service, authorize)
 app.register_blueprint(client_folder_routes, url_prefix='/api')
 
-documents_repository = MySQLDocumentRepository(db)
-documents_service = DocumentService(documents_repository)
-documents_routes = create_document_routes(documents_service)
-app.register_blueprint(user_routes, url_prefix='/api')
-
 option_repository = SQLOptionRepository(db)
 option_service = OptionService(option_repository)
 option_routes = create_option_routes(option_service, authorize)
 app.register_blueprint(option_routes, url_prefix='/api')
 
-app.register_blueprint(document_routes, url_prefix='/api')
 
 @app.errorhandler(404)
 def page_not_found(error):
