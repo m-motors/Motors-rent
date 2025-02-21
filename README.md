@@ -144,6 +144,11 @@ docker compose up --build
 
 Le plus long a creer est le backend on attend que la base soit dispo avant la création ajout de fichier de migrations pour pas avoir de regression dans la base
 
+OR WITH LLM (OLLAMA)
+
+docker-compose -f docker-compose.yml -f docker-compose.llm.yml up -d
+
+PLEASE READ THE MAKEFILE : make help
 
 ## Connecting to PGAdmin via Web
 
@@ -159,6 +164,3 @@ If you don’t have the PGAdmin application installed, you can access it directl
 2. When prompted for a password, use: **`ChangeMe`**.
 3. To view tables:
    - **Servers** → **Databases** → **groupe11** → **Schemas** → **Tables**.
-
-
-   
