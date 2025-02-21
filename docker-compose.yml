@@ -16,10 +16,11 @@ services:
     networks:
       postgres_network:
       back_network:
+      ollama-network:
     depends_on:
       postgres:
         condition: service_healthy
-
+    
   frontend:
     container_name: frontend
     build:
@@ -36,8 +37,7 @@ services:
       - ./frontend:/var/www
       - /var/www/node_modules
     networks:
-      back_network:
-
+      - back_network
   postgres:
     image: postgres:17.2-alpine3.21
     container_name: postgres
@@ -79,6 +79,8 @@ networks:
   back_network:
     driver: bridge
   postgres_network:
+    driver: bridge
+  ollama-network:
     driver: bridge
 
 volumes:
