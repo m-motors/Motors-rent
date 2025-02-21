@@ -28,7 +28,6 @@ const AddVehicle = () => {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    // Logique de soumission du formulaire
     console.log('Annonce créée :', vehicleData);
   };
 
@@ -37,7 +36,7 @@ const AddVehicle = () => {
         <Header />
         <div className="add_page">
         <div className="add_page_card shadow-2xl max-w-2xl">
-            <h2>une Annonce de Voiture</h2>
+            <h2>Nouvelle Annonce</h2>
             <form onSubmit={handleSubmit}>
             <div className="mb-4">
                 <label className="add_user_label" htmlFor="brand">

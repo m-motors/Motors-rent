@@ -1,16 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Messages } from 'primereact/messages';
-
-const isAdmin = false;
-const tokenExist = localStorage.getItem("token") !== null;
-import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
 export default function Header() {
-    const isAdmin = false
   const [isLogged, setIsLogged] = useState(false);
   const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -30,54 +25,33 @@ export default function Header() {
         });
     }
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLogged(false);
+    navigate("/authpage");
+  };
+
   return (
     <header className="bg-gray-900 text-white py-4 px-6 flex justify-between items-center shadow-md">
       <div className="text-xl font-bold">
         <Link to="/">M-Motors</Link>
       </div>
 
-
       <nav className="hidden md:flex gap-6 text-sm uppercase">
-      
-
-        <Link to="/" className="hover:text-gray-400">
-          Accueil
-        </Link>
+        <Link to="/" className="hover:text-gray-400">Accueil</Link>
         {isLogged && user?.role !== "admin" && (
-          <Link to="/user" className="hover:text-gray-400">
-            Mon compte
-          </Link>
+          <Link to="/user" className="hover:text-gray-400">Mon compte</Link>
         )}
         {isLogged && user?.role === "admin" && (
-          <Link to="/admin" className="hover:text-gray-400">
-            Admin
-          </Link>
-        )}
-        {!isLogged && (
-          <Link to="/authpage" className="hover:text-gray-400">
-            Mon compte
-          </Link>
-        )}
-        <Link to={`/users/${1}/applications`}> Mes dossiers </Link>
-        <Link to="/addVehicle" className="hover:text-gray-400">
-          Nouvelle offre
-        </Link>
-
-        <Link to="/" className="hover:text-gray-400">Accueil</Link>
-        {!isAdmin && tokenExist && (
-          <Link to='/users' className="hover:text-gray-400">Mon compte</Link>
-          // <Link to={`/users/${id}`} className="hover:text-gray-400">Mon compte</Link>
-        )}
-        {isAdmin && tokenExist && (
-          // <Link to={`/admin/${:id}`} className="hover:text-gray-400">Admin</Link>
           <Link to="/admin" className="hover:text-gray-400">Admin</Link>
         )}
-        {!tokenExist && (
+        {!isLogged && (
           <Link to="/authpage" className="hover:text-gray-400">Connexion</Link>
         )}
-        <Link to={`/users/${1}/applications`} className="hover:text-gray-400">Mes dossiers</Link>
+        <Link to="/users/:id/applications" className="hover:text-gray-400">Mes dossiers</Link>
         <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
-        {tokenExist && (
+        {isLogged && (
           <button onClick={handleLogout} className="hover:text-gray-400">Déconnexion</button>
         )}
       </nav>
@@ -99,9 +73,7 @@ export default function Header() {
             Déconnexion
           </button>
         ) : (
-          <Link to="/authpage" className="bg-blue-500 px-3 py-1 rounded">
-            Connexion
-          </Link>
+          <Link to="/authpage" className="bg-blue-500 px-3 py-1 rounded">Connexion</Link>
         )}
       </div>
     </header>
