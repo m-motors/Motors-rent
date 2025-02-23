@@ -1,88 +1,10 @@
 services:
-  backend:
-    container_name: backend
-    build:
-      context: ./backend
-      dockerfile: ./Dockerfile
-      target: ${ENV_MODE}
-    ports:
-      - ${BACKEND_PORT}:5000
-      - "5678:5678"
+  readme:
+    image: alpine:latest 
+    container_name: readme
     volumes:
-      - ./backend:/app
-    env_file:
-      - .env
-      - .env.local
-    networks:
-      postgres_network:
-      back_network:
-      ollama-network:
-    depends_on:
-      postgres:
-        condition: service_healthy
-    
-  frontend:
-    container_name: frontend
-    build:
-      context: ./frontend
-      dockerfile: ./Dockerfile
-      target: ${ENV_MODE}
-    restart: always
-    ports:
-      - ${FRONTEND_PORT}:5173
-    env_file:
-      - .env
-      - .env.local
-    volumes:
-      - ./frontend:/var/www
-      - /var/www/node_modules
-    networks:
-      - back_network
-  postgres:
-    image: postgres:17.2-alpine3.21
-    container_name: postgres
-    restart: always
-    env_file:
-      - .env
-      - .env.local
-    networks:
-      postgres_network:
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./database/postgres:/docker-entrypoint-initdb.d
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "admin", "-d", "groupe11"]
-      interval: 5s
-      retries: 5
+      - ./instruction.txt:/instruction.txt
+    command: vi ./instruction.txt
 
 
-  postgres-admin-tool:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    restart: always
-    env_file:
-      - .env
-      - .env.local
-    ports:
-      - "8080:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-      - ./database/pgadmin/servers.json:/pgadmin4/servers.json
-    networks:
-      postgres_network:
-    depends_on:
-      - postgres
-      
-networks:
-  back_network:
-    driver: bridge
-  postgres_network:
-    driver: bridge
-  ollama-network:
-    driver: bridge
 
-volumes:
-  postgres_data:
-  pgadmin_data:

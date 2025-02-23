@@ -5,7 +5,7 @@ services:
       - 7869:11434
     volumes:
       - .:/code
-      - ./ollama/ollama:/root/.ollama
+      - ./llm/ollama/ollama:/root/.ollama
     container_name: ollama
     pull_policy: always
     tty: true
@@ -14,9 +14,8 @@ services:
       - OLLAMA_KEEP_ALIVE=24h
       - OLLAMA_HOST=0.0.0.0
     networks:
-      - ollama-network
-    depends_on:
-      - backend
+      - ollama-net
+      - backend_net
     deploy:
       replicas: ${ENABLE_LLM:-0}
 
@@ -24,7 +23,7 @@ services:
     image: ghcr.io/open-webui/open-webui:main
     container_name: ollama-webui
     volumes:
-      - ./ollama/ollama-webui:/app/backend/data
+      - ./llm/ollama/ollama-webui:/app/backend/data
     depends_on:
       - ollama
     ports:
@@ -40,4 +39,9 @@ services:
       - host.docker.internal:host-gateway
     restart: unless-stopped
     networks:
-      - ollama-network
+      - ollama-net
+      - backend_net
+
+networks:
+  ollama-net:
+    driver: bridge

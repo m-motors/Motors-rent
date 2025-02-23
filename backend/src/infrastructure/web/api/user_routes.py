@@ -1,13 +1,15 @@
-from src.infrastructure.common.regex import Regex
 from werkzeug.utils import secure_filename
 from flask import Blueprint, jsonify, request, current_app
+
 from src.domain.models.user import User, UserRole
-from src.infrastructure.web.middleware.validator import Validator, Field
+from src.infrastructure.common.regex import Regex
+from src.infrastructure.web.middleware import authorize
 from src.application.services.user_service import UserService
+from src.infrastructure.web.middleware.validator import Validator, Field
 
 user_routes = Blueprint('user_routes', __name__)
 
-def create_user_routes(user_service: UserService) -> Blueprint:
+def create_user_routes(user_service: UserService, authorize : authorize) -> Blueprint:
     @user_routes.route('/users', methods=['GET'])
     def get_users():
         try:
@@ -18,6 +20,7 @@ def create_user_routes(user_service: UserService) -> Blueprint:
             return jsonify({"message": "Erreur serveur", "content": None, "error": str(e)}), 500
 
     @user_routes.route('/users/<int:id>', methods=['GET'])
+    @authorize([UserRole.CLIENT, UserRole.ADMIN])
     def get_user(id):
         try:
             user = user_service.get_user(id)
@@ -45,7 +48,7 @@ def create_user_routes(user_service: UserService) -> Blueprint:
                 last_name=data["last_name"],
                 password=data["password"],
                 is_active=data.get("is_active", True),
-                user_role=UserRole('admin')
+                user_role=UserRole('client')
             )
 
             saved_user = user_service.create_user(new_user)
@@ -56,6 +59,7 @@ def create_user_routes(user_service: UserService) -> Blueprint:
             return jsonify({"message": "Erreur serveur", "content": None, "error": str(e)}), 500
 
     @user_routes.route('/users/<int:id>', methods=['PUT'])
+    @authorize([UserRole.CLIENT, UserRole.ADMIN])
     def update_user(id):
         try:
             data = request.get_json()
@@ -66,6 +70,7 @@ def create_user_routes(user_service: UserService) -> Blueprint:
             return jsonify({"message": "Erreur serveur", "content": None, "error": str(e)}), 500
 
     @user_routes.route('/users/<int:id>', methods=['DELETE'])
+    @authorize([UserRole.CLIENT, UserRole.ADMIN])
     def delete_user(id):
         try:
             success = user_service.delete_user(id)

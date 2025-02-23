@@ -1,0 +1,18 @@
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+      args:
+        VITE_PORT: ${VITE_PORT}
+        ENV_MODE: ${ENV_MODE}
+    restart: always
+    ports:
+      - ${VITE_PORT}:5173
+    env_file:
+      - .env
+      - .env.local
+    volumes:
+      - ./frontend:/var/www
+      - /var/www/node_modules

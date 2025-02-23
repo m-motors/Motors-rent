@@ -1,0 +1,34 @@
+{
+    "rest-client.previewOption": "exchange",
+    "rest-client.logLevel": "verbose",
+    "rest-client.enableCustomVariableReferencesCodeLens": true,
+    "rest-client.environmentVariables": {
+        "$shared": {
+            "idUser": "j.renevier",
+            "pwdUser": "ChangeMe",
+            "idAdmin": "admin",
+            "pwdAdmin": "ChangeMe" ,
+            "sessionId" : ""
+            
+        },
+        "local": {
+            "protocol" : "http",
+            "host": "localhost",
+            "port" : "3000",
+            "access_token" : "",
+            "refresh_token" : ""
+        },
+        "production": {
+            "protocol" : "https",
+            "host": "localhost",
+            "port" : "",
+            "access_token" : "",
+            "refresh_token" : ""
+        },
+    },
+    "rest-client.defaultHeaders": {
+        "User-Agent": "vscode-restclient",
+        "Authorization": "Bearer"
+    }
+
+}
