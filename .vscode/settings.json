@@ -8,8 +8,8 @@
             "pwdUser": "ChangeMe",
             "idAdmin": "admin",
             "pwdAdmin": "ChangeMe" ,
-            "sessionId" : ""
-            
+            "access_token" : "",
+            "refresh_token" : ""
         },
         "local": {
             "protocol" : "http",

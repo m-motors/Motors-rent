@@ -4,11 +4,17 @@ BACKEND_PORT=5000
 FRONTEND_PORT=5173
 
 
-BACK_VERSION=0.0.3
 ENV_MODE=production
-FLASK_PORT=5000
 
-.PHONY: help build run stop logs start
+PYTHON_FLASK_VERSION=0.0.1
+FLASK_INTERNAL_PORT=5000
+
+NGINX_VERSION=0.0.1
+NGINX_HTTP_PORT=80
+NGINX_HTTPS_PORT=443
+
+
+.PHONY: help build run stop logs start 
 
 help:
 	@echo "Commands :"
@@ -18,24 +24,24 @@ help:
 	@echo "  logs  => See backend and frontend logs"
 	@echo "  llm   => Run app with Docker Compose + LLM"
 
-
 start :
-	docker compose --env-file .env --env-file .env.local -f docker-compose.frontend.yml -f docker-compose.backend.yml -f docker-compose.db.yml up --build
+	docker compose --env-file .env --env-file .env.local up --build
 
 logs : 
-	docker logs -f postgres   | awk '{print "\033[1;31m[POSTGRES]\033[0m " $$0}' & \
-	docker logs -f pgadmin    | awk '{print "\033[1;36m[PGADMIN]\033[0m " $$0}' & \
-	docker logs -f backend    | awk '{print "\033[1;32m[BACKEND]\033[0m " $$0}' & \
-	docker logs -f frontend   | awk '{print "\033[1;35m[FRONTEND]\033[0m " $$0}'
+	docker compose logs -f
 
 buildd: 
-	docker compose --env-file .env --env-file .env.local -f docker-compose.frontend.yml -f docker-compose.backend.yml -f docker-compose.db.yml up --build -d
+	docker compose --env-file .env --env-file .env.local up --build -d
 
 cleanall: 
-	docker ps -a --format "{{.Names}}" | grep -q "^readme$$" && docker rm -f readme || true
-	docker stop postgres pgadmin backend frontend
-	docker  rm -f postgres pgadmin backend frontend
-	docker volume rm motors-rent_postgres_data motors-rent_pgadmin_data
+	docker compose down -v
+
+ia:
+	$(MAKE) cleanall
+	docker compose --env-file .env --env-file .env.local -f docker-compose.llm.yml up --build
+
+iad:
+	docker compose --env-file .env --env-file .env.local -f docker-compose.llm.yml up --build -d
 
 startd :
 	$(MAKE) buildd
@@ -46,13 +52,36 @@ restartd:
 	$(MAKE) buildd
 	$(MAKE) logs
 
+restartdwia:
+	$(MAKE) cleanall
+	$(MAKE) buildd
+	$(MAKE) iad
+	$(MAKE) logs
 
-startbackendprodall:
-	docker compose --env-file .env --env-file .env.local -f docker-compose.frontend.yml -f docker-compose.backend.prod.yml -f docker-compose.db.yml up -d
-	docker compose --env-file .env --env-file .env.local -f docker-compose.reverse-proxy.yml up --build
+startback:
+	docker compose --env-file .env --env-file .env.local backend up -d
+	
 
-startbackendprod:
-	docker compose --env-file .env --env-file .env.local -f docker-compose.reverse-proxy.yml up --build
+buildback :
+	docker build --build-arg FLASK_INTERNAL_PORT=$(FLASK_INTERNAL_PORT) --build-arg ENV_MODE=$(ENV_MODE) -t ghcr.io/j-renevier/python-flask:v$(PYTHON_FLASK_VERSION) -f ./backend/Dockerfile.prod ./backend
+
+runback :
+	docker run --env-file .env --env-file .env.local -p 5000:$(FLASK_INTERNAL_PORT) -d ghcr.io/j-renevier/python-flask:v$(PYTHON_FLASK_VERSION) 
+
+pushback :
+	docker push ghcr.io/j-renevier/python-flask:v$(PYTHON_FLASK_VERSION)
+
+
+buildproxy :
+	docker build --build-arg NGINX_HTTPS_PORT=$(NGINX_HTTPS_PORT) --build-arg NGINX_HTTP_PORT=$(NGINX_HTTP_PORT) --build-arg ENV_MODE=$(ENV_MODE) -t ghcr.io/j-renevier/nginx:v$(NGINX_VERSION) -f ./reverse-proxy/Dockerfile.prod ./reverse-proxy
+
+runproxy :
+	docker run --env-file .env --env-file .env.local -p 80:$(NGINX_HTTP_PORT) -p 443:$(NGINX_HTTPS_PORT) -d  ghcr.io/j-renevier/nginx:v$(NGINX_VERSION)
+
+pushproxy :
+	docker push ghcr.io/j-renevier/nginx:v$(NGINX_VERSION)
+
+	
 
 build:
 	docker-compose build
@@ -63,18 +92,4 @@ run:
 stop:
 	docker-compose down
 
-
-
 rebuild: clean build run
-
-
-
-llm:
-	docker-compose -f docker-compose.yml -f docker-compose.llm.yml up -d
-
-
-buildback :
-	docker build --build-arg FLASK_PORT=$(FLASK_PORT) --build-arg ENV_MODE=$(ENV_MODE) -t ghcr.io/j-renevier/backend:v$(BACK_VERSION) -f ./backend/Dockerfile.prod ./backend
-
-pushback :
-	docker push ghcr.io/j-renevier/backend:v$(BACK_VERSION)

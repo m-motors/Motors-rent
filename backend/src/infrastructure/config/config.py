@@ -19,8 +19,8 @@ class Config:
     CSRF_ENABLED = os.getenv("CSRF_ENABLED", "1") == "1"
 
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-key")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=int(os.getenv("JWT_ACCESS_TOKEN_EXPIRES", 1)))
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=int(os.getenv("JWT_REFRESH_TOKEN_EXPIRES", 7)))
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=1)
+    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=7)
 
     # Valeurs possibles: "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"
     LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")  
@@ -52,7 +52,7 @@ class DevelopmentConfig(Config):
     TESTING = 1
     SSL_CONTEXT = "adhoc"
     
-
+    
 class ProductionConfig(Config):
     FLASK_ENV = "production"
     DEBUG = 0

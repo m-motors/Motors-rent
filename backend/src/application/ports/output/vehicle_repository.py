@@ -23,3 +23,7 @@ class VehicleRepository(ABC):
     @abstractmethod
     def delete(self, id: int) -> bool:
         pass
+
+    @abstractmethod
+    def toggle_vehicle_status(self, id: int) -> Vehicle | None: 
+        pass

@@ -14,7 +14,11 @@ class Field:
         if value is None:
             return not self.required
         
+        python_type = self.get_python_type()
+        
         if not isinstance(value, self.get_python_type()):
+            if python_type == float and isinstance(value, int):
+                return True
             return False
         
         if self.match and isinstance(value, str) and not re.match(self.match, value):

@@ -7,16 +7,19 @@ from src.infrastructure.common.logger import logger
 from src.infrastructure.config.config import Config
 from src.application.services.user_service import UserService
 from src.application.services.option_service import OptionService
+from src.application.services.vehicle_service import VehicleService
 from src.infrastructure.web.api.user_routes import create_user_routes
 from src.infrastructure.web.api.tools_routes import create_tools_routes
 from src.infrastructure.web.middleware.authorize import create_authorize
 from src.infrastructure.web.api.option_routes import create_option_routes
+from src.infrastructure.web.api.vehicle_routes import create_vehicle_routes
 from src.application.services.client_folder_service import ClientFolderService
 from src.application.services.authentication_service import AuthenticationService
 from src.infrastructure.web.api.client_folder_routes import create_client_folder_routes
 from src.infrastructure.web.api.authentication_routes import create_authentication_routes
 from src.infrastructure.adapters.persistence.sql_user_repository import SQLUserRepository
 from src.infrastructure.adapters.persistence.sql_option_repository import SQLOptionRepository
+from src.infrastructure.adapters.persistence.sql_vehicle_repository import SQLVehicleRepository
 from src.infrastructure.adapters.persistence.sql_client_folder_repository import SQLClientFolderRepository
 
 db = SQLAlchemy()
@@ -42,6 +45,7 @@ def create_app(config_class=Config):
     # Repositories
     user_repository = SQLUserRepository(db)
     option_repository = SQLOptionRepository(db)
+    vehicle_repository = SQLVehicleRepository(db)
     client_folder_repository = SQLClientFolderRepository(db)
 
     authorize = create_authorize(user_repository)
@@ -49,6 +53,7 @@ def create_app(config_class=Config):
     # Services
     user_service = UserService(user_repository)
     option_service = OptionService(option_repository)
+    vehicle_service = VehicleService(vehicle_repository)
     authentication_service = AuthenticationService(user_repository)
     client_folder_service = ClientFolderService(user_repository, client_folder_repository)
 
@@ -56,6 +61,7 @@ def create_app(config_class=Config):
     tools_routes = create_tools_routes(authorize)
     user_routes = create_user_routes(user_service, authorize)
     option_routes = create_option_routes(option_service, authorize)
+    vehicle_routes = create_vehicle_routes(vehicle_service, authorize)
     authentication_routes = create_authentication_routes(authentication_service)
     client_folder_routes = create_client_folder_routes(client_folder_service, authorize)
 
@@ -63,6 +69,7 @@ def create_app(config_class=Config):
     app.register_blueprint(user_routes, url_prefix='/api')
     app.register_blueprint(tools_routes, url_prefix='/api')
     app.register_blueprint(option_routes, url_prefix='/api')
+    app.register_blueprint(vehicle_routes, url_prefix='/api')
     app.register_blueprint(client_folder_routes, url_prefix='/api')
     app.register_blueprint(authentication_routes, url_prefix='/api')
 

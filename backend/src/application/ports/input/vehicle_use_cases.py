@@ -23,3 +23,7 @@ class VehicleUseCase(ABC):
     @abstractmethod
     def delete_vehicle(self, id: int) -> bool:
         pass
+
+    @abstractmethod
+    def toggle_vehicle_status(self, id: int) -> Vehicle:
+        pass

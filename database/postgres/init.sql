@@ -11,29 +11,32 @@ END $$;
 -- Table: user
 CREATE TABLE "users" (
     "id" SERIAL PRIMARY KEY,
-    "created_at" TIMESTAMP DEFAULT current_timestamp,
     "email" VARCHAR(100) NOT NULL UNIQUE,
+    "password" VARCHAR(255) NOT NULL,
     "first_name" VARCHAR(50) NOT NULL,
     "last_name" VARCHAR(50) NOT NULL,
-    "is_active" BOOLEAN NOT NULL DEFAULT TRUE,
     "user_role" TEXT NOT NULL CHECK ("user_role" IN ('client', 'admin')),
-    "password" VARCHAR(255) NOT NULL
+    "is_active" BOOLEAN NOT NULL DEFAULT TRUE,
+    "created_at" TIMESTAMP DEFAULT current_timestamp
 );
 
 -- Table: vehicule
 CREATE TABLE "vehicules" (
     "id" SERIAL PRIMARY KEY,
-    "created_at" TIMESTAMP DEFAULT current_timestamp,
+    "title" VARCHAR(256) NOT NULL,
+    "description" VARCHAR(512) DEFAULT NULL,
+    "brand" VARCHAR(100),
+    "model" VARCHAR(100),
+    "year" INTEGER,
+    "horsepower" REAL,
+    "price" REAL,
+    "category" VARCHAR(100),
+    "motor" VARCHAR(100),
+    "color" VARCHAR(20),
+    "mileage" REAL,
     "available" BOOLEAN NOT NULL DEFAULT TRUE,
-    "brand" VARCHAR(100) NOT NULL,
-    "model" VARCHAR(100) NOT NULL,
-    "year" INTEGER NOT NULL,
-    "horsepower" INTEGER NOT NULL,
-    "price" INTEGER NOT NULL,
-    "category" VARCHAR(100) NOT NULL,
-    "motor" VARCHAR(100) NOT NULL,
-    "color" VARCHAR(20) NOT NULL,
-    "mileage" INTEGER NOT NULL
+    "status" TEXT NOT NULL CHECK ("status" IN ('rent', 'sale')),
+    "created_at" TIMESTAMP DEFAULT current_timestamp
 );
 
 CREATE TYPE client_folder_status AS ENUM (
@@ -98,17 +101,18 @@ INSERT INTO "users" ("created_at", "email", "first_name", "last_name", "is_activ
 ('2025-02-11 22:02:12', 'user4@example.com', 'Emma', 'Morel', TRUE, 'client', '$2y$10$abcdefghijklmnopqrstuv');
 
 -- Insertion des données pour la table `vehicules`
-INSERT INTO "vehicules" ("created_at", "brand", "model", "year", "horsepower", "price", "category", "motor", "color", "mileage") VALUES
-('2025-02-11 22:02:12', 'Toyota', 'Corolla', 2020, 132, 20000, 'Sedan', 'Gasoline', 'White', 15000),
-('2025-02-11 22:02:12', 'Honda', 'Civic', 2019, 158, 22000, 'Sedan', 'Gasoline', 'Black', 12000),
-('2025-02-11 22:02:12', 'Ford', 'Mustang', 2021, 450, 35000, 'Coupe', 'Gasoline', 'Red', 5000),
-('2025-02-11 22:02:12', 'Chevrolet', 'Camaro', 2020, 275, 33000, 'Coupe', 'Gasoline', 'Blue', 8000),
-('2025-02-11 22:02:12', 'BMW', '3 Series', 2018, 255, 28000, 'Sedan', 'Gasoline', 'Gray', 20000),
-('2025-02-11 22:02:12', 'Audi', 'A4', 2019, 248, 30000, 'Sedan', 'Gasoline', 'Silver', 18000),
-('2025-02-11 22:02:12', 'Mercedes-Benz', 'C-Class', 2021, 255, 40000, 'Sedan', 'Gasoline', 'White', 7000),
-('2025-02-11 22:02:12', 'Tesla', 'Model 3', 2021, 283, 45000, 'Sedan', 'Electric', 'Black', 3000),
-('2025-02-11 22:02:12', 'Nissan', 'Altima', 2020, 188, 24000, 'Sedan', 'Gasoline', 'Blue', 16000),
-('2025-02-11 22:02:12','Hyundai', 'Elantra', 2019, 147, 19000, 'Sedan', 'Gasoline', 'Red', 14000);
+INSERT INTO "vehicules" 
+("title", "description", "created_at", "brand", "model", "year", "horsepower", "price", "category", "motor", "color", "mileage", "status") VALUES
+('Toyota Corolla 2020', 'Sedan essence fiable, économique avec 132 chevaux et 15,000 km.', '2025-02-11 22:02:12', 'Toyota', 'Corolla', 2020, 132, 20000, 'Sedan', 'Gasoline', 'White', 15000, 'rent'),
+('Honda Civic 2019', 'Compact sportive, 158 chevaux, faible consommation et bon confort.', '2025-02-11 22:02:12', 'Honda', 'Civic', 2019, 158, 22000, 'Sedan', 'Gasoline', 'Black', 12000, 'rent'),
+('Ford Mustang 2021', 'Muscle car iconique avec 450 chevaux, idéale pour les passionnés.', '2025-02-11 22:02:12', 'Ford', 'Mustang', 2021, 450, 35000, 'Coupe', 'Gasoline', 'Red', 5000, 'rent'),
+('Chevrolet Camaro 2020', 'Voiture sportive avec un moteur puissant de 275 chevaux.', '2025-02-11 22:02:12', 'Chevrolet', 'Camaro', 2020, 275, 33000, 'Coupe', 'Gasoline', 'Blue', 8000, 'rent'),
+('BMW 3 Series 2018', 'Berline premium, 255 chevaux, élégance et performance.', '2025-02-11 22:02:12', 'BMW', '3 Series', 2018, 255, 28000, 'Sedan', 'Gasoline', 'Gray', 20000, 'rent'),
+('Audi A4 2019', 'Berline allemande raffinée, 248 chevaux et intérieur haut de gamme.', '2025-02-11 22:02:12', 'Audi', 'A4', 2019, 248, 30000, 'Sedan', 'Gasoline', 'Silver', 18000, 'rent'),
+('Mercedes-Benz C-Class 2021', 'Luxe et performance avec 255 chevaux, en excellent état.', '2025-02-11 22:02:12', 'Mercedes-Benz', 'C-Class', 2021, 255, 40000, 'Sedan', 'Gasoline', 'White', 7000, 'sale'),
+('Tesla Model 3 2021', 'Voiture électrique performante, autonomie élevée et technologie avancée.', '2025-02-11 22:02:12', 'Tesla', 'Model 3', 2021, 283, 45000, 'Sedan', 'Electric', 'Black', 3000, 'sale'),
+('Nissan Altima 2020', 'Berline spacieuse et confortable avec 188 chevaux et faible kilométrage.', '2025-02-11 22:02:12', 'Nissan', 'Altima', 2020, 188, 24000, 'Sedan', 'Gasoline', 'Blue', 16000, 'sale'),
+('Hyundai Elantra 2019', 'Voiture économique et fiable avec 147 chevaux et 14,000 km.', '2025-02-11 22:02:12', 'Hyundai', 'Elantra', 2019, 147, 19000, 'Sedan', 'Gasoline', 'Red', 14000, 'sale');
 
 -- Insertion des données pour la table `client_folders`
 INSERT INTO "client_folders" ("created_at", "user_id", "vehicule_id", "type", "status") VALUES

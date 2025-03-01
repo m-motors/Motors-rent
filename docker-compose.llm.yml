@@ -1,34 +1,31 @@
 services:
   ollama:
+    container_name: ollama
     image: ollama/ollama:latest
     ports:
       - 7869:11434
     volumes:
-      - .:/code
-      - ./llm/ollama/ollama:/root/.ollama
-    container_name: ollama
-    pull_policy: always
+      - ./llm:/root/.ollama
     tty: true
-    restart: always
+    restart: unless-stopped
+    pull_policy: always
     environment:
       - OLLAMA_KEEP_ALIVE=24h
       - OLLAMA_HOST=0.0.0.0
     networks:
-      - ollama-net
+      - ollama_net
       - backend_net
-    deploy:
-      replicas: ${ENABLE_LLM:-0}
 
   ollama-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: ollama-webui
     volumes:
-      - ./llm/ollama/ollama-webui:/app/backend/data
+      - ./llm/ollama-webui:/app/backend/data
     depends_on:
       - ollama
     ports:
       - "8081:8080"
-    environment: # https://docs.openwebui.com/getting-started/env-configuration#default_models
+    environment:
       - OLLAMA_BASE_URLS=http://host.docker.internal:7869 #comma separated ollama hosts
       - ENV=dev
       - WEBUI_AUTH=False
@@ -39,9 +36,10 @@ services:
       - host.docker.internal:host-gateway
     restart: unless-stopped
     networks:
-      - ollama-net
-      - backend_net
+      - ollama_net
 
 networks:
-  ollama-net:
+  ollama_net:
     driver: bridge
+  backend_net:
+    external: true

@@ -64,3 +64,4 @@ coverage/
 
 # Ollama modules
 ollama/
+llm/

@@ -29,7 +29,7 @@ LABEL stage=production
 
 COPY ./gunicorn.conf.py /app/gunicorn.conf.py
 COPY ./src /app/src
-COPY ./main.py /app/main.py
+COPY ./wsgi.py /app/wsgi.py
 
 EXPOSE 5000
 

@@ -28,7 +28,7 @@ RUN pip install --upgrade pip setuptools wheel \
 && pip install flask-debugtoolbar debugpy
 
 EXPOSE ${FLASK_INTERNAL_PORT}
-
+ENV FLASK_ENV=development
 CMD ["sh", "-c", "python ./src/infrastructure/scripts/migrate.py && flask --app ./main.py run --host=0.0.0.0 --reload"]
 
 
