@@ -1,0 +1,59 @@
+###
+# @name login
+POST {{protocol}}://{{host}}:{{port}}/api/authentication/login
+Content-Type: application/json
+
+{
+  "identification" : "user85@example.com",
+  "password": "ChangeMe45/*"
+}
+
+###
+@access_token = {{login.response.body.content.access_token}}
+@refresh_token = {{login.response.body.content.refresh_token}}
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/vehicles
+Content-Type: application/json
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/vehicles/2
+Content-Type: application/json
+
+### 
+POST {{protocol}}://{{host}}:{{port}}/api/vehicles
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "title": "Tesla Model S",
+  "description": "Voiture électrique haut de gamme",
+  "brand": "Tesla",
+  "model": "Model S",
+  "year": 2023,
+  "horsepower": 10200,
+  "price": 8500,
+  "category": "Sedan",
+  "motor": "Électrique",
+  "color": "Noir",
+  "mileage": 0.0,
+  "available": true,
+  "status": "rent"
+}
+
+
+### Modifier un véhicule (mise à jour partielle)
+PATCH {{protocol}}://{{host}}:{{port}}/api/vehicles/10
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+
+{
+  "price": 100000.54,
+  "available": false
+}
+
+### Supprimer un véhicule
+DELETE {{protocol}}://{{host}}:{{port}}/api/vehicles/12
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+

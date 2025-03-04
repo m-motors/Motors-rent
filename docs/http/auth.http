@@ -1,0 +1,13 @@
+###
+# @name login
+POST {{protocol}}://{{host}}:{{port}}/api/authentication/login
+Content-Type: application/json
+
+{
+  "identification" : "user79@example.com",
+  "password": "ChangeMe45/*"
+}
+
+###
+@access_token = {{login.response.body.content.access_token}}
+@refresh_token = {{login.response.body.content.refresh_token}}

@@ -48,15 +48,10 @@ eggs/
 # Python eggs
 *.egg
 
-# Django migrations (if applicable in case of hybrid projects)
-migrations/
 
 # Logs
 *.log
 
-
-# VSCode settings (or any editor-specific)
-.vscode/
 
 # MacOS system files
 .DS_Store
@@ -69,3 +64,4 @@ coverage/
 
 # Ollama modules
 ollama/
+llm/

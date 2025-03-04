@@ -1,65 +1,69 @@
 from typing import List
-from domain.models.vehicle import Vehicle, VehicleStatus
-from application.ports.output.vehicle_repository import VehicleRepository
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
 
 from src.domain.models.vehicle import Vehicle
+from src.domain.models.vehicle import Vehicle, VehicleStatus
 from src.application.ports.output.vehicle_repository import VehicleRepository
 
-class MySQLVehicleRepository(VehicleRepository):
+class SQLVehicleRepository(VehicleRepository):
     def __init__(self, db: SQLAlchemy):
         self.db = db
     
     def find_by_id(self, id: int) -> Vehicle | None:
-        query = """
-            SELECT * FROM vehicules WHERE id = %s
-        """
+        query = text("""
+            SELECT * FROM vehicules WHERE id = :id
+        """)
         result = self.db.session.execute(query, {"id": id}).fetchone()
-        return self._map_to_vehicle(result) if result else None
+        return self._map_to_vehicle(result._asdict()) if result else None
     
     def find_all(self) -> List[Vehicle]:
-        query = """
+        query = text("""
             SELECT * FROM vehicules
-        """
+        """)
         results = self.db.session.execute(query).fetchall()
-        return [self._map_to_vehicle(result) for result in results]
-    
+        return [self._map_to_vehicle(row._asdict()) for row in results]
+
     def save(self, vehicle: Vehicle) -> Vehicle:
-        query = """
-            INSERT INTO vehicules (brand, model, year, horsepower, price, 
-                                 category, motor, color, mileage, available, status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        params = self._map_to_params(vehicle)
-        result = self.db.session.execute(query, params)
-        self.db.session.commit()
-        vehicle.id = result.lastrowid
-        return vehicle
+        try:
+            query = text("""
+                INSERT INTO vehicules (title, description, brand, model, year, horsepower, price, category, motor, color, mileage, available, status, created_at)
+                VALUES (:title, :description, :brand, :model, :year, :horsepower, :price, :category, :motor, :color, :mileage, :available, :status, current_timestamp)
+                RETURNING id
+            """)
+            params = self._map_to_params(vehicle)
+            result = self.db.session.execute(query, params)
+            vehicle.id = result.fetchone()[0]
+            self.db.session.commit()
+            return vehicle
+        except SQLAlchemyError as e:
+            self.db.session.rollback()
+            raise e
     
     def update(self, vehicle: Vehicle) -> Vehicle:
-        """
-        Met à jour un véhicule dans la base de données.
-        """
-        query = """
-            UPDATE vehicules 
-            SET brand = %s, model = %s, year = %s, horsepower = %s, price = %s,
-                category = %s, motor = %s, color = %s, mileage = %s, available = %s, status = %s
-            WHERE id = %s
-        """
-        params = self._map_to_params(vehicle)
-        params["id"] = vehicle.id
-        self.db.session.execute(query, params)
-        self.db.session.commit()
-        return vehicle
+        try:
+            query = text("""
+                UPDATE vehicules 
+                SET title = :title, description = :description, brand = :brand, model = :model, year = :year,
+                    horsepower = :horsepower, price = :price, category = :category, motor = :motor, color = :color,
+                    mileage = :mileage, available = :available, status = :status, created_at = :created_at
+                WHERE id = :id
+            """)
+            params = self._map_to_params(vehicle)
+            params["id"] = vehicle.id
+            result = self.db.session.execute(query, params)
+            self.db.session.commit()
+            return vehicle
+        except SQLAlchemyError as e:
+            self.db.session.rollback()
+            raise e
 
     def delete(self, id: int) -> bool:
-        """
-        Supprime un véhicule de la base de données.
-        """
-        query = """
-            DELETE FROM vehicules WHERE id = %s
-        """
+        query = text("""
+            DELETE FROM vehicules WHERE id = :id
+        """)
         result = self.db.session.execute(query, {"id": id})
         self.db.session.commit()
         return result.rowcount > 0
@@ -80,34 +84,38 @@ class MySQLVehicleRepository(VehicleRepository):
             return vehicle
         return None
     
-    def _map_to_vehicle(self, row) -> Vehicle:
+    def _map_to_vehicle(self, row: dict) -> Vehicle:
         return Vehicle(
-            id=row.id,
-            brand=row.brand,
-            model=row.model,
-            year=row.year,
-            horsepower=row.horsepower,
-            price=row.price,
-            category=row.category,
-            motor=row.motor,
-            color=row.color,
-            mileage=row.mileage,
-            available=row.available,
-            status=VehicleStatus(row.status),  
-            created_at=row.created_at
+            id=row["id"],
+            title=row["title"], 
+            description=row["description"],
+            brand=row["brand"],
+            model=row["model"],
+            year=row["year"],
+            horsepower=row["horsepower"],
+            price=row["price"],
+            category=row["category"],
+            motor=row["motor"],
+            color=row["color"],
+            mileage=row["mileage"],
+            available=row["available"],
+            status=VehicleStatus(row["status"])
         )
-    
+
     def _map_to_params(self, vehicle: Vehicle) -> dict:
         return {
-            "brand": vehicle.brand,
-            "model": vehicle.model,
-            "year": vehicle.year,
-            "horsepower": vehicle.horsepower,
-            "price": vehicle.price,
-            "category": vehicle.category,
-            "motor": vehicle.motor,
-            "color": vehicle.color,
-            "mileage": vehicle.mileage,
-            "available": vehicle.available,
-            "status": vehicle.status.value 
-        } 
+        "title": vehicle.title,
+        "description": vehicle.description,
+        "brand": vehicle.brand,
+        "model": vehicle.model,
+        "year": vehicle.year,
+        "horsepower": vehicle.horsepower,
+        "price": vehicle.price,
+        "category": vehicle.category,
+        "motor": vehicle.motor,
+        "color": vehicle.color,
+        "mileage": vehicle.mileage,
+        "available": vehicle.available,
+        "status": vehicle.status.value,
+        "created_at": vehicle.created_at
+    } 

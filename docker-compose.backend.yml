@@ -1,0 +1,27 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+      target: ${ENV_MODE}
+      args:
+        FLASK_INTERNAL_PORT: ${FLASK_INTERNAL_PORT}
+        ENV_MODE: ${ENV_MODE}
+    ports:
+      - ${FLASK_EXTERNAL_PORT}:${FLASK_INTERNAL_PORT}
+      - ${DEBUGPY_PORT}:${DEBUGPY_PORT}
+    volumes:
+      - ./backend:/app
+    env_file:
+      - .env
+      - .env.local
+    networks:
+      - backend_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      
+networks:
+  backend_net:
+    driver: bridge

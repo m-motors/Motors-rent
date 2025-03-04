@@ -1,0 +1,36 @@
+{
+	"Nom": "My Estimate",
+	"Cot total": {
+		"mensuellement": "8.55",
+		"initiaux": "0.00",
+		"12 mois": "102.60"
+	},
+	"Mtadonnes": {
+		"Devise": "USD",
+		"Local": "fr_FR",
+		"Cr le": "23/02/2025 19:30:52",
+		"Mentions lgales": "AWS Pricing Calculator fournit seulement une estimation de vos frais AWS et n'inclut pas toutes les taxes qui peuvent s'appliquer. Les frais rels dpendent de divers facteurs, et notamment de votre utilisation relle des services AWS.",
+		"URL de partage": "https://calculator.aws/#/estimate?id=483c2ae715163c0608354cdd41751c4e63c33d50"
+	},
+	"Groupes": {
+		"Services": [
+			{
+				"Nom du service": "AWS Amplify",
+				"Région": "Europe (Paris)",
+				"Statut": "",
+				"Coût du service": {
+					"mensuellement": "8.55",
+					"initiaux": "0.00",
+					"12 mois": "102.60"
+				},
+				"Propriétés": {
+					"Durée de chaque requête (en ms)": "500",
+					"Nombre de minutes de création": "100 par mois",
+					"Données stockées par mois": "2 Go",
+					"Données diffusées par mois": "50 Go",
+					"Nombre de requêtes SSR": "0 par heure"
+				}
+			}
+		]
+	}
+}
