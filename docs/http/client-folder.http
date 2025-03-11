@@ -46,7 +46,7 @@ Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
 ###
-PUT {{protocol}}://{{host}}:{{port}}/api/clientfolders/19
+PATCH {{protocol}}://{{host}}:{{port}}/api/clientfolders/19
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 

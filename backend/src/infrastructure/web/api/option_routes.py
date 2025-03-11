@@ -1,13 +1,10 @@
-import time
 from flask import request, jsonify, Blueprint
 
 from src.domain.models.user import UserRole
-from src.infrastructure.common.regex import Regex
 from src.infrastructure.common.logger import logger
 from src.infrastructure.web.middleware import authorize
-from src.domain.models.option import Option
-from src.infrastructure.web.middleware.validator import Validator, Field
 from src.application.services.option_service import OptionService
+from src.infrastructure.web.middleware.validator import Validator, Field
 
 option_routes = Blueprint('option_routes', __name__)
 
@@ -29,7 +26,8 @@ def create_option_routes(option_service: OptionService, authorize: authorize) ->
 
             return jsonify({"message": "Option created", "content": res.to_dict(), "error": None}), 201
         except Exception as e:
-            return jsonify({"message": "Error creating option", "content": None, "error": str(e)}), 400
+            logger.error(f"Create option error: {str(e)}")
+            return jsonify({"message": "Create option failed", "content": None, "error": "Internal Server Error"}), 500
 
 
     @option_routes.route('/option', methods=['GET'])
@@ -39,7 +37,8 @@ def create_option_routes(option_service: OptionService, authorize: authorize) ->
             res = option_service.list_option()
             return jsonify({"message": "Option retrieved", "content": {"options" : [option.to_dict() for option in res]} , "error": None}), 200
         except Exception as e:
-            return jsonify({"message": "Error retrieving option", "content": None, "error": str(e)}), 500
+            logger.error(f"List option error: {str(e)}")
+            return jsonify({"message": "List option failed", "content": None, "error": "Internal Server Error"}), 500
             
 
     @option_routes.route('/option/<int:id>', methods=['GET'])
@@ -49,9 +48,10 @@ def create_option_routes(option_service: OptionService, authorize: authorize) ->
             res = option_service.get_option(id)
             return jsonify({"message": "Option retrieved", "content": {"option" : res.to_dict()}, "error": None}), 200
         except Exception as e:
-            return jsonify({"message": "Error retrieving option", "content": None, "error": str(e)}), 500
+            logger.error(f"Get option error: {str(e)}")
+            return jsonify({"message": "Get option failed", "content": None, "error": "Internal Server Error"}), 500
         
-    @option_routes.route('/option/<int:id>', methods=['PUT'])
+    @option_routes.route('/option/<int:id>', methods=['PATCH'])
     @authorize(UserRole.ADMIN)
     @Validator(json_fields=[
         Field("name", "str", required=True),
@@ -62,7 +62,8 @@ def create_option_routes(option_service: OptionService, authorize: authorize) ->
             res = option_service.update_option(id, data.get("name", None))
             return jsonify({"message": "option updated", "content": {"option" : res.to_dict()}, "error": None}), 200
         except Exception as e:
-            return jsonify({"message": "Error updating option", "content": None, "error": str(e)}), 500
+            logger.error(f"Update option error: {str(e)}")
+            return jsonify({"message": "Update option failed", "content": None, "error": "Internal Server Error"}), 500
 
 
     @option_routes.route('/option/<int:id>', methods=['DELETE'])
@@ -75,7 +76,8 @@ def create_option_routes(option_service: OptionService, authorize: authorize) ->
         
             raise ValueError(success)
         except Exception as e:
-            return jsonify({"message": "Error deleting option", "error": str(e)}), 500
+            logger.error(f"Delete option error: {str(e)}")
+            return jsonify({"message": "Delete option failed", "content": None, "error": "Internal Server Error"}), 500
 
 
     return option_routes

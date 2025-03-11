@@ -1,8 +1,8 @@
 import time
 from flask import request, jsonify, Blueprint
 
-from src.infrastructure.common.logger import logger
 from src.infrastructure.common.regex import Regex
+from src.infrastructure.common.logger import logger
 from src.infrastructure.web.middleware.validator import Validator, Field
 from src.application.services.authentication_service import AuthenticationService
 
@@ -33,7 +33,7 @@ def create_authentication_routes(authentication_service: AuthenticationService) 
                 response = jsonify({"message": "Login successful", "content": authentication["content"], "error": None}), 200
         except Exception as e:
             logger.error(f"Authentication login error: {str(e)}")
-            response = jsonify({"message": "Authentication failed", "content": None, "error": "Internal Server Error"}), 500
+            response = jsonify({"message": "Authentication login failed", "content": None, "error": "Internal Server Error"}), 500
 
         # Prevent a timing attack by setting a fixed delay of 2 seconds.
         delay : int = 2

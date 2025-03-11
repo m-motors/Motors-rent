@@ -59,20 +59,26 @@ class ClientFolderService(ClientFolderUseCase):
             raise ValueError("Client Folder not found")
 
         if user.user_role == UserRole.CLIENT:
-            if client_folder.user_id != user.id:
-                raise PermissionError("No access to client folder")
+            restricted_fields = {"status", "type", "user_id"}
+            if client_folder.user_id != user.id or any(field in update_data for field in restricted_fields):
+                raise PermissionError("Unauthorized")
             
             client_folder.status = ClientFolderStatus.IN_VALIDATION
   
-        if user.user_role == UserRole.ADMIN:
-            if "status" in update_data:
-                client_folder.status = ClientFolderStatus(update_data["status"])
+        if "status" in update_data:
+            try:
+                client_folder.status = ClientFolderStatus(update_data['status'])
+            except ValueError:
+                raise ValueError(f"Invalid status: {update_data['status']}")
 
-            if "type" in update_data:
-                client_folder.type = ClientFolderType(update_data["type"])
+        if "type" in update_data:
+            try:
+                client_folder.type = ClientFolderType(update_data['type'])
+            except ValueError:
+                raise ValueError(f"Invalid type: {update_data['type']}")
 
-            if "user_id" in update_data:
-                client_folder.user_id = update_data["user_id"]
+        if "user_id" in update_data:
+            client_folder.user_id = update_data["user_id"]
 
         if "vehicule_id" in update_data:
             client_folder.vehicule_id = update_data["vehicule_id"]

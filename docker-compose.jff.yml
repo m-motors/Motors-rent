@@ -1,0 +1,7 @@
+services:
+  readme:
+    image: alpine:latest 
+    container_name: readme
+    volumes:
+      - ./instruction.txt:/instruction.txt
+    command: vi ./instruction.txt

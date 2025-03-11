@@ -16,7 +16,6 @@ class OptionService(OptionUsecase):
         option = self.option_repository.save(option)
         return option
 
-
     def list_option(self) -> List[Option]:
         return self.option_repository.find_all()
 
