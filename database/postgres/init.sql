@@ -57,6 +57,24 @@ CREATE TABLE client_folders (
     status client_folder_status DEFAULT 'created'
 );
 
+CREATE TABLE "options" (
+    "id" SERIAL PRIMARY KEY,
+    "name" VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE "client_folder_options" (
+    "client_folder_id" INTEGER NOT NULL,
+    "option_id" INTEGER NOT NULL,
+    PRIMARY KEY ("client_folder_id", "option_id"),
+    FOREIGN KEY ("client_folder_id") REFERENCES "client_folders" ("id") ON DELETE CASCADE,
+    FOREIGN KEY ("option_id") REFERENCES "options" ("id") ON DELETE CASCADE
+);
+
+CREATE TYPE client_folder_type AS ENUM (
+    'Buy', 
+    'Rental'
+);
+
 -- Création du type ENUM pour le statut des documents
 CREATE TYPE document_status AS ENUM (
     'created',
@@ -78,9 +96,31 @@ CREATE TABLE documents (
     expired_at TIMESTAMP DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS migrations (
-    version VARCHAR(255) PRIMARY KEY,
-    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE client_folder_vehicles (
+    client_folder_id INTEGER NOT NULL,
+    vehicule_id INTEGER NOT NULL,
+    PRIMARY KEY (client_folder_id, vehicule_id),
+    FOREIGN KEY (client_folder_id) REFERENCES client_folders (id) ON DELETE CASCADE,
+    FOREIGN KEY (vehicule_id) REFERENCES vehicules (id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE client_folder_documents (
+    client_folder_id INTEGER NOT NULL,
+    document_id INTEGER NOT NULL,
+    PRIMARY KEY (client_folder_id, document_id),
+    FOREIGN KEY (client_folder_id) REFERENCES client_folders (id) ON DELETE CASCADE,
+    FOREIGN KEY (document_id) REFERENCES documents (id) ON DELETE CASCADE
+);
+
+-- Création de la table documents
+CREATE TABLE documents_rag (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) DEFAULT NULL,
+    "format" VARCHAR(50) DEFAULT NULL,
+    link VARCHAR(255) DEFAULT NULL,
+    "status" TEXT NOT NULL CHECK ("status" IN ('add', 'process', 'remove')),
+    created_at TIMESTAMP DEFAULT current_timestamp
 );
 
 -- Ajout des clés étrangères
@@ -131,3 +171,10 @@ INSERT INTO "documents" ("created_at", "client_folder_id", "document_type", "lin
 ('2025-02-11 22:02:12', 3, 'Insurance', 'http://example.com/doc3.pdf'),
 ('2025-02-11 22:02:12', 4, 'Registration', 'http://example.com/doc4.pdf'),
 ('2025-02-11 22:02:12', 5, 'Proof of Address', 'http://example.com/doc5.pdf');
+
+-- Insertion des données pour la table `options`
+INSERT INTO "options" (name) VALUES
+('Assurance tous risques'),
+('Assistance dépannage'),
+('Entretien et SAV'),
+('Contrôle technique');

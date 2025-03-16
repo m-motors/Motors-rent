@@ -22,6 +22,12 @@ from src.infrastructure.adapters.persistence.sql_option_repository import SQLOpt
 from src.infrastructure.adapters.persistence.sql_vehicle_repository import SQLVehicleRepository
 from src.infrastructure.adapters.persistence.sql_client_folder_repository import SQLClientFolderRepository
 
+from src.application.services.rag_service import RAGService
+from src.infrastructure.web.api.rag_routes import create_rag_routes
+from src.infrastructure.adapters.storage.s3_file_storage import S3DocumentStorage
+from src.infrastructure.adapters.rag.langchain_rag_pipeline import LangcahinRAGPipeline
+from src.infrastructure.adapters.persistence.sql_document_rag_repository import SQLDocumentRAGRepository
+
 db = SQLAlchemy()
 
 def create_app(config_class=Config):
@@ -72,6 +78,15 @@ def create_app(config_class=Config):
     app.register_blueprint(vehicle_routes, url_prefix='/api')
     app.register_blueprint(client_folder_routes, url_prefix='/api')
     app.register_blueprint(authentication_routes, url_prefix='/api')
+
+
+    rag_pipeline = LangcahinRAGPipeline()
+    document_storage = S3DocumentStorage(app)
+    document_RAG_repository =  SQLDocumentRAGRepository(db)
+    rag_service = RAGService(document_RAG_repository, document_storage, rag_pipeline)
+    rag_routes = create_rag_routes(rag_service, authorize)
+    app.register_blueprint(rag_routes, url_prefix='/api')
+    
 
     @app.route('/')
     def hello():

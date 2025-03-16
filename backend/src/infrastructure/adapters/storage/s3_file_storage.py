@@ -1,17 +1,17 @@
 import os
 import boto3
-from typing import BinaryIO
+from typing import BinaryIO, List
 from botocore.exceptions import ClientError
 from src.application.ports.output.file_storage import DocumentStorage
 
 
 class S3DocumentStorage(DocumentStorage):
-    def __init__(self):
+    def __init__(self, current_app):
         self.s3_client = boto3.client(
             's3',
-            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
-            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
-            region_name=os.getenv('AWS_REGION', 'eu-west-3')
+            aws_access_key_id=current_app.config.get('AWS_ACCESS_KEY_ID', 'ChangeMe'),
+            aws_secret_access_key=current_app.config.get('AWS_SECRET_ACCESS_KEY', 'ChangeMe'),
+            region_name=current_app.config.get('AWS_REGION', 'eu-west-3')
         )
         self.bucket_name = 'hetic-web3-groupe11-mmotors'
         self.access_point_arn = 'arn:aws:s3:eu-west-3:142706263687:accesspoint/api-mmotors'
@@ -63,3 +63,31 @@ class S3DocumentStorage(DocumentStorage):
             return True
         except ClientError:
             return False
+        
+
+    def list_objects(self, folder_name: str = "") -> List[str]:
+        try:
+            bucket = self.s3_resource.Bucket(self.bucket_name)
+            return [obj.key for obj in bucket.objects.filter(Prefix=folder_name)]
+        except ClientError as e:
+            current_app.logger.error(f"Erreur lors de la récupération des fichiers du dossier {folder_name} : {e}")
+            raise
+
+    def upload_file(self, file: BinaryIO, file_name: str, folder_name: str = "") -> str:
+        try:
+            key = f"{folder_name}/{file_name}" if folder_name else file_name
+            self.s3_client.upload_fileobj(file, self.bucket_name, key)
+            return f"{self.base_url}/{key}"
+        except ClientError as e:
+            current_app.logger.error(f"Erreur lors du téléversement de {file_name} : {e}")
+            raise
+    
+    def download_file(self, file_name: str, folder_name: str = "", local_path: str = None) -> str:
+        try:
+            key = f"{folder_name}/{file_name}" if folder_name else file_name
+            local_path = local_path or file_name
+            self.s3_client.download_file(self.bucket_name, key, local_path)
+            return local_path
+        except ClientError as e:
+            current_app.logger.error(f"Erreur lors du téléchargement de {file_name} : {e}")
+            raise

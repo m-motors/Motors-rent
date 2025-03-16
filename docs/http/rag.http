@@ -1,0 +1,48 @@
+###
+# @name login
+POST {{protocol}}://{{host}}:{{port}}/api/authentication/login
+Content-Type: application/json
+
+{
+  "identification" : "user39@example.com",
+  "password": "ChangeMe45/*"
+}
+
+###
+@access_token = {{login.response.body.content.access_token}}
+@refresh_token = {{login.response.body.content.refresh_token}}
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/tools/version
+
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/list
+
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/install
+
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag
+Content-Type: application/json
+
+{
+  "prompt": "Who is the presidnet of the US"
+}
+
+
+
+###
+GET http://localhost:11434/api/tags
+
+###
+POST http://localhost:11434/api/pull
+
+{"name": "mistral:7b"}
+
+###
+DELETE http://localhost:11434/api/delete
+
+{"name": "mistral:7b"}

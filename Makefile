@@ -58,6 +58,10 @@ restartdwia:
 	$(MAKE) iad
 	$(MAKE) logs
 
+pipinstall:
+	docker compose exec backend sh -c "pip install $(LIB) && pip freeze > requirements.txt"
+
+
 startback:
 	docker compose --env-file .env --env-file .env.local backend up -d
 	

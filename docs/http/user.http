@@ -38,3 +38,39 @@ Content-Type: application/json
   "last_name" : "cordi",
   "user_role": "admin"
 }
+
+
+GET https://35.180.87.203:443/api/tools/version
+
+
+###
+POST https://35.180.87.203:443/api/users
+Content-Type: application/json
+
+{
+  "email" : "user85@example.com",
+  "password": "ChangeMe45/*",
+  "first_name" : "annie",
+  "last_name" : "cordi"
+}
+
+
+###
+# @name login
+POST https://35.180.87.203:443/api/authentication/login
+Content-Type: application/json
+
+{
+  "identification" : "user85@example.com",
+  "password": "ChangeMe45/*"
+}
+
+###
+@access_token = {{login.response.body.content.access_token}}
+@refresh_token = {{login.response.body.content.refresh_token}}
+
+###
+GET https://35.180.87.203:443/api/tools/identity
+Authorization: Bearer {{access_token}}
+Content-Type: application/json
+

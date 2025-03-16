@@ -164,3 +164,12 @@ If you don’t have the PGAdmin application installed, you can access it directl
 2. When prompted for a password, use: **`ChangeMe`**.
 3. To view tables:
    - **Servers** → **Databases** → **groupe11** → **Schemas** → **Tables**.
+
+
+Mettre a jour le data, la version de postgres sur rds est trop veille pas de retrocompatibilité sur backup/restore. 
+Pour setup la base, supprime l'existant, execute le init comme requete sql 
+
+
+pip install ollama chromadb langchain langchain-core langchain_community
+
+pip freeze > requirements.txt

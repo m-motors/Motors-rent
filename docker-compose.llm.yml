@@ -3,7 +3,7 @@ services:
     container_name: ollama
     image: ollama/ollama:latest
     ports:
-      - 7869:11434
+      - 11434:11434
     volumes:
       - ./llm:/root/.ollama
     tty: true

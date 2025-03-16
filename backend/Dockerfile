@@ -29,7 +29,8 @@ RUN pip install --upgrade pip setuptools wheel \
 
 EXPOSE ${FLASK_INTERNAL_PORT}
 ENV FLASK_ENV=development
-CMD ["sh", "-c", "python ./src/infrastructure/scripts/migrate.py && flask --app ./main.py run --host=0.0.0.0 --reload"]
+CMD ["sh", "-c", "flask --app ./main.py run --host=0.0.0.0 --reload"]
+# CMD ["sh", "-c", "python ./src/infrastructure/scripts/migrate.py && flask --app ./main.py run --host=0.0.0.0 --reload"]
 
 
 FROM base AS debug
@@ -40,6 +41,7 @@ RUN pip install --upgrade pip setuptools wheel \
 EXPOSE ${FLASK_INTERNAL_PORT}
 EXPOSE 5678
 
-CMD ["sh", "-c", "python ./src/infrastructure/scripts/migrate.py && python -m debugpy --listen 0.0.0.0:5678 -m flask --app ./main.py run --host=0.0.0.0 --reload"]
+CMD ["sh", "-c", "python -m debugpy --listen 0.0.0.0:5678 -m flask --app ./main.py run --host=0.0.0.0 --reload"]
+# CMD ["sh", "-c", "python ./src/infrastructure/scripts/migrate.py && python -m debugpy --listen 0.0.0.0:5678 -m flask --app ./main.py run --host=0.0.0.0 --reload"]
 
 
