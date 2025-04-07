@@ -88,7 +88,7 @@ class RAGPipeline(ABC):
         pass
     
     @abstractmethod
-    def save_vectorstore(self, persist_directory:str=None, collection_name:str=None) -> Dict: 
+    def save_vectorstore(self, persist_directory:str=None, collection_name:str=None, embedder_id: str=None) -> Dict: 
         pass
 
     @abstractmethod
@@ -99,6 +99,10 @@ class RAGPipeline(ABC):
     def search_vectorstores(self, id:str = None, name:str = None) -> List[Dict]:
         pass
 
+    @abstractmethod
+    def update_vectorstore(self, id: str, updates: Dict) -> List[Dict]:
+        pass
+    
     @abstractmethod
     def remove_vectorstore(self, id:str) -> List[Dict]:
         pass

@@ -264,6 +264,17 @@ Content-Type: application/json
 }
 
 ###
+POST {{protocol}}://{{host}}:{{port}}/api/rag
+Content-Type: application/json
+
+{
+  "question":"When was found M-Motors?",
+  "id":"a4c9f591-4b57-4b9f-9177-4eb0e3c90ef4","vectorstore_id":"fcfbbd84-9d79-4b34-aa83-8debcc569647"
+}
+
+###
+
+Who is joachim Renevier
 
 
 ### 

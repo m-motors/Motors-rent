@@ -534,11 +534,15 @@ class LangcahinRAGPipeline(RAGPipeline):
             print(f"[ERROR] List vectorstores : {error}")
             raise Exception(f"List vectorstores - Unexpected error: {error}") from error
         
-    def save_vectorstore(self, persist_directory: str = None, collection_name: str = None) -> Dict: 
+    def save_vectorstore(self, persist_directory: str = None, collection_name: str = None, embedder_id:str=None) -> Dict: 
         try : 
             print(f"[INFO] Save store")
+            embedder_info = next(
+                ({"index": i, "embedder": embedder} for i, embedder in enumerate(self.embedders) if embedder["id"] == embedder_id),
+                None
+            )
 
-            embedder = self.embedders[0]
+            embedder = embedder_info["embedder"] if embedder_info else self.embedders[0]
             
             vectorspace = self.create_vector_space(collection_name=collection_name, persist_directory=persist_directory, embedder=embedder["embedder_instance"])
             retriever = self.create_retriever(vectorspace)
@@ -586,6 +590,30 @@ class LangcahinRAGPipeline(RAGPipeline):
             print(f"[ERROR] Search vectorstore : {error}")
             raise Exception(f"Search vectorstore - Unexpected error: {error}") from error
 
+    def update_vectorstore(self, id: str, updates: Dict) -> List[Dict]:
+        try:
+            print(f"[INFO] Update vectorstore...")
+
+            vectorstore_info = next(({"index": i, "vectorstore": vs} for i, vs in enumerate(self.vectorstores) if vs["id"] == id),None)
+
+            if not vectorstore_info:
+                raise Exception(f"No vectorstore found with ID: {id}")
+
+            for key, value in updates.items():
+                if key in vectorstore_info["vectorstore"]:
+                    vectorstore_info["vectorstore"][key] = value
+                else:
+                    print(f"[WARNING] Clé '{key}' non reconnue dans le vectorstore")
+
+            self.vectorstores[vectorstore_info["index"]] = vectorstore_info["vectorstore"]
+
+            print(f"[SUCCESS] vectorstore {id} mis à jour")
+            return self.vectorstores
+
+        except Exception as error:
+            print(f"[ERROR] Update vectorstore : {error}")
+            raise Exception(f"Update vectorstore - Unexpected error: {error}") from error
+        
 
     def remove_vectorstore(self, id:str) -> List[Dict]:
         try: 
@@ -718,7 +746,6 @@ class LangcahinRAGPipeline(RAGPipeline):
             print(f"[ERROR] Add docs to store: {e}")
             raise Exception(f"Add docs to store - Unexpected error: {e}") from e
             
-
 
 
     def remove_docs_store(self, store_id: str) -> Dict:

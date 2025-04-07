@@ -3,6 +3,7 @@ import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import { ReactNode, useEffect, useState } from "react";
 import axios from "axios";
+import { current } from "@reduxjs/toolkit";
 
 type  ModelType =  {
 	name: string,
@@ -49,7 +50,7 @@ type ChatType =  {
 	description: string,
 	vectorstore_id: string | VectorstoreType | null,
 	chat: {
-		history: [],
+		history: Message[];
 		llm_model_name: string,
 		stream: boolean,
 		options: {
@@ -74,6 +75,7 @@ const Llm = () => {
 	const [embedders, setEmbedders] = useState<EmbedderType[]>([]);
 	const [vectorestores, setVectorestores] = useState<VectorstoreType[]>([]);
 	const [chats, setChats] = useState<ChatType[]>([]);
+	const [currentChatId, setCurrentChatId] = useState<string | null>(null);
 
 	const [isModalOpen, setModalOpen] = useState(false);
 	const [modalContent, setModalContent] = useState<React.ReactNode>(null);
@@ -93,8 +95,9 @@ const Llm = () => {
 		fetchModels();
 		fetchEmbedders();
 		fetchVectorestores();
-    // fetchChats();
+    fetchChats();
   }, []);
+
 
 	const fetchModels = async () => {
 		try {
@@ -136,7 +139,7 @@ const Llm = () => {
 				}
 			);
 			
-			setModels((prev) => [...prev, res.data.content]);
+			fetchModels()
 		} catch (error: any) {
 			console.error(error)
 		}
@@ -203,7 +206,7 @@ const Llm = () => {
 				}
 			);
 			
-			setEmbedders((prev) => [...prev, res.data.content]);
+			setEmbedders((prev) => [...prev, res.data.content[0]]);
 		} catch (error: any) {
 			console.error(error)
 		}
@@ -365,12 +368,7 @@ const Llm = () => {
 
 		try {
 			const res = await axios.post(`${host}/api/rag/vectorestores`,
-				{ 
-					store_id: store_id,
-					dirs: dirs,
-					files: files,
-					chunk_size: chunk_size,
-					chunk_overlap: chunk_overlap,
+				{ 	
 				},
 				{
 					headers: {
@@ -379,39 +377,37 @@ const Llm = () => {
 				}
 			);
 			
-			setVectorestores((prev) => [...prev, res.data.content]);
+			const updatedVectorstore = res.data.content;
+			setVectorestores((prev) =>
+				prev.map((vs) =>
+					vs.id === updatedVectorstore.id ? { ...vs, ...updatedVectorstore } : vs
+				)
+			)
 		} catch (error: any) {
 			console.error(error)
 		}
 	}
 
+	const fetchChats = async () => {
+		try {
+			const res: any = await axios.get(`${host}/api/rag/chats`);
+			const chats = res.data.content;
 
-
-
-
-
-	// const fetchChats = async () => {
-	// 	try {
-	// 		const res: any = await axios.get(`${host}/api/rag/chats`);
-	// 		const chats = res.data.content;
-
-	// 		const enriched = chats.map((chat: ChatType) => ({
-	// 			...chat,
-	// 			vectorstore_id: vectorstores.find(vs => typeof chat.vectorstore_id === "string" && vs.id === chat.vectorstore_id) || chat.vectorstore_id,
-	// 		}));
+			const enriched = chats.map((chat: ChatType) => ({
+				...chat,
+				vectorstore_id: vectorestores.find(vs => typeof chat.vectorstore_id === "string" && vs.id === chat.vectorstore_id) || chat.vectorstore_id,
+			}));
 	
-	// 		setChats(enriched);
-	// 	} catch (error: any) {
-	// 		console.error(error)
-	// 	}
-	// };
+			setChats(enriched);
+		} catch (error: any) {
+			console.error(error)
+		}
+	};
 
-
-
-	const displayChats = () => (
+	const displayChats = (chats: ChatType[]) => (
 		<CardList<ChatType>
 			items={chats}
-			getKey={(chat, index) => chat.id || index}
+			getKey={(chat, index) => chat.name || index}
 			onRemove={(event, chat) => removeChat(event, chat)}
 			renderDetails={(chat) => (
 				<>
@@ -470,6 +466,56 @@ const Llm = () => {
 			console.error(error)
 		}
 	}
+
+	const handleGenerateResponse = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		const formData = new FormData(event.currentTarget);
+		const question = formData.get("prompt") as string;
+	
+		if (!currentChatId || !question.trim()) return;
+	
+		try {
+			const res = await axios.post(`${host}/api/rag`, {
+				question: question,
+				id: currentChatId,
+				vectorstore_id: chats.find((chat) => chat.id === currentChatId)?.vectorstore_id
+			}, {
+				headers: {
+					"Content-Type": "application/json",
+				},
+			});
+	
+			const response  = res.data.content;
+
+			setChats(prevChats =>
+				prevChats.map(chat => {
+					if (chat.id !== currentChatId) return chat;
+	
+					return {
+						...chat,
+						chat: {
+							...chat.chat,
+							history: [
+								...chat.chat.history,
+								{ role: "user", content: question },
+								{ role: "assistant", content: response }
+							]
+						}
+					};
+				})
+			);
+			
+			event.currentTarget.reset();
+	
+		} catch (error) {
+			console.error(error);
+		}
+	};
+	
+	const handleChangeCurrentChat = (event: React.ChangeEvent<HTMLSelectElement>) => {
+		const selectedId = event.target.value;
+		setCurrentChatId(selectedId);
+	};
 	
 
   return (
@@ -485,181 +531,215 @@ const Llm = () => {
 				)}
 
 				<div className="min-h-screen bg-gray-900 p-6 text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-					<section>
-						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Models</h3>
-						<form onSubmit={event => handleSubmitAddModel(event)} className="max-w-sm mx-auto">
-							<div>
-								<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
-								<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+					<aside>
+						<section>
+							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Models</h3>
+							<form onSubmit={event => handleSubmitAddModel(event)} className="max-w-sm mx-auto">
 								<div>
+									<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
+									<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+									<div>
+										<p>
+											Nom du model trouvé sur : <a href="https://ollama.com/search">Ollama</a>
+										</p>
+										<p>
+											Conseiller : <span>mistral:7b</span> ou <span>llama2:7b</span>
+										</p>
+									</div>
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
+							</form>
+
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+							{
+								displayModels(models)
+							}
+						</section>
+
+						<section>
+							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Embedders</h3>
+							<form onSubmit={event => handleSubmitAddEmbedder(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model</label>
+									<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
 									<p>
-										Nom du model trouvé sur : <a href="https://ollama.com/search">Ollama</a>
-									</p>
-									<p>
-										Conseiller : <span>mistral:7b</span> ou <span>llama2:7b</span>
+										Conseiller : <span>all-MiniLM-L6-v2</span>
 									</p>
 								</div>
-							</div>
-							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
-						</form>
+								<div>
+									<label  htmlFor="isEncodeKwargs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Encode kwargs</label>
+									<input id="isEncodeKwargs" type="text" name="isEncodeKwargs" placeholder="Encode kwargs" title='boolean' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le embedder</button>
+							</form>
 
-						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
 
-						{
-							displayModels(models)
-						}
-					</section>
+							<form onSubmit={event => handleSearchEmbedder(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
+									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
 
-					<section>
-						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Embedders</h3>
-						<form onSubmit={event => handleSubmitAddEmbedder(event)} className="max-w-sm mx-auto">
-							<div>
-								<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model</label>
-								<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-								<p>
-									Conseiller : <span>all-MiniLM-L6-v2</span>
-								</p>
-							</div>
-							<div>
-								<label  htmlFor="isEncodeKwargs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Encode kwargs</label>
-								<input id="isEncodeKwargs" type="text" name="isEncodeKwargs" placeholder="Encode kwargs" title='boolean' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-							</div>
-							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le embedder</button>
-						</form>
+								<div>
+									<label  htmlFor="embedderName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de l'embedder</label>
+									<input id="embedderName" type="text" name="embedderName" placeholder="Nom de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
 
-						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher l'embedder</button>
+							</form>
 
-						<form onSubmit={event => handleSearchEmbedder(event)} className="max-w-sm mx-auto">
-							<div>
-								<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
-								<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-							</div>
-
-							<div>
-								<label  htmlFor="embedderName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de l'embedder</label>
-								<input id="embedderName" type="text" name="embedderName" placeholder="Nom de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-							</div>
-
-							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher l'embedder</button>
-						</form>
-
-						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
-					
-						{
-							displayEmbedders(embedders)
-						}
-					</section>
-
-					<section>
-						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Vectorestore</h3>
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
 						
-						<form onSubmit={event => handleSubmitAddVectorestore(event)} className="max-w-sm mx-auto">
-							<div>
-								<label  htmlFor="persistDirectory" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Repertoire persisté</label>
-								<input id="persistDirectory" type="text" name="persistDirectory" placeholder="Repertoire persisté" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							{
+								displayEmbedders(embedders)
+							}
+						</section>
 
-								<label  htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de la collection</label>
-								<input id="collectionName" type="text" name="collectionName" placeholder="Nom de la collection" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+						<section>
+							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Vectorestore</h3>
+							
+							<form onSubmit={event => handleSubmitAddVectorestore(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="persistDirectory" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Repertoire persisté</label>
+									<input id="persistDirectory" type="text" name="persistDirectory" placeholder="Repertoire persisté" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
 
-								<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embdder</label>
-								<input disabled id="embedderId" type="text" name="embedderId" placeholder="Id de l'embdder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+									<label  htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de la collection</label>
+									<input id="collectionName" type="text" name="collectionName" placeholder="Nom de la collection" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
 
+									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embdder</label>
+									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embdder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Creer le vectorstore</button>
+							</form>
+
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+							<form onSubmit={event => handleSearchVectorestore(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
+									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+
+								<div>
+									<label  htmlFor="vectorestoreName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du vectorestore</label>
+									<input id="vectorestoreName" type="text" name="vectorestoreName" placeholder="Nom du vectorestore" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher le vectorestore</button>
+							</form>
+
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+							<form onSubmit={event => handleSubmitAddRetriver(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="storeId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Id *</label>
+
+									<select
+										id="storeId"
+										name="storeId"
+										className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+										title="Sélectionnez un Vectorstore"
+										required
+									>
+										<option value="">Sélectionnez un Vectorstore</option>
+										{vectorestores.map((store) => (
+											<option key={store.id} value={store.id}>
+												{store.name}
+											</option>
+										))}
+									</select>
+								</div>
+								<div>
+									<label  htmlFor="dirs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du repertoire</label>
+									<input id="dirs" type="text" name="dirs" placeholder="Nom du repertoire" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
+							</form>
+
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+						
+							{
+								displayVectorestores(vectorestores)
+							}
+						</section>
+					</aside>
+
+					<main className="flex flex-col h-screen overflow-hidden p-2 space-y-4 px-4">
+						<div >
+							<label  htmlFor="chatId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Chat *</label>
+							<select
+								id="chatId"
+								name="chatId"
+								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+								title="string"
+								onChange={event => handleChangeCurrentChat(event)}
+							>
+								<option value="">Sélectionnez un chat</option>
+								{chats.map((chat) => (
+									<option key={chat.id} value={chat.id}>
+										{chat.name}
+									</option>
+								))}
+							</select>
+						</div>
+							
+						
+						{currentChatId && (
+							<div className="flex-1 overflow-y-auto px-2">
+								<ChatHistory
+									history={chats.find((chat) => chat.id === currentChatId)?.chat.history || []}
+								/>
 							</div>
-							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Creer le vectorstore</button>
-						</form>
+						)}
 
-						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+						<div>
+							<form onSubmit={event => handleGenerateResponse(event)}>
+								<div>
+									<label  htmlFor="prompt" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Prompt *</label>
+									<textarea id="prompt" name="prompt" placeholder="Votre question ..." className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Envoyer</button>
+							</form>
+						</div>
+						
+					</main>
 
-						<form onSubmit={event => handleSearchVectorestore(event)} className="max-w-sm mx-auto">
-							<div>
-								<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
-								<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-							</div>
+					<aside>
+						<section>
+							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Chats</h3>
+							<form onSubmit={event => handleSubmitAddChat(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="chatName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
+									<input id="chatName" type="text" name="chatName" placeholder="Chat par defaut" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<div>
+									<label  htmlFor="llmModelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model LLM</label>
+									<input id="llmModelName" type="text" name="llmModelName" placeholder="mistral:7b" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<div>
+									<label  htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+									<textarea id="description" name="description" placeholder="Description" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<div>
+									<label  htmlFor="options" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Options</label>
+									<input disabled id="options" type="text" name="options" placeholder="..." className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<div>
+									<label  htmlFor="vectorstoreId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de la collection</label>
+									<input id="vectorstoreId" type="text" name="vectorstoreId" placeholder="11111111-1111-1111-1111-111111111111" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le chat</button>
+							</form>
+							{
+								displayChats(chats)
+							}
 
-							<div>
-								<label  htmlFor="vectorestoreName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du vectorestore</label>
-								<input id="vectorestoreName" type="text" name="vectorestoreName" placeholder="Nom du vectorestore" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-							</div>
-
-							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher le vectorestore</button>
-						</form>
-
-						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
-
-						{
-							displayVectorestores(vectorestores)
-						}
-					</section>
-
-					<section>
-						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Retriver</h3>
-						<form onSubmit={event => handleSubmitAddRetriver(event)} className="max-w-sm mx-auto">
-							<div>
-								<label  htmlFor="storeId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Id *</label>
-
-								<select
-									id="storeId"
-									name="storeId"
-									className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-									title="Sélectionnez un Vectorstore"
-									required
-								>
-									<option value="">Sélectionnez un Vectorstore</option>
-									{vectorestores.map((store) => (
-										<option key={store.id} value={store.id}>
-											{store.name}
-										</option>
-									))}
-								</select>
-							</div>
-							<div>
-								<label  htmlFor="dirs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du repertoire</label>
-								<input id="dirs" type="text" name="dirs" placeholder="Nom du vectorestore" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-							</div>
-
-
-							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
-						</form>
-
-						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
-
-						{
-							displayModels(models)
-						}
-					</section>
-
-
-
-					<section>
-						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Chats</h3>
-						<form onSubmit={event => handleSubmitAddChat(event)} className="max-w-sm mx-auto">
-							<div>
-								<label  htmlFor="chatName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
-								<input id="chatName" type="text" name="chatName" placeholder="Chat par defaut" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-							</div>
-							<div>
-								<label  htmlFor="llmModelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model LLM</label>
-								<input id="llmModelName" type="text" name="llmModelName" placeholder="mistral:7b" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-							</div>
-							<div>
-								<label  htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-								<textarea id="description" name="description" placeholder="Description" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-							</div>
-							<div>
-								<label  htmlFor="options" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Options</label>
-								<input disabled id="options" type="text" name="options" placeholder="..." className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-							</div>
-							<div>
-								<label  htmlFor="vectorstoreId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de la collection</label>
-								<input id="vectorstoreId" type="text" name="vectorstoreId" placeholder="11111111-1111-1111-1111-111111111111" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-							</div>
-							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le chat</button>
-						</form>
-						{
-							displayChats()
-						}
-
-					</section>
+						</section>
+					</aside>
         </div>
         <Footer />
     </div>
@@ -799,6 +879,38 @@ const Modal = ({ isOpen, onClose, children }: ModalProps) => {
 					{children}
 				</div>
 			</div>
+		</div>
+	);
+};
+
+type Message = {
+	role: 'user' | 'assistant';
+	content: string;
+};
+
+type ChatHistoryProps = {
+	history: Message[];
+};
+
+const ChatHistory = ({ history }: ChatHistoryProps) => {
+	return (
+		<div className="space-y-4">
+			{history.map((msg, index) => (
+				<div
+					key={index}
+					className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+				>
+					<div
+						className={`max-w-[320px] p-4 rounded-xl shadow-sm text-sm leading-5 ${
+							msg.role === 'user'
+								? 'bg-blue-600 text-white rounded-br-none'
+								: 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-white rounded-bl-none'
+						}`}
+					>
+						{msg.content}
+					</div>
+				</div>
+			))}
 		</div>
 	);
 };

@@ -134,14 +134,17 @@ class RAGService:
         return self.rag_pipeline.remove_embedder(id)
     
 
-    def save_vectorstore(self, persist_directory:str=None, collection_name:str=None) -> Dict: 
-        return self.rag_pipeline.save_vectorstore(persist_directory=persist_directory, collection_name=collection_name)
+    def save_vectorstore(self, persist_directory:str=None, collection_name:str=None, embedder_id: str=None) -> Dict: 
+        return self.rag_pipeline.save_vectorstore(persist_directory=persist_directory, collection_name=collection_name, embedder_id=embedder_id)
     
     def list_vectorstore(self) -> Dict: 
         return self.rag_pipeline.list_vectorstore()
     
     def search_vectorstores(self, id:str = None, name:str = None) -> Dict: 
         return self.rag_pipeline.search_vectorstores(id=id, name=name)
+    
+    def update_vectorstore(self, id:str, updates: Dict) -> Dict: 
+        return self.rag_pipeline.update_vectorstore(id=id, updates=updates)
     
     def remove_vectorstore(self, id:str) -> Dict: 
         return self.rag_pipeline.remove_vectorstore(id)

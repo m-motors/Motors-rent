@@ -111,7 +111,7 @@ class RAGUseCase(ABC):
         pass
 
     @abstractmethod
-    def save_vectorstore(self, persist_directory: str = None, collection_name: str =None) -> Dict: 
+    def save_vectorstore(self, persist_directory: str = None, collection_name: str =None, embedder_id: str=None) -> Dict: 
         pass
 
     @abstractmethod
@@ -120,6 +120,10 @@ class RAGUseCase(ABC):
 
     @abstractmethod
     def search_vectorstores(self, id:str = None, name:str = None) -> Dict: 
+        pass
+
+    @abstractmethod
+    def update_vectorstore(self, id: str, updates: Dict) -> List[Dict]:
         pass
 
     @abstractmethod

@@ -588,8 +588,9 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             data = request.json
             persist_directory = data.get('persist_directory')
             collection_name = data.get('collection_name')
+            embedder_id = data.get('embedder_id')
 
-            res = rag_service.save_vectorstore(persist_directory=persist_directory, collection_name=collection_name)
+            res = rag_service.save_vectorstore(persist_directory=persist_directory, collection_name=collection_name,embedder_id=embedder_id)
 
             result = {
 
@@ -606,6 +607,54 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         except Exception as e:
             logger.error(f"Create vectorestore error: {str(e)}")
             return jsonify({"message": "Create vectorestore failed", "content": None, "error": "Internal Server Error"}), 500
+        
+    @rag_routes.route('/rag/vectorestores', methods=['PATCH'])
+    @Validator(
+        json_fields=[
+            Field("id", "str", required=True),
+            Field("name", "str", required=False),
+            Field("persist_directory", "str", required=False),
+            Field("docs", "docs", required=False),
+            Field("embedder", "str", required=False)
+        ]
+    )
+    def update_vectorstore():
+        try:
+            data = request.json
+            id = data.get('id')
+            name = data.get('name')
+            persist_directory = data.get('persist_directory')
+            docs = data.get('docs')
+            embedder = data.get('embedder')
+
+            update = {
+                "id" :  id,
+                "name" : name,
+                "persist_directory": persist_directory,  
+                "docs" : docs,
+                "embedder" : embedder
+            }
+
+            res = rag_service.update_vectorstore(id=id, update=update)
+
+            if res.count :
+                result = [
+                    {
+                        "id": store['id'],
+                        "name" : store['name'],
+                        "persist_directory": store['persist_directory'],  
+                        "vector_space" : True,
+                        "retriever" : True, 
+                        "docs" : store['docs'],
+                        "embedder" : store['embedder']
+                    }
+                    for store in res
+                ]
+
+            return jsonify({"message": "Remove vectorestore", "content": result or res, "error": None}), 200
+        except Exception as e:
+            logger.error(f"Remove vectorestore error: {str(e)}")
+            return jsonify({"message": "Remove vectorestore failed", "content": None, "error": "Internal Server Error"}), 500
         
 
     @rag_routes.route('/rag/vectorestores', methods=['DELETE'])
