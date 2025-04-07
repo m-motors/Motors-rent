@@ -83,7 +83,7 @@ def create_app(config_class=Config):
     rag_pipeline = LangcahinRAGPipeline()
     document_storage = S3DocumentStorage(app)
     document_RAG_repository =  SQLDocumentRAGRepository(db)
-    rag_service = RAGService(document_RAG_repository, document_storage, rag_pipeline)
+    rag_service = RAGService(document_RAG_repository, document_storage, rag_pipeline, app.config.get('RAG_FILE_STORAGE_FOLDER_NAME', 'llm'), 'tmp')
     rag_routes = create_rag_routes(rag_service, authorize)
     app.register_blueprint(rag_routes, url_prefix='/api')
     

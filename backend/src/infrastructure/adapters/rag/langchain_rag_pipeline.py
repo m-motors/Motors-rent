@@ -1,16 +1,16 @@
+import os
 import time
-import json
 import uuid
 import requests
+from typing import Any, List, Optional, Dict, Union
+
 from ollama import chat
-from langchain_community.llms import Ollama
-from typing import List, Optional
-from langchain.prompts import PromptTemplate
 from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.output_parsers import StrOutputParser
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain.document_loaders import TextLoader, PyPDFLoader, JSONLoader
 
 from src.application.ports.output.rag_pipeline import RAGPipeline
 from src.domain.models.document_rag import DocumentRAG, DocumentRAGStatus
@@ -18,87 +18,152 @@ from src.domain.models.document_rag import DocumentRAG, DocumentRAGStatus
 
 class LangcahinRAGPipeline(RAGPipeline):
     def __init__(self):
-        self.retriever: any
-        self.prompt_template: any
-        self.model_name="sentence-transformers/all-MiniLM-L6-v2"
-        self.model_kwargs="cpu"
-        self.encode_kwargs= True
-        self.llm_model_name="mistral:7b"  # Alternative :  'llama2:7b
         self.ollama_host = "http://ollama:11434"
-        self.chats = {}
+        self.llm_model_name="mistral:7b"  # Alternative :  'llama2:7b
 
-    def list_llm(self, ollama_host=None) -> List:
-        ollama_host = ollama_host if ollama_host is not None else self.ollama_host 
-    
+        self.default_options = {
+            'temperature': 1.5,
+            'top_k': 100,
+            'top_p': 0.9,
+            'num_predict': 512,
+            'num_ctx': 2048,
+            'repeat_penalty': 1.1,
+            'repeat_last_n': 64,
+            'num_gpu': 1,
+            'stop': ['\n'],
+            'seed': 12345
+        }
+
+        self.chats = [
+            {
+                "chat": {
+                    "history": [],
+                    "llm_model_name": "mistral:7b",
+                    "options": self.default_options,
+                    "stream": False
+                },
+                "vectorstore_id": None,
+                "description": "This is the chat by default",
+                "id": "11111111-1111-1111-1111-111111111111",
+                "name": "Default chat", 
+            }
+        ]
+
+        self.model_name="all-MiniLM-L6-v2"
+        self.device="cpu"
+        self.is_encode_kwargs= True
+
+        self.embedders = []
+
+
+        self.persist_directory = 'chroma'
+        self.collection_name = 'default'
+        self.vectorstores = []
+        self.chunk_size = 200
+        self.chunk_overlap = 50
+        self.default_file_dir = 'tmp'
+
+        self.with_retriever: bool = False
+        self.prompt_template:str="Context: {context}\nQuestion: {question}\nRéponse:"
+
+
+
+    def list_llm(self, ollama_host: str = None) -> List[Dict]:
+        ollama_host = ollama_host or self.ollama_host
+
         try:
             print("[INFO] List modeles...")
             response = requests.get(f"{ollama_host}/api/tags")
-            
-            if response.status_code == 200:
-                models = response.json().get("models", [])
-                print(f"[SUCCESS] Ollama models {models}")
-                return models
-            else:
-                raise Exception(f"Ollama list failed: {response.status_code} - {response.text}")
-            
-        except Exception as e:
-            print(f"[ERROR] List modeles : {e}")
-            raise e
+            response.raise_for_status() 
+
+            models = response.json().get("models", [])
+            print(f"[SUCCESS] Ollama models {models}")
+            return models
+
+        except requests.exceptions.RequestException as error:
+            print(f"[ERROR] List modeles fetching error : {error}")
+            raise Exception(f"List modeles - fetching error : {error}") from error
         
+        except Exception as error:
+            print(f"[ERROR] List modeles : {error}")
+            raise Exception(f"List modeles - Unexpected error: {error}") from error
+    
 
-    def install_llm(self, ollama_host=None, llm_model_name=None) -> List | dict :
-        ollama_host = ollama_host if ollama_host is not None else self.ollama_host 
-        llm_model_name = llm_model_name if llm_model_name is not None else self.llm_model_name 
+    def install_llm(self, ollama_host: str = None, llm_model_name: str = None) -> Union[List[Dict], Dict]:
+        ollama_host = ollama_host or self.ollama_host
+        llm_model_name = llm_model_name or self.llm_model_name
     
         try:
             print("[INFO] List modeles...")
             response = requests.get(f"{ollama_host}/api/tags")
+            response.raise_for_status()
             
             models = response.json().get("models", [])
 
             if any(model["name"] == llm_model_name for model in models):
-                print(f"[INFO] {llm_model_name} was install")
-                print(models)
+                print(f"[INFO] {llm_model_name} already install")
                 return models
 
             print(f"[INFO] Installation {llm_model_name}...")
+
             response = requests.post(f"{ollama_host}/api/pull", json={"name": llm_model_name})
+            response.raise_for_status()
 
-            print(f"[SUCCESS] Ollama installation of {llm_model_name} returned:")
-            print(f"Status Code: {response.status_code}, Response: {response.text}")
+            model_info = response.text
+            print(f"[SUCCESS] Ollama installation of {llm_model_name}  installed successfully:{model_info}")
 
-            if response.status_code == 200:
-                return response
-            else:
-                raise Exception(f"Ollama installation failed: {response.status_code} - {response.text}")
+            return model_info
+
+        except requests.exceptions.RequestException as error:
+            print(f"[ERROR] Instalation model fetching error : {error}")
+            raise Exception(f"Instalation modeles - fetching error : {error}") from error
         
-        except Exception as e:
-            print(f"[ERROR] Instalation model failed : {e}")
-            raise e 
+        except Exception as error:
+            print(f"[ERROR] Instalation model : {error}")
+            raise Exception(f"Instalation model - Unexpected error: {error}") from error
         
-
-    def uninstall_llm(self, ollama_host=None, llm_model_name=None)-> dict:
-        ollama_host = ollama_host if ollama_host is not None else self.ollama_host 
-        llm_model_name = llm_model_name if llm_model_name is not None else self.llm_model_name 
-
+            
+    def uninstall_llm(self, ollama_host: str = None, llm_model_name: str = None) -> List[Dict]:
+        ollama_host = ollama_host or self.ollama_host
+        llm_model_name = llm_model_name or self.llm_model_name
+    
         try:
             print(f"[INFO] Remove model {llm_model_name}...")
             response = requests.delete(f"{ollama_host}/api/delete", json={"name": llm_model_name})
+            response.raise_for_status()
 
-            if response.status_code == 200:
-                print(f"[SUCCESS] Modele {llm_model_name} remove")
-                return True
-            else:
-                raise Exception(f"Ollama remove failed: {response.status_code} - {response.text}")
+            print(response)
+            print(str(response))
+
+            print(f"[SUCCESS] Modele {llm_model_name} remove")
         
-        except Exception as e:
-            print(f"[ERROR] Remove model failed : {e}")
-            raise e
+            response = requests.get(f"{ollama_host}/api/tags")
+            response.raise_for_status() 
+
+            return response.json().get("models", [])
+        
+        except requests.exceptions.RequestException as error:
+            print(f"[ERROR] Uninstall model fetching error : {error}")
+            raise Exception(f"Uninstall modeles - fetching error : {error}") from error
+        
+        except Exception as error:
+            print(f"[ERROR] Uninstall model : {error}")
+            raise Exception(f"Uninstall model - Unexpected error: {error}") from error
         
 
-    def create_chat(self, name, llm_model_name=None, description='', options={})-> dict:
-        llm_model_name = llm_model_name if llm_model_name is not None else self.llm_model_name 
-    
+    def list_chats(self)-> List[Dict]:
+        try:
+            print(f"[INFO] Get chats...")
+            return self.chats
+        
+        except Exception as error:
+            print(f"[ERROR] List chats : {error}")
+            raise Exception(f"List chats - Unexpected error: {error}") from error
+        
+    def create_chat(self, name, llm_model_name: str = None, description: str = None, options:dict=None, vectorstore_id: Optional[str] = None)-> dict:
+        llm_model_name = llm_model_name or self.llm_model_name
+        options = options or self.default_options
+
         try : 
             print(f"[INFO] Create chat...")
             chat_id = str(uuid.uuid4())
@@ -106,6 +171,7 @@ class LangcahinRAGPipeline(RAGPipeline):
                 "id": chat_id,
                 "name": name,
                 "description": description,
+                "vectorstore_id": vectorstore_id,
                 "chat": {
                     "llm_model_name": llm_model_name,
                     "options": options,
@@ -114,209 +180,572 @@ class LangcahinRAGPipeline(RAGPipeline):
                 }
             }
             self.chats.append(new_chat)
-            print(f"[SUCCESS] Chat '{name}' create {json.dumps(new_chat)}")
+            print(f"[SUCCESS] Chat {new_chat['name']} - {new_chat['chat']}")
             return new_chat
-        except Exception as e:
-            print(f"[ERROR] Create chat failed : {e}")
-            raise e
-
-    def list_chats(self)-> List:
-        try :
-            print(f"[INFO] List chats...")
-            return [{"id": chat["id"], "name": chat["name"], "description": chat["description"]} for chat in self.chats]
-        except Exception as e:
-            print(f"[ERROR] List chats failed : {e}")
-            raise e
         
-    def search_chat(self, identifier) -> dict:
-        try : 
-            print(f"[INFO] Search chat...")
-            for index, chat in enumerate(self.chats):
-                if chat["id"] == identifier or chat["name"] == identifier:
-                    print(f"[SUCCESS] Chat {index} {chat['id']} {chat['name']} found")
-                    return {'index': index, 'chat': chat}
-            raise Exception(f"No chat found with: {identifier}")
-        except Exception as e:
-            print(f"[ERROR] Search chat failed : {e}")
-            raise e
-
-    def remove_chat(self, identifier) -> bool:
-        try: 
-            print(f"[INFO] Remove chat...")
-            chat_info = self.search_chat(identifier)
-            index = chat_info["index"]
-
-            removed_chat = self.chats.pop(index) 
-            print(f"[SUCCESS] Chat {removed_chat['id']} ({removed_chat['name']}) removed")
-            return True
-        except Exception as e:
-            print(f"[ERROR] Remove chat failed : {e}")
-            raise e
-        
-    def list_chat_options(self, identifier)-> dict:
-        try:
-            print(f"[INFO] Get parameters...")
-            chat_info = self.search_chat(identifier)
-            chat = chat_info["chat"]
-
-            print(f"[SUCCESS] Model parameters for chat {chat['id']} ({chat['name']}) :\n{chat.get('options', {})}")
-            return chat.get("options", {})
-        except Exception as e:
-            print(f"[ERROR] Get chat parameters failed: {e}")
-            raise e
-
-
-    def set_chat_options(self, identifier, options=None) -> dict:
-        try:
-            chat_info = self.search_chat(identifier)
-            chat = chat_info["chat"]
-
-            if options is not None:
-                if "options" not in chat:
-                    chat["options"] = {}
-                chat["options"].update(options)
-
-            print(f"[SUCCESS] Chat {chat['id']} ({chat_info['name']}) updated :\n{chat.get('options', {})}")
-            return chat.get("options", {})
-
-        except Exception as e:
-            print(f"[ERROR] Set chat parameters failed: {e}")
-            raise e
-
-
+        except Exception as error:
+            print(f"[ERROR] Create chats : {error}")
+            raise Exception(f"Create chats - Unexpected error: {error}") from error
     
 
+    def add_vectorstore_to_chat(self, chat_id: str, vectorstore_id: str) -> dict:
+        try:
+            print(f"[INFO] Linking vectorstore '{vectorstore_id}' to chat '{chat_id}'")
 
+            chat_info = next(({"index": i, "chat": chat} for i, chat in enumerate(self.chats) if chat["id"] == id), None)
+            if not chat:
+                raise ValueError(f"Chat ID '{chat_id}' not found.")
+
+            vectorstore = next((v for v in self.vectorstores if v["id"] == vectorstore_id), None)
+            if not vectorstore:
+                raise ValueError(f"Vectorstore ID '{vectorstore_id}' not found.")
+
+            chat_info["vectorstore_id"] = vectorstore_id
+
+            print(f"[SUCCESS] Vectorstore '{vectorstore_id}' linked to chat '{chat_info['name']}'")
+            return chat_info
+        
+        except Exception as error:
+            print(f"[ERROR] Linking vectorstore to chat: {error}")
+            raise Exception(f"Add vectorstore to chat - Unexpected error: {error}") from error
         
         
-    def generate_response(self, question, ollama_host=None, llm_model_name=None, withContext = False, retriever=None, prompt_template=None) -> any:
-        ollama_host = ollama_host if ollama_host is not None else self.ollama_host 
-        llm_model_name = llm_model_name if llm_model_name is not None else self.llm_model_name 
+    def remove_chat(self, id:str) -> List[Dict]:
+        try: 
+            print(f"[INFO] Remove chat...")
 
-        if (withContext): 
-            retriever = retriever if retriever is not None else self.retriever
-            prompt_template = prompt_template if prompt_template is not None else self.prompt_template
+            chat_info = next(({"index": i, "chat": chat} for i, chat in enumerate(self.chats) if chat["id"] == id), None)
 
+            if not chat_info:
+                raise Exception(f"No chat found with ID: {id}")
+
+            removed_chat = self.chats.pop(chat_info["index"])
+            print(f"[SUCCESS] Chat {removed_chat['id']} ({removed_chat['name']}) removed")
+            return  self.chats
+        
+        except Exception as error:
+            print(f"[ERROR] Remove chats : {error}")
+            raise Exception(f"Remove chats - Unexpected error: {error}") from error
+
+
+    def search_chat(self, id:str = None, name:str = None) -> List[Dict]:
+        try : 
+            print(f"[INFO] Searching chat by id: {id} or name: {name}...")
+
+            normalize = lambda s: "".join(s.lower().split()) if s else None
+            normalized_name = normalize(name)
+
+            result = [
+                chat for chat in self.chats
+                if (id and chat["id"] == id) or (normalized_name and normalize(chat["name"]) == normalized_name)
+            ]
+
+            if result:
+                print(f"[SUCCESS] Found {len(result)} chat(s): {[chat['name'] for chat in result]}")
+            else:
+                print("[INFO] No chat found.")
+
+            return result 
+        except Exception as error:
+            print(f"[ERROR] Search chats : {error}")
+            raise Exception(f"Search chats - Unexpected error: {error}") from error
+        
+
+    def deep_search_chat(self, partial: Dict[str, Any]) -> List[Dict]:
+        try:
+            print(f"[INFO] Performing deep search with criteria: {partial}")
+
+            def match(obj: Any, pattern: Any) -> bool:
+                if isinstance(pattern, dict):
+                    return all(k in obj and match(obj[k], v) for k, v in pattern.items())
+                elif isinstance(pattern, list):
+                    return all(item in obj for item in pattern)
+                else:
+                    return obj == pattern  
+                
+            result = [chat for chat in self.chats if match(chat, partial)]
+
+            if result:
+                print(f"[SUCCESS] Found {len(result)} matching chat(s): {[chat['name'] for chat in result]}")
+            else:
+                print("[INFO] No matching chat found.")
+
+            return result
+
+        except Exception as error:
+            print(f"[ERROR] Deepsearch chats : {error}")
+            raise Exception(f"Deepsearch chats - Unexpected error: {error}") from error
+
+
+    def list_options_chat(self, id:str) -> Dict:
+        try: 
+            print(f"[INFO] List options chat...")
+
+            chat_info = next((chat for chat in self.chats if chat["id"] == id), None)
+
+            if not chat_info:
+                raise Exception(f"No chat found with ID: {id}")
+
+            print(f"[SUCCESS] Chat {chat_info['id']} ({chat_info['name']}) found return option")
+            return chat_info["chat"].get("options", {})
+        
+        except Exception as error:
+            print(f"[ERROR] List options chats : {error}")
+            raise Exception(f"List options chats - Unexpected error: {error}") from error
+        
+
+    def update_options_chat(self, id: str, options:Dict) -> Dict:
+        try:
+            print(f"[INFO] Update options chat...")
+            chat_info = next((chat for chat in self.chats if chat["id"] == id), None)
+
+            if not chat_info:
+                raise Exception(f"No chat found with ID: {id}")
+
+            chat_info["chat"].setdefault("options", {}).update(options)
+
+            print(f"[SUCCESS] Chat {chat_info['id']} ({chat_info['name']}) updated: {chat_info['chat'].get('options', {})}")
+
+            return chat_info["chat"]
+        except Exception as error:
+            print(f"[ERROR] Update options chats : {error}")
+            raise Exception(f"Update options chats - Unexpected error: {error}") from error    
+        
+
+
+    def generate_response(self, question: str, ollama_host: str = None, llm_model_name: str = None, id: str = None, with_retriever: bool = False, vectorstore_id: str = None, prompt_template: str = None) -> any:
+        
+        ollama_host = ollama_host or self.ollama_host
+        prompt_template = prompt_template or self.prompt_template
+
+        # Récupérer le chat correspondant à l'ID ou prendre le premier par défaut
+        chat = next((c for c in self.chats if c["id"] == id), self.chats[0])
+        llm_model_name = llm_model_name or chat["chat"].get("llm_model_name") or self.llm_model_name
+
+        # Logique de gestion du retriever
+        if with_retriever is False:
+            # Ne pas utiliser le retriever
+            retriever = None
+        else:
+            # Utiliser un retriever par défaut ou celui spécifié par vectorstore_id
+            if vectorstore_id:
+                # Chercher le retriever associé au vectorstore_id
+                retriever = next((v["retriever"] for v in self.vectorstores if v["id"] == vectorstore_id), None)
+            else:
+                # Si aucun vectorstore_id n'est spécifié dans la fonction, utiliser celui dans le chat
+                vectorstore_id_from_chat = chat.get("vectorstore_id")
+                
+                if vectorstore_id_from_chat:
+                    # Utiliser le vectorstore_id du chat
+                    retriever = next((v["retriever"] for v in self.vectorstores if v["id"] == vectorstore_id_from_chat), None)
+                else:
+                    # Si aucun vectorstore_id dans le chat, utiliser le premier dans self.vectorstores
+                    if self.vectorstores:
+                        retriever = self.vectorstores[0].get("retriever", None)
+                    else:
+                        raise ValueError("No vectorstore found in the system.")
+
+        # Si retriever est défini, obtenir le contexte à partir des documents associés
+        if with_retriever:
             docs = retriever.invoke(question)
             formatted_context = "\n\n".join(doc.page_content for doc in docs)
-
-            # Build prompt
             full_prompt = prompt_template.format(question=question, context=formatted_context)
+        else:
+            full_prompt = prompt_template.format(question=question, context='')
 
-        # Execution
-        full_prompt = question
+        messages = chat["chat"]["history"] + [{"role": "user", "content": full_prompt}]
 
-        print("[INFO] Generating response...")
-        start_time = time.time()
-        try : 
-            # Envoi de la requête à Ollama
+        print(f"Chat : {chat}")
+        print(f"Message : {messages}")
+
+        try:
             payload = {
                 "model": llm_model_name,
-                "messages": [{"role": "user", "content": full_prompt}],
-                "stream": False
+                "messages": messages,
+                "stream": chat["chat"].get("stream", False)
             }
 
             response = requests.post(f"{ollama_host}/api/chat", json=payload)
+            response.raise_for_status()
+            response_data = response.json()
+            message_content = response_data.get("message", {}).get("content", "")
 
-            print(f"[SUCCESS] llm response")
+
+            chat["chat"]["history"].append({"role": "user", "content": question})
+            chat["chat"]["history"].append({"role": "assistant", "content": message_content})
+
+            print(f"[SUCCESS] LLM response received")
             print(f"Status Code: {response.status_code}, Response: {response.text}")
-            elapsed_time = time.time() - start_time
-            print(f"[SUCCESS] Réponse générée en {elapsed_time:.2f}s")
-            
-            if response.status_code == 200:
-                return StrOutputParser().parse(response.json()["message"]["content"])
-            else:
-                raise Exception(f"Ollama installation failed: {response.status_code} - {response.text}")
+            print(f"History : {chat['chat']['history']}")
+
+            return StrOutputParser().parse(message_content)
+        except requests.exceptions.RequestException as error:
+            print(f"[ERROR] Generate response fetching error : {error}")
+            raise Exception(f"Generate response - fetching error : {error}") from error
         
+        except Exception as error:
+            print(f"[ERROR] Generate response : {error}")
+            raise Exception(f"Generate response - Unexpected error: {error}") from error
+
+
+
+
+    def load_embedder(self, model_name:str=None, device:str=None, is_encode_kwargs:str=None) -> any:
+        try: 
+            model_name = model_name or self.model_name
+            device = device or self.device
+            is_encode_kwargs = is_encode_kwargs or self.is_encode_kwargs
+
+            print(f"[INFO] Loading embedding model: {model_name}")
+            start_time = time.time()
+
+            model_kwargs = {"device": device} 
+            encode_kwargs = {"normalize_embeddings": is_encode_kwargs}
+
+            embedder = HuggingFaceEmbeddings(
+                model_name=model_name,
+                model_kwargs=model_kwargs,
+                encode_kwargs=encode_kwargs
+            )
+
+            elapsed_time = time.time() - start_time
+            print(f"[SUCCESS] Embedding model loaded in {elapsed_time:.2f}s")
+            return embedder
+        
+        except Exception as error:
+            print(f"[ERROR] Load embedder : {error}")
+            raise Exception(f"Load embedder - Unexpected error: {error}") from error
+       
+
+    def list_embedders(self)-> List[Dict]:
+        try:
+            print(f"[INFO] List embedders...")
+            return self.embedders
+        
+        except Exception as error:
+            print(f"[ERROR] List embedders : {error}")
+            raise Exception(f"List embedders - Unexpected error: {error}") from error
+        
+        
+    def search_embedder(self, id:str = None, name:str = None) -> List[Dict]:
+        try : 
+            print(f"[INFO] Searching embedder by id: {id} or name: {name}...")
+
+            normalize = lambda s: "".join(s.lower().split()) if s else None
+            normalized_name = normalize(name)
+
+            result = [
+                embedder for embedder in self.embedders
+                if (id and embedder["id"] == id) or (normalized_name and normalize(embedder["name"]) == normalized_name)
+            ]
+
+            if result:
+                print(f"[SUCCESS] Found {len(result)} embedder(s): {[embedder['name'] for embedder in result]}")
+            else:
+                print("[INFO] No embedder found.")
+
+            return result 
+        except Exception as error:
+            print(f"[ERROR] Search embedder : {error}")
+            raise Exception(f"Search embedder - Unexpected error: {error}") from error
+
+    def create_embedder(self, model_name:str=None, device:str=None, is_encode_kwargs:str=None) -> Dict:
+        try : 
+            embedder_instance = self.load_embedder(model_name=model_name, device=device, is_encode_kwargs=is_encode_kwargs)
+            embedder_id = str(uuid.uuid4())
+
+            embedder_info = {
+                "id": embedder_id,
+                "name": f"Embedder {model_name}",
+                "model_name": model_name,
+                "embedder_instance": embedder_instance,
+                "device": device or self.device,
+                "is_encode_kwargs": is_encode_kwargs or self.is_encode_kwargs
+            }
+
+            self.embedders.append(embedder_info)
+            return embedder_info  
+        except Exception as error:
+            print(f"[ERROR] Create embedder : {error}")
+            raise Exception(f"Create embedder - Unexpected error: {error}") from error
+        
+
+    def remove_embedder(self, id:str) -> List[Dict]:
+        try: 
+            print(f"[INFO] Remove embedder...")
+
+            embedder_info = next(({"index": i, "embedder": embedder} for i, embedder in enumerate(self.embedders) if embedder["id"] == id), None)
+
+            if not embedder_info:
+                raise Exception(f"No embedder found with ID: {id}")
+
+            removed_embedder = self.embedders.pop(embedder_info["index"])
+            print(f"[SUCCESS] embedder {removed_embedder['id']} ({removed_embedder['name']}) removed")
+            return  self.embedders
+        
+        except Exception as error:
+            print(f"[ERROR] Remove embedders : {error}")
+            raise Exception(f"Remove embedders - Unexpected error: {error}") from error
+        
+
+
+    def create_vector_space(self, persist_directory: str = None, collection_name: str = None, embedder:any=None) -> Chroma:
+        try: 
+            persist_directory = persist_directory or self.persist_directory
+            collection_name = collection_name or self.collection_name
+            embedder = embedder or self.embedders[0]['embedder_instance']
+
+            print(f"[INFO] Creating empty vector space: {collection_name}")
+            start_time = time.time()
+
+            vector_space = Chroma(
+                collection_name=collection_name,
+                persist_directory=persist_directory,
+                embedding_function=embedder
+            )
+
+            elapsed_time = time.time() - start_time
+            print(f"[SUCCESS] Vector space '{collection_name}' created. {elapsed_time:.2f}s")
+            return vector_space
+        except Exception as error:
+            print(f"[ERROR] Create vector space : {error}")
+            raise Exception(f"Create vector space - Unexpected error: {error}") from error
+        
+
+    def create_retriever(self, vector_space: Chroma) -> Dict:
+        try : 
+            print(f"[INFO] Creating retriever for space")
+            
+            retriever = vector_space.as_retriever()
+
+            print(f"[SUCCESS] Retriever for space created.")
+            return retriever
+        except Exception as error:
+            print(f"[ERROR] Create retriever : {error}")
+            raise Exception(f"Create retriever - Unexpected error: {error}") from error
+        
+
+    def list_vectorstore(self)-> List[Dict]:
+        try:
+            print(f"[INFO] List vectorstores...")
+            return self.vectorstores
+        
+        except Exception as error:
+            print(f"[ERROR] List vectorstores : {error}")
+            raise Exception(f"List vectorstores - Unexpected error: {error}") from error
+        
+    def save_vectorstore(self, persist_directory: str = None, collection_name: str = None) -> Dict: 
+        try : 
+            print(f"[INFO] Save store")
+
+            embedder = self.embedders[0]
+            
+            vectorspace = self.create_vector_space(collection_name=collection_name, persist_directory=persist_directory, embedder=embedder["embedder_instance"])
+            retriever = self.create_retriever(vectorspace)
+
+            new_store = {
+                "id" :  str(uuid.uuid4()),
+                "name" : collection_name or self.collection_name,
+                "persist_directory": persist_directory or self.persist_directory,  
+                "vector_space" : vectorspace,
+                "retriever" : retriever, 
+                "chunk_size" : self.chunk_size, 
+                "chunk_overlap" : self.chunk_overlap, 
+                "docs" : [], 
+                "embedder" : embedder['id']
+            } 
+
+            self.vectorstores.append(new_store)
+
+            print(f"[SUCCESS] Save store")
+
+            return new_store
+        except Exception as error:
+            print(f"[ERROR] Save store : {error}")
+            raise Exception(f"Save store - Unexpected error: {error}") from error
+    
+    def search_vectorstores(self, id:str = None, name:str = None) -> List[Dict]:
+        try : 
+            print(f"[INFO] Searching vectorstore by id: {id} or name: {name}...")
+
+            normalize = lambda s: "".join(s.lower().split()) if s else None
+            normalized_name = normalize(name)
+
+            result = [
+                vectorstore for vectorstore in self.vectorstores
+                if (id and vectorstore["id"] == id) or (normalized_name and normalize(vectorstore["name"]) == normalized_name)
+            ]
+
+            if result:
+                print(f"[SUCCESS] Found {len(result)} vectorstore(s): {[vectorstore['name'] for vectorstore in result]}")
+            else:
+                print("[INFO] No vectorstore found.")
+
+            return result 
+        except Exception as error:
+            print(f"[ERROR] Search vectorstore : {error}")
+            raise Exception(f"Search vectorstore - Unexpected error: {error}") from error
+
+
+    def remove_vectorstore(self, id:str) -> List[Dict]:
+        try: 
+            print(f"[INFO] Remove vectorstore...")
+
+            vectorstore_info = next(({"index": i, "vectorstore": vectorstore} for i, vectorstore in enumerate(self.vectorstores) if vectorstore["id"] == id), None)
+
+            if not vectorstore_info:
+                raise Exception(f"No vectorstore found with ID: {id}")
+
+            removed_vectorstore = self.vectorstores.pop(vectorstore_info["index"])
+            print(f"[SUCCESS] vectorstore {removed_vectorstore['id']} ({removed_vectorstore['name']}) removed")
+            return  self.vectorstores
+        
+        except Exception as error:
+            print(f"[ERROR] Remove vectorstores : {error}")
+            raise Exception(f"Remove vectorstores - Unexpected error: {error}") from error
+        
+
+    def get_docs_from_file(self, file_path: str, supported_extensions:any) -> List[Document]:
+        ext = os.path.splitext(file_path)[1].lower()
+        if ext in supported_extensions:
+            try:
+                loader = supported_extensions[ext](file_path)
+                return loader.load()
+            except Exception as e:
+                print(f"[ERROR] Failed to load {file_path}: {e}")
+        else:
+            print(f"[WARN] Unsupported file format: {file_path}")
+        return []
+        
+
+    def load_documents(self, dirs: Optional[List[str]] = None, files: Optional[List[str]] = None) -> List[Document]:
+        supported_extensions = {
+            ".txt": lambda path: TextLoader(path, encoding="utf-8"),
+            ".pdf": lambda path: PyPDFLoader(path),
+            ".json": lambda path: JSONLoader(path, jq_schema=".content", text_content=False),
+        }
+
+        documents = []
+        if files:
+            for file_path in files:
+                if os.path.isfile(file_path):
+                    documents += self.get_docs_from_file(file_path, supported_extensions)
+                else:
+                    print(f"[WARN] File not found: {file_path}")
+
+        if dirs:
+            for dir_path in dirs:
+                if os.path.isdir(dir_path):
+                    for filename in os.listdir(dir_path):
+                        file_path = os.path.join(dir_path, filename)
+                        if os.path.isfile(file_path):
+                            documents += self.get_docs_from_file(file_path, supported_extensions)
+                else:
+                    print(f"[WARN] Directory not found: {dir_path}")
+
+        if not files and not dirs:
+            default_dir = self.default_file_dir
+            if os.path.isdir(default_dir):
+                for filename in os.listdir(default_dir):
+                    file_path = os.path.join(default_dir, filename)
+                    if os.path.isfile(file_path):
+                        documents += self.get_docs_from_file(file_path, supported_extensions)
+            else:
+                print(f"[WARN] Default directory not found: {default_dir}")
+
+        print(f"[INFO] Total documents loaded: {len(documents)}")
+        return documents
+
+    def chunk_docs(self, documents: List[Document], chunk_size: int = None, chunk_overlap: int = None) -> List[Document]:
+        try: 
+            chunk_size = chunk_size or self.chunk_size
+            chunk_overlap = chunk_overlap or self.chunk_overlap
+
+            print("[INFO] Chunking documents...")
+            start_time = time.time()
+
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap
+            )
+
+            chunks = text_splitter.split_documents(documents)
+
+            elapsed_time = time.time() - start_time
+            print(f"[SUCCESS] {len(documents)} documents split into {len(chunks)} chunks. {elapsed_time:.2f}s")
+
+            return chunks
+        except Exception as error:
+            print(f"[ERROR] Chunking documents : {error}")
+            raise Exception(f"Chunking documents - Unexpected error: {error}") from error
+        
+
+    def add_docs_store(self, store_id: str, dirs: Optional[List[str]] = None, files: Optional[List[str]] = None, chunk_size: Optional[int] = None,
+    chunk_overlap: Optional[int] = None) -> Dict:
+        try:
+            target_store = next((s for s in self.vectorstores if s.get("id") == store_id), None)
+            if not target_store:
+                raise ValueError(f"Store ID '{store_id}' not found.")
+
+            documents = self.load_documents(dirs=dirs, files=files)
+
+            effective_chunk_size = chunk_size or target_store.get("chunk_size") or self.chunk_size
+            effective_chunk_overlap = chunk_overlap or target_store.get("chunk_overlap") or self.chunk_overlap
+
+            chunks = self.chunk_docs(documents, chunk_size=effective_chunk_size, chunk_overlap=effective_chunk_overlap)
+
+            vector_space = target_store["vector_space"]
+
+            print(f"[INFO] Adding {len(chunks)} chunks to collection '{target_store['name']}'")
+            start_time = time.time()
+
+            vector_space.add_documents(chunks)
+
+            elapsed = time.time() - start_time
+            print(f"[SUCCESS] Documents added to vector store in {elapsed:.2f}s")
+
+            if chunk_size:
+                target_store["chunk_size"] = chunk_size
+            if chunk_overlap:
+                target_store["chunk_overlap"] = chunk_overlap
+
+            paths = {chunk.metadata.get("source") for chunk in chunks if "source" in chunk.metadata}
+            target_store["docs"].extend(path for path in paths if path not in target_store["docs"])
+
+            return target_store
 
         except Exception as e:
-            print(f"[ERROR] Erreur lors de la génération de réponse : {e}")
-            return {"status": "error", "message": str(e)}
+            print(f"[ERROR] Add docs to store: {e}")
+            raise Exception(f"Add docs to store - Unexpected error: {e}") from e
+            
 
 
-        
-    
-    # def load_embedding_model(self, model_name=None) -> any:
-    #   model_name = model_name if model_name is not None else self.model_name 
-    #   print(f"[INFO] Loading embedding model: {model_name}")
-    #   start_time = time.time()
-    #   model_kwargs = {"device": self.model_kwargs}
-    #   encode_kwargs = {"normalize_embeddings": self.encode_kwargs}
-    #   embeddings = HuggingFaceEmbeddings(
-    #       model_name=model_name, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs
-    #   )
-    #   elapsed_time = time.time() - start_time
-    #   print(f"[SUCCESS] Embedding model loaded in {elapsed_time:.2f}s")
-    #   return embeddings
-    
-    
-    # def load_document(self, file_path: str) -> any:
-    #     print(f"[INFO] Loading document from {file_path}")
-    #     start_time = time.time()
-    #     with open(file_path, 'r', encoding='utf-8') as file:
-    #         content = file.read()
-    #     elapsed_time = time.time() - start_time
-    #     print(f"[SUCCESS] Document loaded. Length: {len(content)} characters. {elapsed_time:.2f}s")
-    #     return content
-    
-    # def chunk_text(self, doc_content: str, chunk_size: int, chunk_overlap: int)  -> any:
 
-    #     print("[INFO] Chunking document...")
-    #     start_time = time.time()
-    #     docs = [Document(page_content=doc_content)]
-    #     text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-    #     chunks = text_splitter.split_documents(docs)
-    #     elapsed_time = time.time() - start_time
-    #     print(f"[SUCCESS] Document split into {len(chunks)} chunks. {elapsed_time:.2f}s")
-    #     return chunks
-    
-    # def create_vectorstore_indexing_chunks(self, chunks: List, embeddings: any, persist_directory: str) -> any:
-    #     print("[INFO] Storing embeddings in ChromaDB")
-    #     start_time = time.time()
-    #     vectorstore = Chroma.from_documents(chunks, embedding=embeddings, persist_directory=persist_directory)
-    #     vectorstore.persist()
-    #     elapsed_time = time.time() - start_time
-    #     print(f"[SUCCESS] Documents stored in ChromaDB. {elapsed_time:.2f}s")
-    #     return vectorstore
-        
-    # def create_retriever(self, vectorstore: str) -> any:
-    #     return vectorstore.as_retriever()
-    
-    # def define_prompt_template(self) -> any:
-    #     print("[INFO] Defining prompt template...")
-    #     start_time = time.time()
-    #     prompt_template = PromptTemplate(
-    #         template="Context:\n{context}\n\nQuestion: {question}\nAnswer:",
-    #         input_variables=["context", "question"]
-    #     )
-    #     elapsed_time = time.time() - start_time
-    #     print(f"[SUCCESS] Prompt template generated. {elapsed_time:.2f}s")
-    #     return prompt_template
-    
-    # def startRag(self) -> any:
-    #     print("\n#### STEP 1: Setup ####")
-    #     start_time = time.time()
-    #     embedding_model = self.load_embedding_model()
-    #     elapsed_time = time.time() - start_time
-    #     print(f"[SUCCESS] {elapsed_time:.2f}s")
+    def remove_docs_store(self, store_id: str) -> Dict:
+        try:
+            # Recherche du vectorstore par ID
+            target_store = next((s for s in self.vectorstores if s.get("id") == store_id), None)
+            if not target_store:
+                raise ValueError(f"Store ID '{store_id}' not found.")
 
-    #     print("\n#### STEP 2: Pre-Indexing ####")
-    #     start_time = time.time()
-    #     doc_content = self.load_document('./assets/ressources/base.txt')
-    #     chunks = self.chunk_text(doc_content)
-    #     elapsed_time = time.time() - start_time
-    #     print(f"[SUCCESS] {elapsed_time:.2f}s")
+            vector_space = target_store.get("vector_space")
+            if not vector_space:
+                raise ValueError("Vector space not initialized for this store.")
 
-    #     print("\n#### STEP 3: Indexing ####")
-    #     start_time = time.time()
-    #     vectorstore = self.create_vectorstore_indexing_chunks(chunks, embedding_model)
-    #     elapsed_time = time.time() - start_time
-    #     print(f"[SUCCESS] {elapsed_time:.2f}s")
+            print(f"[INFO] Removing all documents from store '{store_id}'")
 
-    #     print("\n#### STEP 4: Retrieval ####")
-    #     start_time = time.time()
-    #     self.retriever = self.create_retriever(vectorstore)
-    #     self.prompt_template = self.define_prompt_template()
-    #     elapsed_time = time.time() - start_time
-    #     print(f"[SUCCESS] {elapsed_time:.2f}s")
-    
+            # Suppression de tous les documents dans la collection Chroma
+            vector_space._collection.delete(where={})
+
+            # Réinitialisation de la liste des fichiers indexés
+            target_store["docs"] = []
+
+            print(f"[SUCCESS] Documents removed from store '{store_id}'")
+            return target_store
+
+        except Exception as e:
+            print(f"[ERROR] Remove docs from store: {e}")
+            raise Exception(f"Remove docs from store - Unexpected error: {e}") from e
+
+
+

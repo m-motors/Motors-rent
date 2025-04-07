@@ -117,8 +117,9 @@ CREATE TABLE client_folder_documents (
 CREATE TABLE documents_rag (
     id SERIAL PRIMARY KEY,
     name VARCHAR(50) DEFAULT NULL,
-    "format" VARCHAR(50) DEFAULT NULL,
+    doc_format VARCHAR(50) DEFAULT NULL,
     link VARCHAR(255) DEFAULT NULL,
+    e_tag VARCHAR(255) DEFAULT NULL,
     "status" TEXT NOT NULL CHECK ("status" IN ('add', 'process', 'remove')),
     created_at TIMESTAMP DEFAULT current_timestamp
 );

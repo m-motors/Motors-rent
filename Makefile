@@ -62,8 +62,9 @@ pipinstall:
 	docker compose exec backend sh -c "pip install $(LIB) && pip freeze > requirements.txt"
 
 
-startback:
-	docker compose --env-file .env --env-file .env.local backend up -d
+restartback:
+	docker restart backend
+	$(MAKE) logs
 	
 
 buildback :

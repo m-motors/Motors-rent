@@ -1,5 +1,6 @@
 import re
 from functools import wraps
+from typing import Dict, List
 from flask import request, jsonify
 
 class Field:
@@ -32,8 +33,8 @@ class Field:
             "int": int,
             "float": float,
             "bool": bool, 
-            "dict" : dict,
-            "list" : list,
+            "dict" : Dict,
+            "list" : List,
         }
         return type_mapping.get(self.field_type, str)
     
@@ -46,20 +47,22 @@ class Validator:
     def validate_request(self):
         errors = []
 
-        if self.json_fields and request.content_type != "application/json":
-            return {"message": "Invalid Content-Type, expected application/json"}
-        data = request.get_json() or {}
+        data = {}
         if self.json_fields:
-            errors.extend(self.validate_fields(self.json_fields, data, "body"))
+            if request.content_type != "application/json":
+                errors.append("Invalid Content-Type, expected application/json")
+            else:
+                data = request.get_json(silent=True) or {}
+                errors.extend(self.validate_fields(self.json_fields, data, "body"))
+
+                allowed_keys = {field.label for field in self.json_fields}
+                extra_keys = set(data.keys()) - allowed_keys
+                if extra_keys:
+                    errors.append(f"Unexpected fields in body: {', '.join(extra_keys)}")
 
         errors.extend(self.validate_fields(self.header_fields, request.headers, "header"))
-
         errors.extend(self.validate_fields(self.query_fields, request.args, "query"))
 
-        allowed_keys = {field.label for field in self.json_fields}
-        extra_keys = set(data.keys()) - allowed_keys
-        if extra_keys:
-            errors.append(f"Unexpected fields in body: {', '.join(extra_keys)}")
         return errors if errors else None
 
     def validate_fields(self, fields, source, source_name):

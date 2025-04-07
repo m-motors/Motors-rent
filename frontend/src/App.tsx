@@ -14,6 +14,7 @@ import VehicleDetail from "./pages/VehicleDetail.tsx";
 import UserApplications from "./pages/UserApplication.tsx";
 import AddVehicle from "./components/vehicles/AddVehicle.tsx";
 import ModifyUser from "./pages/ModifyUser.tsx"
+import Llm from "./pages/Llm.tsx";
 
 const router = createBrowserRouter([
   {
@@ -72,7 +73,12 @@ const router = createBrowserRouter([
     path: "/modifyUser/:id",
     element : <ModifyUser />,
     errorElement: <Error />
-  }
+  },
+  {
+    path: "/llm",
+    element: <Llm />,
+    errorElement: < Error />
+  },
 ]);
 
 const App: React.FC = () => {
@@ -82,10 +88,9 @@ const App: React.FC = () => {
     const fetchHealth = async () => {
       try {
         const result: any = await axios.get(`${host}/`);
-        console.log(result);
         console.log(`✅ API accessible\n🔗 Hôte : ${host}\n🎉 Résultat : ${result.data}`);
       } catch (error: any) {
-        console.log(`❌ Erreur API\n🔗 Hôte : ${host}\n🚨 Erreur : ${error.message || error}\n📌 Contacter l'administrateur.`);
+        console.error(`❌ Erreur API\n🔗 Hôte : ${host}\n🚨 Erreur : ${error.message || error}\n📌 Contacter l'administrateur.`);
       }
     };
 
