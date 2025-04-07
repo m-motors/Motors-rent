@@ -1,7 +1,7 @@
 // src/AdminPage.js
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import axios from "axios";
 
 type  ModelType =  {
@@ -22,11 +22,32 @@ type  ModelType =  {
 	}
 }
 
+type EmbedderType =  {
+	name: string,
+	id: string,
+	model_name: string,
+	embedder_instance: boolean,
+	device: string,
+	is_encode_kwargs: boolean
+}
+
+type VectorstoreType =  {
+	name: string,
+	id: string,
+	persist_directory: string,
+	vector_space : boolean, 
+	retriever : boolean, 
+	chunk_size : number,
+	chunk_overlap : number,
+	docs : [], 
+	embedder : string | EmbedderType | null ,
+}
+
 type ChatType =  {
 	name: string,
 	id: string,
 	description: string,
-	vectorstore_id: string | null,
+	vectorstore_id: string | VectorstoreType | null,
 	chat: {
 		history: [],
 		llm_model_name: string,
@@ -50,10 +71,28 @@ type ChatType =  {
 const Llm = () => {
 	const host = import.meta.env.VITE_API_HOST;
 	const [models, setModels] = useState<ModelType[]>([]);
+	const [embedders, setEmbedders] = useState<EmbedderType[]>([]);
+	const [vectorstores, setVectorstores] = useState<VectorstoreType[]>([]);
 	const [chats, setChats] = useState<ChatType[]>([]);
+
+	const [isModalOpen, setModalOpen] = useState(false);
+	const [modalContent, setModalContent] = useState<React.ReactNode>(null);
+
+	const displayModal = (content: React.ReactNode) => {
+		setModalContent(content);
+		setModalOpen(true);
+	};
+
+	const closeModal = () => {
+		setModalOpen(false);
+		setModalContent(null);
+	};
+
 
   useEffect(() => {
 		fetchModels();
+		fetchEmbedders();
+
     fetchChats();
   }, []);
 
@@ -66,51 +105,11 @@ const Llm = () => {
 		}
 	};
 
-	const fetchChats = async () => {
-		try {
-			const res: any = await axios.get(`${host}/api/rag/chats`);
-			setChats(prev => [...res.data.content]);
-		} catch (error: any) {
-			console.error(error)
-		}
-	};
-
-	// const displayModel = () => {
-	// 	return (
-	// 		<ul>
-	// 			{
-	// 				models.map((model, index) => (
-	// 					<li key={index}>
-	// 						<div className="max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-	// 							<h4>{model.name}</h4>
-	// 							<details>
-	// 								<summary>More</summary>
-	// 								<ul>
-	// 									<li>
-	// 										Model : {model.model}
-	// 									</li>
-	// 									<li>
-	// 										Taille : {model.size.toString()}
-	// 									</li>
-	// 									<li>
-	// 										Nombre de paramètres : {model.details.parameter_size} 
-	// 									</li>
-	// 								</ul>
-	// 								<button className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-2.5 py-1 me-1 mb-1 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" onClick={(event)=>removeModel(event, model.name)}>Remove</button>
-	// 							</details>
-	// 						</div>
-	// 					</li>
-	// 				))
-	// 			}
-	// 		</ul>
-	// 	)
-	// }
-
-	const displayModel = () => (
+	const displayModels = (models: ModelType[]) => (
 		<CardList<ModelType>
 			items={models}
 			getKey={(model, index) => model.name || index}
-			onRemove={(event, model) => removeModel(event, model.name)}
+			onRemove={(event, model) => removeModel(event, model)}
 			renderDetails={(model) => (
 				<>
 					<h4>{model.name}</h4>
@@ -143,7 +142,7 @@ const Llm = () => {
 		}
 	}
 
-	const removeModel = async (event:React.MouseEvent<HTMLButtonElement>, modelName: String) => {
+	const removeModel = async (event:React.MouseEvent<HTMLButtonElement>, model: ModelType) => {
 		event.preventDefault()
 		try {
 			const res = await axios.delete(`${host}/api/rag/llm`, {
@@ -151,105 +150,154 @@ const Llm = () => {
 					"Content-Type": "application/json"
 				},
 				data: {
-					llm_model_name: modelName
+					llm_model_name: model.name
 				}
 			});
 			
-			setModels((prev) => prev.filter((model) => model.name !== modelName));
+			setModels((prev) => prev.filter((mod) => mod.name !== model.name));
 		} catch (error: any) {
 			console.error(error)
 		}
 	};
 
-	// const displayChat = () => {
-	// 	return (
-	// 		<ul>
-	// 			{
-	// 				chats.map((chat, index) => (
-	// 					<li key={index}>
-	// 						<div className="max-w-sm p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-	// 							<h4>{chat.name}</h4>
-	// 							<details>
-	// 								<summary>More</summary>
-	// 								<ul>
-	// 									<li>
-	// 										Id : {chat.id}
-	// 									</li>
-	// 									<li>
-	// 										Description : {chat.description}
-	// 									</li>
-	// 									<li>
-	// 									vectorstore_id : {chat.vectorstore_id}
-	// 									</li>
-	// 									<li>
-	// 										<details>
-	// 											<summary>Chat</summary>
-	// 											<ul>
-	// 												<li>
-	// 													History : {JSON.stringify(chat.chat.history)}
-	// 												</li>
-	// 												<li>
-	// 													LLM model name: {chat.chat.llm_model_name}
-	// 												</li>
-	// 												<li>
-	// 													Stream: {chat.chat.stream}
-	// 												</li>
-	// 												<li>
-	// 													<details>
-	// 														<summary>options</summary>
-	// 														<ul>
-	// 															<li>
-	// 																Num_ctx : {chat.chat.options.num_ctx}
-	// 															</li>
-	// 															<li>
-	// 																Num_gpu : {chat.chat.options.num_gpu}
-	// 															</li>
-	// 															<li>
-	// 																Num_predict : {chat.chat.options.num_predict}
-	// 															</li>
-	// 															<li>
-	// 																Repeat_last_n : {chat.chat.options.repeat_last_n}
-	// 															</li>
-	// 															<li>
-	// 																Repeat_penalty : {chat.chat.options.repeat_penalty}
-	// 															</li>
-	// 															<li>
-	// 																Seed : {chat.chat.options.seed}
-	// 															</li>
-	// 															<li>
-	// 																Stop : {chat.chat.options.stop}
-	// 															</li>
-	// 															<li>
-	// 																Temperature : {chat.chat.options.temperature}
-	// 															</li>
-	// 															<li>
-	// 																Top_k : {chat.chat.options.top_k}
-	// 															</li>
-	// 															<li>
-	// 																Top_p : {chat.chat.options.top_p}
-	// 															</li>
-	// 														</ul>
-	// 													</details>
-	// 												</li>
-	// 											</ul>
-	// 										</details>
-	// 									</li>
-	// 								</ul>
-	// 								<button className="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900" onClick={(event)=>removeChat(event, chat.id)}>Remove</button>
-	// 							</details>
-	// 						</div>
-	// 					</li>
-	// 				))
-	// 			}
-	// 		</ul>
-	// 	)
-	// }
 
-	const displayChat = () => (
+	const fetchEmbedders = async () => {
+		try {
+			const res: any = await axios.get(`${host}/api/rag/embedders`);
+			setEmbedders([...res.data.content]);
+		} catch (error: any) {
+			console.error(error)
+		}
+	};
+
+	const displayEmbedders = (embedders: EmbedderType[]) => (
+		<CardList<EmbedderType>
+			items={embedders}
+			getKey={(embedder, index) => embedder.name || index}
+			onRemove={(event, embedder) => removeEmbedder(event, embedder)}
+			renderDetails={(embedder) => (
+				<>
+					<h4>{embedder.name}</h4>
+					<RecursiveRenderer data={embedder} />
+				</>
+			)}
+		/>
+	);
+
+	const handleSubmitAddEmbedder = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		const formData = new FormData(event.currentTarget);
+		const model_name = formData.get("modelName") as string;		
+		const is_encode_kwargs = formData.get("isEncodeKwargs") as string;		
+
+		try {
+			const res = await axios.post(`${host}/api/rag/embedders`,
+				{ 
+					model_name: model_name,
+					is_encode_kwargs: !!is_encode_kwargs
+				},
+				{
+					headers: {
+						"Content-Type": "application/json"
+					}
+				}
+			);
+			
+			setEmbedders((prev) => [...prev, res.data.content]);
+		} catch (error: any) {
+			console.error(error)
+		}
+	}
+	
+	const removeEmbedder 	= async (event:React.MouseEvent<HTMLButtonElement>, embedder: EmbedderType) => {
+		event.preventDefault()
+		try {
+			const res = await axios.delete(`${host}/api/rag/embedders`, {
+				headers: {
+					"Content-Type": "application/json"
+				},
+				data: {
+					id: embedder.id
+				}
+			});
+			
+			setEmbedders((prev) => prev.filter((emb) => emb.id !== embedder.id));
+		} catch (error: any) {
+			console.error(error)
+		}
+	}
+
+	const handleSearchEmbedder = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		const formData = new FormData(event.currentTarget);
+		const id = formData.get("embedderId") as string;		
+		const name = formData.get("embedderName") as string;		
+
+		try {
+			const res = await axios.post(`${host}/api/rag/embedders/search`,
+				{ 
+					id: id,
+					name: name
+				},
+				{
+					headers: {
+						"Content-Type": "application/json"
+					}
+				}
+			);
+
+			displayModal(displayEmbedders(res.data.content))
+
+		} catch (error: any) {
+			console.error(error)
+		}
+	}
+
+
+
+
+
+
+
+	const fetchVectorstores = async () => {
+		try {
+			const res: any = await axios.get(`${host}/api/rag/vectorestores`);
+			const vectorstores = res.data.content;
+
+			const enriched = vectorstores.map((vs: VectorstoreType) => ({
+				...vs,
+				embedder: embedders.find(e => typeof vs.embedder === "string" && e.id === vs.embedder) || vs.embedder,
+			}));
+	
+			setVectorstores(enriched);
+		} catch (error: any) {
+			console.error(error)
+		}
+	};
+
+	const fetchChats = async () => {
+		try {
+			const res: any = await axios.get(`${host}/api/rag/chats`);
+			const chats = res.data.content;
+
+			const enriched = chats.map((chat: ChatType) => ({
+				...chat,
+				vectorstore_id: vectorstores.find(vs => typeof chat.vectorstore_id === "string" && vs.id === chat.vectorstore_id) || chat.vectorstore_id,
+			}));
+	
+			setChats(enriched);
+		} catch (error: any) {
+			console.error(error)
+		}
+	};
+
+
+
+	const displayChats = () => (
 		<CardList<ChatType>
 			items={chats}
 			getKey={(chat, index) => chat.id || index}
-			onRemove={(event, chat) => removeChat(event, chat.id)}
+			onRemove={(event, chat) => removeChat(event, chat)}
 			renderDetails={(chat) => (
 				<>
 					<h4>{chat.name}</h4>
@@ -259,7 +307,7 @@ const Llm = () => {
 		/>
 	);
 
-	const removeChat = async (event:React.MouseEvent<HTMLButtonElement>, id: String) => {
+	const removeChat = async (event:React.MouseEvent<HTMLButtonElement>, chat: ChatType) => {
 		event.preventDefault()
 		try {
 			const res = await axios.delete(`${host}/api/rag/chats`, {
@@ -267,11 +315,11 @@ const Llm = () => {
 					"Content-Type": "application/json"
 				},
 				data: {
-					id: id
+					id: chat.id
 				}
 			});
 			
-			setChats((prev) => prev.filter((chat) => chat.id !== id));
+			setChats((prev) => prev.filter((cha) => cha.id !== chat.id));
 		} catch (error: any) {
 			console.error(error)
 		}
@@ -313,14 +361,23 @@ const Llm = () => {
     <div>
         <Header />
 
-        <div className="min-h-screen bg-gray-900 p-6 text-white flex gap-24">
+				{isModalOpen && (
+					<Modal isOpen={isModalOpen} onClose={closeModal}>
+						{
+							modalContent
+						}
+					</Modal>
+				)}
+
+
+        <div className="min-h-screen bg-gray-900 p-6 text-white flex gap-10">
 
 					<section className="w-100">
 						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Models</h3>
 						<form onSubmit={event => handleSubmitAddModel(event)} className="max-w-sm mx-auto">
 							<div>
 								<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
-								<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
 								<div>
 									<p>
 										Nom du model trouvé sur : <a href="https://ollama.com/search">Ollama</a>
@@ -332,9 +389,47 @@ const Llm = () => {
 							</div>
 							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
 						</form>
+							{
+								displayModels(models)
+							}
+					</section>
 
+					<section className="w-100">
+						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Embedders</h3>
+						<form onSubmit={event => handleSubmitAddEmbedder(event)} className="max-w-sm mx-auto">
+							<div>
+								<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model</label>
+								<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								<p>
+									Conseiller : <span>all-MiniLM-L6-v2</span>
+								</p>
+							</div>
+							<div>
+								<label  htmlFor="isEncodeKwargs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Encode kwargs</label>
+								<input id="isEncodeKwargs" type="text" name="isEncodeKwargs" placeholder="Encode kwargs" title='boolean' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+							</div>
+							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le embedder</button>
+						</form>
+
+						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+						<form onSubmit={event => handleSearchEmbedder(event)} className="max-w-sm mx-auto">
+							<div>
+								<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
+								<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+
+							<div>
+								<label  htmlFor="embedderName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de l'embedder</label>
+								<input id="embedderName" type="text" name="embedderName" placeholder="Nom de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+
+							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher l'embedder</button>
+						</form>
+						
+					
 						{
-							displayModel()
+							displayEmbedders(embedders)
 						}
 					</section>
 
@@ -364,14 +459,10 @@ const Llm = () => {
 							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le chat</button>
 						</form>
 						{
-							displayChat()
+							displayChats()
 						}
 
-
-
 					</section>
-
-
         </div>
         <Footer />
     </div>
@@ -397,7 +488,7 @@ const CardList = <T,>({
 	removeLabel = "Remove"
 }: CardListProps<T>) => {
 	return (
-		<ul>
+		<ul className="flex flex-col gap-10">
 			{items.map((item, index) => (
 				<li key={getKey(item, index)} className="max-w-full">
 					<div className="w-full max-w-sm overflow-hidden text-ellipsis break-words p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
@@ -442,28 +533,75 @@ const RecursiveRenderer = ({ data, level = 0, parentKey = "" }: RecursiveRendere
 		);
 	}
 
-	if (typeof data === "object") {
-		return (
-			<li style={{ marginLeft: level * 10 }}>
-				<details open={level === 0}>
-					<summary>{parentKey || "Object"}</summary>
-					<ul>
-						{Object.entries(data).map(([key, value]) => (
-							<li key={key}>
-								{typeof value === "object" && value !== null ? (
-									<RecursiveRenderer data={value} level={level + 1} parentKey={key} />
-								) : (
-									<>
-										<strong>{key.charAt(0).toUpperCase() + key.slice(1)} :</strong> {value?.toString()}
-									</>
-								)}
-							</li>
-						))}
-					</ul>
-				</details>
-			</li>
-		);
-	}
+  if (typeof data === "object") {
+    if (level === 0) {
+      return (
+        <ul style={{ marginLeft: level * 10 }}>
+          {Object.entries(data).map(([key, value]) => (
+            <li key={key}>
+              {typeof value === "object" && value !== null ? (
+                <RecursiveRenderer data={value} level={level + 1} parentKey={key} />
+              ) : (
+                <>
+                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)} :</strong> {value?.toString()}
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+      );
+    }
 
-	return <span>Unsupported type</span>;
+    return (
+      <ul style={{ marginLeft: level * 10 }}>
+        <li>
+          <details open={level === 0}>
+            <summary>{parentKey || "Object"}</summary>
+            <ul>
+              {Object.entries(data).map(([key, value]) => (
+                <li key={key}>
+                  {typeof value === "object" && value !== null ? (
+                    <RecursiveRenderer data={value} level={level + 1} parentKey={key} />
+                  ) : (
+                    <>
+                      <strong>{key.charAt(0).toUpperCase() + key.slice(1)} :</strong> {value?.toString()}
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </details>
+        </li>
+      </ul>
+    );
+  }
+
+  return <span>Unsupported type</span>;
+};
+
+
+type ModalProps = {
+	isOpen: boolean;
+	onClose: () => void;
+	children: React.ReactNode;
+};
+
+const Modal = ({ isOpen, onClose, children }: ModalProps) => {
+	if (!isOpen) return null;
+
+	return (
+		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 text-white">
+			<div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-3xl w-full p-6">
+				<button
+					onClick={onClose}
+					className="absolute top-0 right-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white text-2xl"
+				>
+					&times;
+				</button>
+				<div className="flex flex-row flex-wrap justify-center gap-4">
+					{children}
+				</div>
+			</div>
+		</div>
+	);
 };

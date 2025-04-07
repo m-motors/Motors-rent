@@ -16,6 +16,9 @@ Content-Type: application/json
 GET {{protocol}}://{{host}}:{{port}}/api/tools/version
 
 
+@protocol = http
+@host = localhost
+@port = 3000
 
 ###
 GET {{protocol}}://{{host}}:{{port}}/api/rag/llm
