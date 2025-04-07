@@ -72,7 +72,7 @@ const Llm = () => {
 	const host = import.meta.env.VITE_API_HOST;
 	const [models, setModels] = useState<ModelType[]>([]);
 	const [embedders, setEmbedders] = useState<EmbedderType[]>([]);
-	const [vectorstores, setVectorstores] = useState<VectorstoreType[]>([]);
+	const [vectorestores, setVectorestores] = useState<VectorstoreType[]>([]);
 	const [chats, setChats] = useState<ChatType[]>([]);
 
 	const [isModalOpen, setModalOpen] = useState(false);
@@ -92,8 +92,8 @@ const Llm = () => {
   useEffect(() => {
 		fetchModels();
 		fetchEmbedders();
-
-    fetchChats();
+		fetchVectorestores();
+    // fetchChats();
   }, []);
 
 	const fetchModels = async () => {
@@ -173,7 +173,7 @@ const Llm = () => {
 	const displayEmbedders = (embedders: EmbedderType[]) => (
 		<CardList<EmbedderType>
 			items={embedders}
-			getKey={(embedder, index) => embedder.name || index}
+			getKey={(embedder, index) => embedder.id || index}
 			onRemove={(event, embedder) => removeEmbedder(event, embedder)}
 			renderDetails={(embedder) => (
 				<>
@@ -254,42 +254,157 @@ const Llm = () => {
 	}
 
 
-
-
-
-
-
-	const fetchVectorstores = async () => {
+	const fetchVectorestores = async () => {
 		try {
 			const res: any = await axios.get(`${host}/api/rag/vectorestores`);
-			const vectorstores = res.data.content;
+			const vectorestores = res.data.content;
 
-			const enriched = vectorstores.map((vs: VectorstoreType) => ({
+			const enriched = vectorestores.map((vs: VectorstoreType) => ({
 				...vs,
-				embedder: embedders.find(e => typeof vs.embedder === "string" && e.id === vs.embedder) || vs.embedder,
+				embedder: embedders.find(e => e.id === vs.embedder) || vs.embedder,
 			}));
 	
-			setVectorstores(enriched);
+			setVectorestores(enriched);
 		} catch (error: any) {
 			console.error(error)
 		}
 	};
 
-	const fetchChats = async () => {
+	const displayVectorestores = (vectorestores: VectorstoreType[]) => (
+		<CardList<VectorstoreType>
+			items={vectorestores}
+			getKey={(vectorestore, index) => vectorestore.id || index}
+			onRemove={(event, vectorestore) => removeVectorestore(event, vectorestore)}
+			renderDetails={(vectorestore) => (
+				<>
+					<h4>{vectorestore.name}</h4>
+					<RecursiveRenderer data={vectorestore} />
+				</>
+			)}
+		/>
+	);
+
+	const handleSubmitAddVectorestore = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		const formData = new FormData(event.currentTarget);
+		const persist_directory = formData.get("persistDirectory") as string;		
+		const collection_name = formData.get("collectionName") as string;		
+		const embedder_id = formData.get("embedderId") as string;		
+
 		try {
-			const res: any = await axios.get(`${host}/api/rag/chats`);
-			const chats = res.data.content;
-
-			const enriched = chats.map((chat: ChatType) => ({
-				...chat,
-				vectorstore_id: vectorstores.find(vs => typeof chat.vectorstore_id === "string" && vs.id === chat.vectorstore_id) || chat.vectorstore_id,
-			}));
-	
-			setChats(enriched);
+			const res = await axios.post(`${host}/api/rag/vectorestores`,
+				{ 
+					persist_directory: persist_directory,
+					collection_name: collection_name,
+					embedder_id: embedder_id
+				},
+				{
+					headers: {
+						"Content-Type": "application/json"
+					}
+				}
+			);
+			
+			setVectorestores((prev) => [...prev, res.data.content]);
 		} catch (error: any) {
 			console.error(error)
 		}
-	};
+	}
+
+	const removeVectorestore 	= async (event:React.MouseEvent<HTMLButtonElement>, vectorestore: VectorstoreType) => {
+		event.preventDefault()
+		try {
+			const res = await axios.delete(`${host}/api/rag/vectorestores`, {
+				headers: {
+					"Content-Type": "application/json"
+				},
+				data: {
+					id: vectorestore.id
+				}
+			});
+			
+			setVectorestores((prev) => prev.filter((vec) => vec.id !== vectorestore.id));
+		} catch (error: any) {
+			console.error(error)
+		}
+	}
+
+	const handleSearchVectorestore = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		const formData = new FormData(event.currentTarget);
+		const id = formData.get("vectorestoreId") as string;		
+		const name = formData.get("vectorestoreName") as string;		
+
+		try {
+			const res = await axios.post(`${host}/api/rag/vectorestores/search`,
+				{ 
+					id: id,
+					name: name
+				},
+				{
+					headers: {
+						"Content-Type": "application/json"
+					}
+				}
+			);
+
+			displayModal(displayVectorestores(res.data.content))
+		} catch (error: any) {
+			console.error(error)
+		}
+	}
+
+	const handleSubmitAddRetriver = async (event: React.FormEvent<HTMLFormElement>) => {
+		event.preventDefault()
+		const formData = new FormData(event.currentTarget);
+		const store_id = formData.get("storeId") as string;		
+		const dirs = formData.get("dirs") as string;		
+		const files = formData.get("files") as string;		
+		const chunk_size = formData.get("chunkSize") as string;		
+		const chunk_overlap = formData.get("chunkOverlap") as string;	
+
+		try {
+			const res = await axios.post(`${host}/api/rag/vectorestores`,
+				{ 
+					store_id: store_id,
+					dirs: dirs,
+					files: files,
+					chunk_size: chunk_size,
+					chunk_overlap: chunk_overlap,
+				},
+				{
+					headers: {
+						"Content-Type": "application/json"
+					}
+				}
+			);
+			
+			setVectorestores((prev) => [...prev, res.data.content]);
+		} catch (error: any) {
+			console.error(error)
+		}
+	}
+
+
+
+
+
+
+	// const fetchChats = async () => {
+	// 	try {
+	// 		const res: any = await axios.get(`${host}/api/rag/chats`);
+	// 		const chats = res.data.content;
+
+	// 		const enriched = chats.map((chat: ChatType) => ({
+	// 			...chat,
+	// 			vectorstore_id: vectorstores.find(vs => typeof chat.vectorstore_id === "string" && vs.id === chat.vectorstore_id) || chat.vectorstore_id,
+	// 		}));
+	
+	// 		setChats(enriched);
+	// 	} catch (error: any) {
+	// 		console.error(error)
+	// 	}
+	// };
 
 
 
@@ -369,10 +484,8 @@ const Llm = () => {
 					</Modal>
 				)}
 
-
-        <div className="min-h-screen bg-gray-900 p-6 text-white flex gap-10">
-
-					<section className="w-100">
+				<div className="min-h-screen bg-gray-900 p-6 text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+					<section>
 						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Models</h3>
 						<form onSubmit={event => handleSubmitAddModel(event)} className="max-w-sm mx-auto">
 							<div>
@@ -389,12 +502,15 @@ const Llm = () => {
 							</div>
 							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
 						</form>
-							{
-								displayModels(models)
-							}
+
+						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+						{
+							displayModels(models)
+						}
 					</section>
 
-					<section className="w-100">
+					<section>
 						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Embedders</h3>
 						<form onSubmit={event => handleSubmitAddEmbedder(event)} className="max-w-sm mx-auto">
 							<div>
@@ -426,14 +542,95 @@ const Llm = () => {
 
 							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher l'embedder</button>
 						</form>
-						
+
+						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
 					
 						{
 							displayEmbedders(embedders)
 						}
 					</section>
 
-					<section className="w-100">
+					<section>
+						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Vectorestore</h3>
+						
+						<form onSubmit={event => handleSubmitAddVectorestore(event)} className="max-w-sm mx-auto">
+							<div>
+								<label  htmlFor="persistDirectory" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Repertoire persisté</label>
+								<input id="persistDirectory" type="text" name="persistDirectory" placeholder="Repertoire persisté" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+
+								<label  htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de la collection</label>
+								<input id="collectionName" type="text" name="collectionName" placeholder="Nom de la collection" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+
+								<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embdder</label>
+								<input disabled id="embedderId" type="text" name="embedderId" placeholder="Id de l'embdder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+
+							</div>
+							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Creer le vectorstore</button>
+						</form>
+
+						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+						<form onSubmit={event => handleSearchVectorestore(event)} className="max-w-sm mx-auto">
+							<div>
+								<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
+								<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+
+							<div>
+								<label  htmlFor="vectorestoreName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du vectorestore</label>
+								<input id="vectorestoreName" type="text" name="vectorestoreName" placeholder="Nom du vectorestore" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+
+							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher le vectorestore</button>
+						</form>
+
+						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+						{
+							displayVectorestores(vectorestores)
+						}
+					</section>
+
+					<section>
+						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Retriver</h3>
+						<form onSubmit={event => handleSubmitAddRetriver(event)} className="max-w-sm mx-auto">
+							<div>
+								<label  htmlFor="storeId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Id *</label>
+
+								<select
+									id="storeId"
+									name="storeId"
+									className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+									title="Sélectionnez un Vectorstore"
+									required
+								>
+									<option value="">Sélectionnez un Vectorstore</option>
+									{vectorestores.map((store) => (
+										<option key={store.id} value={store.id}>
+											{store.name}
+										</option>
+									))}
+								</select>
+							</div>
+							<div>
+								<label  htmlFor="dirs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du repertoire</label>
+								<input id="dirs" type="text" name="dirs" placeholder="Nom du vectorestore" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+
+
+							<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
+						</form>
+
+						<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+						{
+							displayModels(models)
+						}
+					</section>
+
+
+
+					<section>
 						<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Chats</h3>
 						<form onSubmit={event => handleSubmitAddChat(event)} className="max-w-sm mx-auto">
 							<div>

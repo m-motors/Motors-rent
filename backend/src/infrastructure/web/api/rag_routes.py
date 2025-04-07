@@ -580,6 +580,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         json_fields=[
             Field("persist_directory", "str", required=False),
             Field("collection_name", "str", required=False),
+            Field("embedder_id", "str", required=False),
         ]
     )
     def create_vectorestore():
