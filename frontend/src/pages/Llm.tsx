@@ -91,12 +91,26 @@ const Llm = () => {
 	};
 
 
-  useEffect(() => {
-		fetchModels();
-		fetchEmbedders();
+	useEffect(() => {
+		const fetchAll = async () => {
+			await fetchModels();
+			await fetchEmbedders();
+			await fetchVectorestores();
+		};
+	
+		fetchAll();
+	}, []);
+
+	useEffect(() => {
+		if (embedders.length === 0) return;
 		fetchVectorestores();
-    fetchChats();
-  }, []);
+	}, [embedders]);
+	
+	
+	useEffect(() => {
+		if (vectorestores.length === 0) return;
+		fetchChats();
+	}, [vectorestores]);
 
 
 	const fetchModels = async () => {
@@ -256,7 +270,6 @@ const Llm = () => {
 		}
 	}
 
-
 	const fetchVectorestores = async () => {
 		try {
 			const res: any = await axios.get(`${host}/api/rag/vectorestores`);
@@ -273,9 +286,12 @@ const Llm = () => {
 		}
 	};
 
-	const displayVectorestores = (vectorestores: VectorstoreType[]) => (
+	const displayVectorestores = (vectorestores: VectorstoreType[]) => {
+		const sortedVectorestores: VectorstoreType[] =  vectorestores.sort((a, b) => a.name.localeCompare(b.name));
+
+		return (
 		<CardList<VectorstoreType>
-			items={vectorestores}
+			items={sortedVectorestores}
 			getKey={(vectorestore, index) => vectorestore.id || index}
 			onRemove={(event, vectorestore) => removeVectorestore(event, vectorestore)}
 			renderDetails={(vectorestore) => (
@@ -285,7 +301,7 @@ const Llm = () => {
 				</>
 			)}
 		/>
-	);
+	)};
 
 	const handleSubmitAddVectorestore = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
@@ -389,34 +405,43 @@ const Llm = () => {
 	}
 
 	const fetchChats = async () => {
+
+		console.log(vectorestores)
+
 		try {
 			const res: any = await axios.get(`${host}/api/rag/chats`);
 			const chats = res.data.content;
 
 			const enriched = chats.map((chat: ChatType) => ({
 				...chat,
-				vectorstore_id: vectorestores.find(vs => typeof chat.vectorstore_id === "string" && vs.id === chat.vectorstore_id) || chat.vectorstore_id,
+				vectorstore_id: vectorestores.find(vs => vs.id === chat.vectorstore_id) || chat.vectorstore_id,
 			}));
-	
+
 			setChats(enriched);
 		} catch (error: any) {
 			console.error(error)
 		}
 	};
 
-	const displayChats = (chats: ChatType[]) => (
-		<CardList<ChatType>
-			items={chats}
-			getKey={(chat, index) => chat.name || index}
-			onRemove={(event, chat) => removeChat(event, chat)}
-			renderDetails={(chat) => (
-				<>
-					<h4>{chat.name}</h4>
-					<RecursiveRenderer data={chat} />
-				</>
-			)}
-		/>
-	);
+	const displayChats = (chats: ChatType[]) => {
+
+		const sortedChats: ChatType[] =  chats.sort((a, b) => a.name.localeCompare(b.name));
+
+		return (
+			<CardList<ChatType>
+				items={sortedChats}
+				getKey={(chat, index) => chat.name || index}
+				onRemove={(event, chat) => removeChat(event, chat)}
+				onSelect={(event, chat) => handleChangeCurrentChat(event, chat)}
+				renderDetails={(chat) => (
+					<>
+						<h4>{chat.name}</h4>
+						<RecursiveRenderer data={chat} />
+					</>
+				)}
+			/>
+		)
+	};
 
 	const removeChat = async (event:React.MouseEvent<HTMLButtonElement>, chat: ChatType) => {
 		event.preventDefault()
@@ -504,7 +529,7 @@ const Llm = () => {
 					};
 				})
 			);
-			
+
 			event.currentTarget.reset();
 	
 		} catch (error) {
@@ -512,14 +537,24 @@ const Llm = () => {
 		}
 	};
 	
-	const handleChangeCurrentChat = (event: React.ChangeEvent<HTMLSelectElement>) => {
-		const selectedId = event.target.value;
+	const handleChangeCurrentChat = (
+		event?: React.ChangeEvent<HTMLSelectElement> | React.MouseEvent<HTMLElement>,
+		chat?: ChatType
+	) => {
+		let selectedId: string | undefined;
+	
+		if ('target' in (event || {}) && (event?.target as HTMLSelectElement).value) {
+			selectedId = (event?.target as HTMLSelectElement).value;
+		} else if (chat?.id) {
+			selectedId = chat.id;
+		}
+	
+		if (!selectedId) return;
 		setCurrentChatId(selectedId);
 	};
-	
 
   return (
-    <div>
+    <div className="h-full" >
         <Header />
 
 				{isModalOpen && (
@@ -531,6 +566,54 @@ const Llm = () => {
 				)}
 
 				<div className="min-h-screen bg-gray-900 p-6 text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+					<aside>
+						<section>
+							<h4 className="text-2xl font-bold dark:text-white mb-4 mt-8">Conversations</h4>
+							{
+								displayChats(chats)
+							}
+						</section>
+					</aside>
+
+					<main className="flex flex-col h-screen overflow-hidden p-2 space-y-4 px-4">
+						<div >
+							<label  htmlFor="chatId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Chat *</label>
+							<select
+								id="chatId"
+								name="chatId"
+								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+								title="string"
+								onChange={event => handleChangeCurrentChat(event)}
+							>
+								<option value="">Sélectionnez un chat</option>
+								{chats.map((chat) => (
+									<option key={chat.id} value={chat.id} selected={chat.id === currentChatId}>
+										{chat.name}
+									</option>
+								))}
+							</select>
+						</div>
+							
+						
+						{currentChatId && (
+							<div className="flex-1 overflow-y-auto px-2">
+								<ChatHistory
+									history={chats.find((chat) => chat.id === currentChatId)?.chat.history || []}
+								/>
+							</div>
+						)}
+
+						<div>
+							<form onSubmit={event => handleGenerateResponse(event)}>
+								<div>
+									<label  htmlFor="prompt" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Prompt *</label>
+									<textarea id="prompt" name="prompt" placeholder="Votre question ..." className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Envoyer</button>
+							</form>
+						</div>
+					</main>
+
 					<aside>
 						<section>
 							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Models</h3>
@@ -666,51 +749,10 @@ const Llm = () => {
 								displayVectorestores(vectorestores)
 							}
 						</section>
-					</aside>
 
-					<main className="flex flex-col h-screen overflow-hidden p-2 space-y-4 px-4">
-						<div >
-							<label  htmlFor="chatId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Chat *</label>
-							<select
-								id="chatId"
-								name="chatId"
-								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-								title="string"
-								onChange={event => handleChangeCurrentChat(event)}
-							>
-								<option value="">Sélectionnez un chat</option>
-								{chats.map((chat) => (
-									<option key={chat.id} value={chat.id}>
-										{chat.name}
-									</option>
-								))}
-							</select>
-						</div>
-							
-						
-						{currentChatId && (
-							<div className="flex-1 overflow-y-auto px-2">
-								<ChatHistory
-									history={chats.find((chat) => chat.id === currentChatId)?.chat.history || []}
-								/>
-							</div>
-						)}
-
-						<div>
-							<form onSubmit={event => handleGenerateResponse(event)}>
-								<div>
-									<label  htmlFor="prompt" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Prompt *</label>
-									<textarea id="prompt" name="prompt" placeholder="Votre question ..." className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-								</div>
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Envoyer</button>
-							</form>
-						</div>
-						
-					</main>
-
-					<aside>
 						<section>
 							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Chats</h3>
+
 							<form onSubmit={event => handleSubmitAddChat(event)} className="max-w-sm mx-auto">
 								<div>
 									<label  htmlFor="chatName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
@@ -734,10 +776,6 @@ const Llm = () => {
 								</div>
 								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le chat</button>
 							</form>
-							{
-								displayChats(chats)
-							}
-
 						</section>
 					</aside>
         </div>
@@ -755,6 +793,8 @@ type CardListProps<T> = {
 	getKey: (item: T, index: number) => string | number;
 	onRemove?: (event: React.MouseEvent<HTMLButtonElement>, item: T) => void;
 	removeLabel?: string;
+	onSelect?: (event: React.MouseEvent<HTMLButtonElement>, item: T) => void;
+	selectLabel?: string;
 };
 
 const CardList = <T,>({
@@ -762,7 +802,9 @@ const CardList = <T,>({
 	renderDetails,
 	getKey,
 	onRemove,
-	removeLabel = "Remove"
+	onSelect,
+	removeLabel = "Remove",
+	selectLabel = "Selectionner"
 }: CardListProps<T>) => {
 	return (
 		<ul className="flex flex-col gap-10">
@@ -770,6 +812,14 @@ const CardList = <T,>({
 				<li key={getKey(item, index)} className="max-w-full">
 					<div className="w-full max-w-sm overflow-hidden text-ellipsis break-words p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
 						{renderDetails(item)}
+						{onSelect && (
+							<button
+								className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
+								onClick={(event) => onSelect(event, item)}
+							>
+								{selectLabel}
+							</button>
+						)}
 						{onRemove && (
 							<button
 								className="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
