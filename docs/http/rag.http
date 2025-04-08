@@ -98,9 +98,9 @@ PATCH {{protocol}}://{{host}}:{{port}}/api/rag/chats/options
 Content-Type: application/json
 
 {
-  "id" : "11111111-1111-1111-1111-111111111111",
+  "id" : "aff4f2dc-6a19-4970-87b2-4d06792b24d2",
   "options" : {
-     "temperature": 2
+     "temperature": 0.2
   }
 }
 
@@ -250,7 +250,7 @@ POST {{protocol}}://{{host}}:{{port}}/api/rag/retriver
 Content-Type: application/json
 
 {
-  "store_id": "{{store_id}}"
+  "store_id": "afe23dad-b017-4a56-aece-a35db8c5a39a"
 }
 
 ###
@@ -269,7 +269,8 @@ Content-Type: application/json
 
 {
   "question":"When was found M-Motors?",
-  "id":"a4c9f591-4b57-4b9f-9177-4eb0e3c90ef4","vectorstore_id":"fcfbbd84-9d79-4b34-aa83-8debcc569647"
+  "id":"a4c9f591-4b57-4b9f-9177-4eb0e3c90ef4",
+  "vectorstore_id":"fcfbbd84-9d79-4b34-aa83-8debcc569647"
 }
 
 ###

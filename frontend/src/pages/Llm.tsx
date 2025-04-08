@@ -383,8 +383,9 @@ const Llm = () => {
 		const chunk_overlap = formData.get("chunkOverlap") as string;	
 
 		try {
-			const res = await axios.post(`${host}/api/rag/vectorestores`,
+			const res = await axios.post(`${host}/api/rag/retriver`,
 				{ 	
+					store_id:store_id
 				},
 				{
 					headers: {
