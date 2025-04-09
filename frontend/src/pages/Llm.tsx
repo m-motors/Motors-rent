@@ -1,16 +1,15 @@
 // src/AdminPage.js
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-import { ReactNode, useEffect, useState } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 import axios from "axios";
-import { current } from "@reduxjs/toolkit";
 
-type  ModelType =  {
+type ModelType =  {
 	name: string,
 	model: string,
-	modified_at: Date,
 	size: Number,
 	digest: string,
+	modified_at: Date,
 	details: {
 		parent_model: string,
 		format: string,
@@ -32,7 +31,7 @@ type EmbedderType =  {
 	is_encode_kwargs: boolean
 }
 
-type VectorstoreType =  {
+type CollectionType =  {
 	name: string,
 	id: string,
 	persist_directory: string,
@@ -48,7 +47,7 @@ type ChatType =  {
 	name: string,
 	id: string,
 	description: string,
-	vectorstore_id: string | VectorstoreType | null,
+	collection: string | CollectionType | null,
 	chat: {
 		history: Message[];
 		llm_model_name: string,
@@ -73,7 +72,7 @@ const Llm = () => {
 	const host = import.meta.env.VITE_API_HOST;
 	const [models, setModels] = useState<ModelType[]>([]);
 	const [embedders, setEmbedders] = useState<EmbedderType[]>([]);
-	const [vectorestores, setVectorestores] = useState<VectorstoreType[]>([]);
+	const [collections, setCollections] = useState<CollectionType[]>([]);
 	const [chats, setChats] = useState<ChatType[]>([]);
 	const [currentChatId, setCurrentChatId] = useState<string | null>(null);
 
@@ -95,7 +94,7 @@ const Llm = () => {
 		const fetchAll = async () => {
 			await fetchModels();
 			await fetchEmbedders();
-			await fetchVectorestores();
+			await fetchCollections();
 		};
 	
 		fetchAll();
@@ -103,14 +102,14 @@ const Llm = () => {
 
 	useEffect(() => {
 		if (embedders.length === 0) return;
-		fetchVectorestores();
+		fetchCollections();
 	}, [embedders]);
 	
 	
 	useEffect(() => {
-		if (vectorestores.length === 0) return;
+		if (collections.length === 0) return;
 		fetchChats();
-	}, [vectorestores]);
+	}, [collections]);
 
 
 	const fetchModels = async () => {
@@ -129,8 +128,8 @@ const Llm = () => {
 			onRemove={(event, model) => removeModel(event, model)}
 			renderDetails={(model) => (
 				<>
-					<h4>{model.name}</h4>
-					<RecursiveRenderer data={model} />
+					<h5 className="text-xl font-bold dark:text-white mb-2">{model.name.charAt(0).toUpperCase() + model.name.slice(1)}</h5>
+					<RecursiveRenderer data={model} keyOrder={["name", "model", "size"]}/>
 				</>
 			)}
 		/>
@@ -139,7 +138,7 @@ const Llm = () => {
 	const handleSubmitAddModel = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		const formData = new FormData(event.currentTarget);
-		const model = formData.get("model") as string;		
+		const model = formData.get("modelName") as string
 
 		try {
 			const res = await axios.post(`${host}/api/rag/llm`,
@@ -270,40 +269,40 @@ const Llm = () => {
 		}
 	}
 
-	const fetchVectorestores = async () => {
+	const fetchCollections = async () => {
 		try {
-			const res: any = await axios.get(`${host}/api/rag/vectorestores`);
-			const vectorestores = res.data.content;
+			const res: any = await axios.get(`${host}/api/rag/collections`);
+			const collections = res.data.content;
 
-			const enriched = vectorestores.map((vs: VectorstoreType) => ({
+			const enriched = collections.map((vs: CollectionType) => ({
 				...vs,
 				embedder: embedders.find(e => e.id === vs.embedder) || vs.embedder,
 			}));
 	
-			setVectorestores(enriched);
+			setCollections(enriched);
 		} catch (error: any) {
 			console.error(error)
 		}
 	};
 
-	const displayVectorestores = (vectorestores: VectorstoreType[]) => {
-		const sortedVectorestores: VectorstoreType[] =  vectorestores.sort((a, b) => a.name.localeCompare(b.name));
+	const displayCollections = (collections: CollectionType[]) => {
+		const sortedCollections: CollectionType[] =  collections.sort((a, b) => a.name.localeCompare(b.name));
 
 		return (
-		<CardList<VectorstoreType>
-			items={sortedVectorestores}
-			getKey={(vectorestore, index) => vectorestore.id || index}
-			onRemove={(event, vectorestore) => removeVectorestore(event, vectorestore)}
-			renderDetails={(vectorestore) => (
+		<CardList<CollectionType>
+			items={sortedCollections}
+			getKey={(collection, index) => collection.id || index}
+			onRemove={(event, collection) => removeCollection(event, collection)}
+			renderDetails={(collection) => (
 				<>
-					<h4>{vectorestore.name}</h4>
-					<RecursiveRenderer data={vectorestore} />
+					<h4>{collection.name}</h4>
+					<RecursiveRenderer data={collection} />
 				</>
 			)}
 		/>
 	)};
 
-	const handleSubmitAddVectorestore = async (event: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmitAddCollection = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		const formData = new FormData(event.currentTarget);
 		const persist_directory = formData.get("persistDirectory") as string;		
@@ -311,7 +310,7 @@ const Llm = () => {
 		const embedder_id = formData.get("embedderId") as string;		
 
 		try {
-			const res = await axios.post(`${host}/api/rag/vectorestores`,
+			const res = await axios.post(`${host}/api/rag/collections`,
 				{ 
 					persist_directory: persist_directory,
 					collection_name: collection_name,
@@ -324,38 +323,38 @@ const Llm = () => {
 				}
 			);
 			
-			setVectorestores((prev) => [...prev, res.data.content]);
+			setCollections((prev) => [...prev, res.data.content]);
 		} catch (error: any) {
 			console.error(error)
 		}
 	}
 
-	const removeVectorestore 	= async (event:React.MouseEvent<HTMLButtonElement>, vectorestore: VectorstoreType) => {
+	const removeCollection 	= async (event:React.MouseEvent<HTMLButtonElement>, collection: CollectionType) => {
 		event.preventDefault()
 		try {
-			const res = await axios.delete(`${host}/api/rag/vectorestores`, {
+			const res = await axios.delete(`${host}/api/rag/collections`, {
 				headers: {
 					"Content-Type": "application/json"
 				},
 				data: {
-					id: vectorestore.id
+					id: collection.id
 				}
 			});
 			
-			setVectorestores((prev) => prev.filter((vec) => vec.id !== vectorestore.id));
+			setCollections((prev) => prev.filter((vec) => vec.id !== collection.id));
 		} catch (error: any) {
 			console.error(error)
 		}
 	}
 
-	const handleSearchVectorestore = async (event: React.FormEvent<HTMLFormElement>) => {
+	const handleSearchCollection = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault()
 		const formData = new FormData(event.currentTarget);
-		const id = formData.get("vectorestoreId") as string;		
-		const name = formData.get("vectorestoreName") as string;		
+		const id = formData.get("collectionId") as string;		
+		const name = formData.get("collectionName") as string;		
 
 		try {
-			const res = await axios.post(`${host}/api/rag/vectorestores/search`,
+			const res = await axios.post(`${host}/api/rag/collections/search`,
 				{ 
 					id: id,
 					name: name
@@ -367,7 +366,7 @@ const Llm = () => {
 				}
 			);
 
-			displayModal(displayVectorestores(res.data.content))
+			displayModal(displayCollections(res.data.content))
 		} catch (error: any) {
 			console.error(error)
 		}
@@ -394,10 +393,10 @@ const Llm = () => {
 				}
 			);
 			
-			const updatedVectorstore = res.data.content;
-			setVectorestores((prev) =>
+			const updatedCollection = res.data.content;
+			setCollections((prev) =>
 				prev.map((vs) =>
-					vs.id === updatedVectorstore.id ? { ...vs, ...updatedVectorstore } : vs
+					vs.id === updatedCollection.id ? { ...vs, ...updatedCollection } : vs
 				)
 			)
 		} catch (error: any) {
@@ -407,7 +406,7 @@ const Llm = () => {
 
 	const fetchChats = async () => {
 
-		console.log(vectorestores)
+		console.log(collections)
 
 		try {
 			const res: any = await axios.get(`${host}/api/rag/chats`);
@@ -415,7 +414,7 @@ const Llm = () => {
 
 			const enriched = chats.map((chat: ChatType) => ({
 				...chat,
-				vectorstore_id: vectorestores.find(vs => vs.id === chat.vectorstore_id) || chat.vectorstore_id,
+				collection: collections.find(vs => vs.id === chat.collection) || chat.collection,
 			}));
 
 			setChats(enriched);
@@ -469,7 +468,7 @@ const Llm = () => {
 		const llm_model_name = formData.get("llmModelName") as string;		
 		const description = formData.get("description") as string;		
 		const options = formData.get("options") as string;		
-		const vectorstore_id = formData.get("vectorstoreId") as string;		
+		const collection = formData.get("collectionId") as string;		
 
 		try {
 			const res = await axios.post(`${host}/api/rag/chats`,
@@ -478,7 +477,7 @@ const Llm = () => {
 					description: description,
 					llm_model_name: llm_model_name,
 					options: options,
-					vectorstore_id: vectorstore_id 
+					collection: collection 
 				},
 				{
 					headers: {
@@ -504,7 +503,7 @@ const Llm = () => {
 			const res = await axios.post(`${host}/api/rag`, {
 				question: question,
 				id: currentChatId,
-				vectorstore_id: chats.find((chat) => chat.id === currentChatId)?.vectorstore_id
+				collection: chats.find((chat) => chat.id === currentChatId)?.collection
 			}, {
 				headers: {
 					"Content-Type": "application/json",
@@ -554,8 +553,15 @@ const Llm = () => {
 		setCurrentChatId(selectedId);
 	};
 
+	const sections = [
+		{ name: "Models", node: <Models onSubmit={handleSubmitAddModel} renderList={() => displayModels(models)} /> },
+		{ name: "Embedders", node: <strong>Embedders</strong> },
+		{ name: "Collection", node: <strong>Collection</strong> },
+		{ name: "Chats", node: <strong>Chats</strong>},
+	];
+
   return (
-    <div className="h-full" >
+    <div >
         <Header />
 
 				{isModalOpen && (
@@ -566,7 +572,7 @@ const Llm = () => {
 					</Modal>
 				)}
 
-				<div className="min-h-screen bg-gray-900 p-6 text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div style={{ height: "calc(100vh - 60px - 112px)"}} className="bg-gray-900 px-6 text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 					<aside>
 						<section>
 							<h4 className="text-2xl font-bold dark:text-white mb-4 mt-8">Conversations</h4>
@@ -576,7 +582,7 @@ const Llm = () => {
 						</section>
 					</aside>
 
-					<main className="flex flex-col h-screen overflow-hidden p-2 space-y-4 px-4">
+					<main  className="flex flex-col overflow-hidden p-2 space-y-4 px-4">
 						<div >
 							<label  htmlFor="chatId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Chat *</label>
 							<select
@@ -615,27 +621,31 @@ const Llm = () => {
 						</div>
 					</main>
 
-					<aside>
+					<AsideTabs sections={sections} />
+
+
+					{/* <aside>
 						<section>
 							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Models</h3>
-							<form onSubmit={event => handleSubmitAddModel(event)} className="max-w-sm mx-auto">
+
+
+							<form onSubmit={event => handleSubmitAddModel(event)} className="max-w-md mx-2 mt-4 mb-8">
+							  <h5 className="text-xl font-bold dark:text-white mb-4">Ajouter un model</h5>
 								<div>
 									<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
-									<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-									<div>
-										<p>
+									<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string" aria-describedby="helper-text-explanation"/>
+									<p id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+										Correspond au model de langage utiliser pour taiter les échanges
+										<div>
 											Nom du model trouvé sur : <a href="https://ollama.com/search">Ollama</a>
-										</p>
-										<p>
+										</div>
+										<div>
 											Conseiller : <span>mistral:7b</span> ou <span>llama2:7b</span>
-										</p>
-									</div>
+										</div>
+									</p>
 								</div>
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 my-4 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
 							</form>
-
-							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
-
 							{
 								displayModels(models)
 							}
@@ -682,9 +692,9 @@ const Llm = () => {
 						</section>
 
 						<section>
-							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Vectorestore</h3>
+							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Collection</h3>
 							
-							<form onSubmit={event => handleSubmitAddVectorestore(event)} className="max-w-sm mx-auto">
+							<form onSubmit={event => handleSubmitAddCollection(event)} className="max-w-sm mx-auto">
 								<div>
 									<label  htmlFor="persistDirectory" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Repertoire persisté</label>
 									<input id="persistDirectory" type="text" name="persistDirectory" placeholder="Repertoire persisté" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
@@ -696,23 +706,23 @@ const Llm = () => {
 									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embdder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
 
 								</div>
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Creer le vectorstore</button>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Creer le collection</button>
 							</form>
 
 							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
 
-							<form onSubmit={event => handleSearchVectorestore(event)} className="max-w-sm mx-auto">
+							<form onSubmit={event => handleSearchCollection(event)} className="max-w-sm mx-auto">
 								<div>
 									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
 									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
 								</div>
 
 								<div>
-									<label  htmlFor="vectorestoreName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du vectorestore</label>
-									<input id="vectorestoreName" type="text" name="vectorestoreName" placeholder="Nom du vectorestore" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+									<label  htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du collection</label>
+									<input id="collectionName" type="text" name="collectionName" placeholder="Nom du collection" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
 								</div>
 
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher le vectorestore</button>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher le collection</button>
 							</form>
 
 							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
@@ -725,11 +735,11 @@ const Llm = () => {
 										id="storeId"
 										name="storeId"
 										className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-										title="Sélectionnez un Vectorstore"
+										title="Sélectionnez un Collection"
 										required
 									>
-										<option value="">Sélectionnez un Vectorstore</option>
-										{vectorestores.map((store) => (
+										<option value="">Sélectionnez un collection</option>
+										{collections.map((store) => (
 											<option key={store.id} value={store.id}>
 												{store.name}
 											</option>
@@ -747,7 +757,7 @@ const Llm = () => {
 							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
 						
 							{
-								displayVectorestores(vectorestores)
+								displayCollections(collections)
 							}
 						</section>
 
@@ -772,13 +782,13 @@ const Llm = () => {
 									<input disabled id="options" type="text" name="options" placeholder="..." className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
 								</div>
 								<div>
-									<label  htmlFor="vectorstoreId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de la collection</label>
-									<input id="vectorstoreId" type="text" name="vectorstoreId" placeholder="11111111-1111-1111-1111-111111111111" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+									<label  htmlFor="collectionId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Collection</label>
+									<input id="collectionId" type="text" name="collectionId" placeholder="11111111-1111-1111-1111-111111111111" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
 								</div>
 								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le chat</button>
 							</form>
 						</section>
-					</aside>
+					</aside> */}
         </div>
         <Footer />
     </div>
@@ -813,22 +823,26 @@ const CardList = <T,>({
 				<li key={getKey(item, index)} className="max-w-full">
 					<div className="w-full max-w-sm overflow-hidden text-ellipsis break-words p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
 						{renderDetails(item)}
-						{onSelect && (
-							<button
-								className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
-								onClick={(event) => onSelect(event, item)}
-							>
-								{selectLabel}
-							</button>
-						)}
-						{onRemove && (
-							<button
-								className="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2.5 text-center me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
-								onClick={(event) => onRemove(event, item)}
-							>
-								{removeLabel}
-							</button>
-						)}
+						{(onSelect || onRemove) && (
+          		<div className="flex justify-end gap-2 mt-2">
+								{onSelect && (
+									<button
+										className="text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-full text-sm px-5 py-2 text-center mb-2 mt-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-900"
+										onClick={(event) => onSelect(event, item)}
+									>
+										{selectLabel}
+									</button>
+								)}
+								{onRemove && (
+									<button
+										className="text-white bg-red-700 hover:bg-red-800 focus:outline-none focus:ring-4 focus:ring-red-300 font-medium rounded-full text-sm px-5 py-2 text-center mb-2 mt-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+										onClick={(event) => onRemove(event, item)}
+									>
+										{removeLabel}
+									</button>
+								)}
+								</div>
+							)}
 					</div>
 				</li>
 			))}
@@ -840,10 +854,12 @@ type RecursiveRendererProps = {
 	data: any;
 	level?: number;
 	parentKey?: string;
+	keyOrder?: string[];
 };
 
-const RecursiveRenderer = ({ data, level = 0, parentKey = "" }: RecursiveRendererProps) => {
-	if (data === null || data === undefined) return <span>null</span>;
+const RecursiveRenderer = ({ data, level = 0, parentKey = "", keyOrder = [] }: RecursiveRendererProps) => {
+	if (data === null || data === undefined)
+		return <span className="italic text-gray-400">null</span>;
 
 	if (typeof data === "string" || typeof data === "number" || typeof data === "boolean") {
 		return <span>{data.toString()}</span>;
@@ -851,62 +867,79 @@ const RecursiveRenderer = ({ data, level = 0, parentKey = "" }: RecursiveRendere
 
 	if (Array.isArray(data)) {
 		return (
-			<ul style={{ marginLeft: level * 10 }}>
-				{data.map((item, index) => (
-					<li key={index}>
-						<RecursiveRenderer data={item} level={level + 1} />
+			<details className={`ml-${Math.min(level * 4, 32)}`}>
+				<summary className="cursor-pointer font-semibold text-gray-700 dark:text-gray-300">
+					{parentKey || "Array"}
+				</summary>
+				<ul className="ml-4 list-disc">
+					{data.map((item, index) => (
+						<li key={index}>
+							<RecursiveRenderer data={item} level={level + 1} />
+						</li>
+					))}
+				</ul>
+			</details>
+		);
+	}
+
+	if (typeof data === "object") {
+		let entries = Object.entries(data);
+		if (keyOrder.length > 0) {
+			entries = [
+				...keyOrder
+					.filter((key) => key in data)
+					.map((key) => [key, data[key]] as [string, any]),
+				...Object.entries(data).filter(([key]) => !keyOrder.includes(key)),
+			];
+		}
+		const primitives = entries.filter(
+			([, value]) =>
+				value === null ||
+				typeof value === "string" ||
+				typeof value === "number" ||
+				typeof value === "boolean"
+		);
+		const complexes = entries.filter(
+			([, value]) =>
+				typeof value === "object" && value !== null
+		);
+
+		const renderItems = () => (
+			<ul className={`pl-${level * 2}`}>
+				{primitives.map(([key, value]) => (
+					<li key={key} className="mb-1">
+						<strong>{key.charAt(0).toUpperCase() + key.slice(1)} :</strong>{" "}
+						<span>{value?.toString()}</span>
+					</li>
+				))}
+				{complexes.map(([key, value]) => (
+					<li key={key} className="mb-1">
+						<RecursiveRenderer data={value} level={level + 1} parentKey={key} />
 					</li>
 				))}
 			</ul>
 		);
+
+		if (level === 0) {
+			return renderItems();
+		}
+
+		return (
+			<ul className={`pl-${level * 2}`}>
+				<li>
+					<details open={level === 0}>
+						<summary className="cursor-pointer font-semibold text-gray-700 dark:text-gray-300">
+							{parentKey || "Object"}
+						</summary>
+						{renderItems()}
+					</details>
+				</li>
+			</ul>
+		);
 	}
 
-  if (typeof data === "object") {
-    if (level === 0) {
-      return (
-        <ul style={{ marginLeft: level * 10 }}>
-          {Object.entries(data).map(([key, value]) => (
-            <li key={key}>
-              {typeof value === "object" && value !== null ? (
-                <RecursiveRenderer data={value} level={level + 1} parentKey={key} />
-              ) : (
-                <>
-                  <strong>{key.charAt(0).toUpperCase() + key.slice(1)} :</strong> {value?.toString()}
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
-      );
-    }
-
-    return (
-      <ul style={{ marginLeft: level * 10 }}>
-        <li>
-          <details open={level === 0}>
-            <summary>{parentKey || "Object"}</summary>
-            <ul>
-              {Object.entries(data).map(([key, value]) => (
-                <li key={key}>
-                  {typeof value === "object" && value !== null ? (
-                    <RecursiveRenderer data={value} level={level + 1} parentKey={key} />
-                  ) : (
-                    <>
-                      <strong>{key.charAt(0).toUpperCase() + key.slice(1)} :</strong> {value?.toString()}
-                    </>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </details>
-        </li>
-      </ul>
-    );
-  }
-
-  return <span>Unsupported type</span>;
+	return <span className="text-red-500">Unsupported type</span>;
 };
-
 
 type ModalProps = {
 	isOpen: boolean;
@@ -965,3 +998,264 @@ const ChatHistory = ({ history }: ChatHistoryProps) => {
 		</div>
 	);
 };
+
+interface Section {
+  name: string;
+  node: ReactNode;
+}
+
+interface AsideTabsProps {
+  sections: Section[];
+}
+
+const AsideTabs: FC<AsideTabsProps> = ({ sections }) => {
+  const [activeTab, setActiveTab] = useState<string>(
+    sections[0]?.name || ""
+  );
+
+  return (
+    <aside className="p-4 h-full flex flex-col overflow-hidden">
+      <nav className="font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
+        <ul className="flex flex-wrap -mb-px">
+          {sections.map(({ name }) => (
+            <li
+              key={name}
+              className={`cursor-pointer px-3 py-1 ${
+                activeTab === name
+                  ? "inline-block p-4 text-blue-600 border-b-2 border-blue-600 rounded-t-lg active dark:text-blue-500 dark:border-blue-500"
+                  : "inline-block p-4 border-b-2 border-transparent rounded-t-lg hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+              }`}
+              onClick={() => setActiveTab(name)}
+            >
+              {name}
+            </li>
+          ))}
+        </ul>
+      </nav>
+				
+			<div className="flex-grow flex flex-col overflow-hidden mt-4">
+				{sections.map(
+					({ name, node }) =>
+						activeTab === name && (
+              <section key={name} className="flex flex-col flex-grow overflow-hidden">
+								<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">
+									{name}
+								</h3>
+								<div className="overflow-y-auto">
+									{node}
+								</div>
+							</section>
+						)
+				)}
+			</div>
+    </aside>
+  );
+};
+
+
+interface ModelsProps {
+  onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  renderList: () => React.ReactNode;
+}
+
+const Models: FC<ModelsProps> = ({ onSubmit, renderList }) => {
+	return (
+		<>
+			<form onSubmit={(event)=> onSubmit(event)} className="max-w-md mx-2 mt-4 mb-8">
+				<h5 className="text-xl font-bold dark:text-white mb-4">Ajouter un model</h5>
+				<div>
+					<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
+					<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string" aria-describedby="helper-text-explanation"/>
+					<div id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+						Correspond au model de langage utiliser pour taiter les échanges
+						<div>
+							Nom du model trouvé sur : <a href="https://ollama.com/search">Ollama</a>
+						</div>
+						<div>
+							Conseiller : <span>mistral:7b</span> ou <span>llama2:7b</span>
+						</div>
+					</div>
+				</div>
+				<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 my-4 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
+			</form>
+			
+			{
+				renderList()
+			}
+		</>
+	)
+}
+
+
+
+
+
+
+
+
+
+{/* <aside>
+						<section>
+							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Models</h3>
+
+
+							<form onSubmit={event => handleSubmitAddModel(event)} className="max-w-md mx-2 mt-4 mb-8">
+							  <h5 className="text-xl font-bold dark:text-white mb-4">Ajouter un model</h5>
+								<div>
+									<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
+									<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string" aria-describedby="helper-text-explanation"/>
+									<p id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+										Correspond au model de langage utiliser pour taiter les échanges
+										<div>
+											Nom du model trouvé sur : <a href="https://ollama.com/search">Ollama</a>
+										</div>
+										<div>
+											Conseiller : <span>mistral:7b</span> ou <span>llama2:7b</span>
+										</div>
+									</p>
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 my-4 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
+							</form>
+							{
+								displayModels(models)
+							}
+						</section>
+
+						<section>
+							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Embedders</h3>
+							<form onSubmit={event => handleSubmitAddEmbedder(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model</label>
+									<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+									<p>
+										Conseiller : <span>all-MiniLM-L6-v2</span>
+									</p>
+								</div>
+								<div>
+									<label  htmlFor="isEncodeKwargs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Encode kwargs</label>
+									<input id="isEncodeKwargs" type="text" name="isEncodeKwargs" placeholder="Encode kwargs" title='boolean' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le embedder</button>
+							</form>
+
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+							<form onSubmit={event => handleSearchEmbedder(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
+									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+
+								<div>
+									<label  htmlFor="embedderName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de l'embedder</label>
+									<input id="embedderName" type="text" name="embedderName" placeholder="Nom de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher l'embedder</button>
+							</form>
+
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+						
+							{
+								displayEmbedders(embedders)
+							}
+						</section>
+
+						<section>
+							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Collection</h3>
+							
+							<form onSubmit={event => handleSubmitAddCollection(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="persistDirectory" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Repertoire persisté</label>
+									<input id="persistDirectory" type="text" name="persistDirectory" placeholder="Repertoire persisté" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+
+									<label  htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de la collection</label>
+									<input id="collectionName" type="text" name="collectionName" placeholder="Nom de la collection" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+
+									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embdder</label>
+									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embdder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Creer le collection</button>
+							</form>
+
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+							<form onSubmit={event => handleSearchCollection(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
+									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+
+								<div>
+									<label  htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du collection</label>
+									<input id="collectionName" type="text" name="collectionName" placeholder="Nom du collection" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher le collection</button>
+							</form>
+
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+
+							<form onSubmit={event => handleSubmitAddRetriver(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="storeId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Id *</label>
+
+									<select
+										id="storeId"
+										name="storeId"
+										className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+										title="Sélectionnez un Collection"
+										required
+									>
+										<option value="">Sélectionnez un collection</option>
+										{collections.map((store) => (
+											<option key={store.id} value={store.id}>
+												{store.name}
+											</option>
+										))}
+									</select>
+								</div>
+								<div>
+									<label  htmlFor="dirs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du repertoire</label>
+									<input id="dirs" type="text" name="dirs" placeholder="Nom du repertoire" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
+							</form>
+
+							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
+						
+							{
+								displayCollections(collections)
+							}
+						</section>
+
+						<section>
+							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Chats</h3>
+
+							<form onSubmit={event => handleSubmitAddChat(event)} className="max-w-sm mx-auto">
+								<div>
+									<label  htmlFor="chatName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
+									<input id="chatName" type="text" name="chatName" placeholder="Chat par defaut" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<div>
+									<label  htmlFor="llmModelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model LLM</label>
+									<input id="llmModelName" type="text" name="llmModelName" placeholder="mistral:7b" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<div>
+									<label  htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+									<textarea id="description" name="description" placeholder="Description" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<div>
+									<label  htmlFor="options" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Options</label>
+									<input disabled id="options" type="text" name="options" placeholder="..." className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<div>
+									<label  htmlFor="collectionId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Collection</label>
+									<input id="collectionId" type="text" name="collectionId" placeholder="11111111-1111-1111-1111-111111111111" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+								</div>
+								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le chat</button>
+							</form>
+						</section>
+</aside> */}

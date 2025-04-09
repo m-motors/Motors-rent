@@ -24,7 +24,7 @@ class RAGUseCase(ABC):
         pass
 
     @abstractmethod
-    def create_chat(self, name: str, llm_model_name: str = None, description: str = None, options:dict=None, vectorstore_id: Optional[str] = None)-> dict:
+    def create_chat(self, name: str, llm_model_name: str = None, description: str = None, options:dict=None, collection: Optional[str] = None)-> dict:
         pass
 
     @abstractmethod
@@ -36,7 +36,7 @@ class RAGUseCase(ABC):
         pass
 
     @abstractmethod
-    def add_vectorstore_to_chat(self, id:str, vectorstore_id:str) -> Dict:
+    def add_collection_to_chat(self, id:str, collection:str) -> Dict:
         pass
 
     @abstractmethod
@@ -52,7 +52,7 @@ class RAGUseCase(ABC):
         pass
 
     @abstractmethod
-    def generate_response(self, question:str, llm_model_name:str=None, id:str=None, with_retriever:bool=False, vectorstore_id:str=None, prompt_template:str=None) -> any:
+    def generate_response(self, question:str, llm_model_name:str=None, id:str=None, with_retriever:bool=False, collection:str=None, prompt_template:str=None) -> any:
         pass
     
     
@@ -111,23 +111,23 @@ class RAGUseCase(ABC):
         pass
 
     @abstractmethod
-    def save_vectorstore(self, persist_directory: str = None, collection_name: str =None, embedder_id: str=None) -> Dict: 
+    def save_collection(self, persist_directory: str = None, collection_name: str =None, embedder_id: str=None) -> Dict: 
         pass
 
     @abstractmethod
-    def list_vectorstore(self) -> List[Dict]:
+    def list_collection(self) -> List[Dict]:
         pass
 
     @abstractmethod
-    def search_vectorstores(self, id:str = None, name:str = None) -> Dict: 
+    def search_collections(self, id:str = None, name:str = None) -> Dict: 
         pass
 
     @abstractmethod
-    def update_vectorstore(self, id: str, updates: Dict) -> List[Dict]:
+    def update_collection(self, id: str, updates: Dict) -> List[Dict]:
         pass
 
     @abstractmethod
-    def remove_vectorstore(self, id:str) -> Dict: 
+    def remove_collection(self, id:str) -> Dict: 
         pass
 
     

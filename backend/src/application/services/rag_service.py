@@ -31,8 +31,8 @@ class RAGService:
     def list_chats(self)-> List:
         return self.rag_pipeline.list_chats()
     
-    def create_chat(self, name,  llm_model_name: str = None, description: str = None, options:Dict=None, vectorstore_id: Optional[str] = None)-> Dict:
-        return self.rag_pipeline.create_chat(name=name, llm_model_name=llm_model_name, description=description, options=options, vectorstore_id=vectorstore_id)
+    def create_chat(self, name,  llm_model_name: str = None, description: str = None, options:Dict=None, collection: Optional[str] = None)-> Dict:
+        return self.rag_pipeline.create_chat(name=name, llm_model_name=llm_model_name, description=description, options=options, collection=collection)
 
     def remove_chat(self, id:str) -> bool:
         return self.rag_pipeline.remove_chat(id)
@@ -40,8 +40,8 @@ class RAGService:
     def search_chat(self, id:str = None, name:str = None) -> List[Dict]:
         return self.rag_pipeline.search_chat(id=id, name=name)
     
-    def add_vectorstore_to_chat(self, id:str, vectorstore_id:str) -> Dict:
-        return self.rag_pipeline.add_vectorstore_to_chat(id=id, vectorstore_id=vectorstore_id)
+    def add_collection_to_chat(self, id:str, collection:str) -> Dict:
+        return self.rag_pipeline.add_collection_to_chat(id=id, collection=collection)
     
     def deepsearch_chat(self, partial:Dict) -> List[Dict]:
         return self.rag_pipeline.deep_search_chat(partial)
@@ -53,8 +53,8 @@ class RAGService:
         return self.rag_pipeline.update_options_chat(id, options)
 
 
-    def generate_response(self, question:str, llm_model_name:str=None, id:str=None, with_retriever:bool=None, vectorstore_id:str=None, prompt_template:str=None) -> any:
-        return self.rag_pipeline.generate_response(question, llm_model_name=llm_model_name, id=id, with_retriever=with_retriever, vectorstore_id=vectorstore_id, prompt_template=prompt_template)
+    def generate_response(self, question:str, llm_model_name:str=None, id:str=None, with_retriever:bool=None, collection:str=None, prompt_template:str=None) -> any:
+        return self.rag_pipeline.generate_response(question, llm_model_name=llm_model_name, id=id, with_retriever=with_retriever, collection=collection, prompt_template=prompt_template)
 
 
     def list_storage_files(self) -> List[str]:
@@ -134,20 +134,20 @@ class RAGService:
         return self.rag_pipeline.remove_embedder(id)
     
 
-    def save_vectorstore(self, persist_directory:str=None, collection_name:str=None, embedder_id: str=None) -> Dict: 
-        return self.rag_pipeline.save_vectorstore(persist_directory=persist_directory, collection_name=collection_name, embedder_id=embedder_id)
+    def save_collection(self, persist_directory:str=None, collection_name:str=None, embedder_id: str=None) -> Dict: 
+        return self.rag_pipeline.save_collection(persist_directory=persist_directory, collection_name=collection_name, embedder_id=embedder_id)
     
-    def list_vectorstore(self) -> Dict: 
-        return self.rag_pipeline.list_vectorstore()
+    def list_collection(self) -> Dict: 
+        return self.rag_pipeline.list_collection()
     
-    def search_vectorstores(self, id:str = None, name:str = None) -> Dict: 
-        return self.rag_pipeline.search_vectorstores(id=id, name=name)
+    def search_collections(self, id:str = None, name:str = None) -> Dict: 
+        return self.rag_pipeline.search_collections(id=id, name=name)
     
-    def update_vectorstore(self, id:str, updates: Dict) -> Dict: 
-        return self.rag_pipeline.update_vectorstore(id=id, updates=updates)
+    def update_collection(self, id:str, updates: Dict) -> Dict: 
+        return self.rag_pipeline.update_collection(id=id, updates=updates)
     
-    def remove_vectorstore(self, id:str) -> Dict: 
-        return self.rag_pipeline.remove_vectorstore(id)
+    def remove_collection(self, id:str) -> Dict: 
+        return self.rag_pipeline.remove_collection(id)
     
     
     def load_documents(self, dirs: Optional[List[str]] = None, files: Optional[List[str]] = None) -> List[Document]:

@@ -42,7 +42,7 @@ class LangcahinRAGPipeline(RAGPipeline):
                     "options": self.default_options,
                     "stream": False
                 },
-                "vectorstore_id": None,
+                "collection": None,
                 "description": "This is the chat by default",
                 "id": "11111111-1111-1111-1111-111111111111",
                 "name": "Default chat", 
@@ -58,7 +58,7 @@ class LangcahinRAGPipeline(RAGPipeline):
 
         self.persist_directory = 'chroma'
         self.collection_name = 'default'
-        self.vectorstores = []
+        self.collections = []
         self.chunk_size = 200
         self.chunk_overlap = 50
         self.default_file_dir = 'tmp'
@@ -160,7 +160,7 @@ class LangcahinRAGPipeline(RAGPipeline):
             print(f"[ERROR] List chats : {error}")
             raise Exception(f"List chats - Unexpected error: {error}") from error
         
-    def create_chat(self, name, llm_model_name: str = None, description: str = None, options:dict=None, vectorstore_id: Optional[str] = None)-> dict:
+    def create_chat(self, name, llm_model_name: str = None, description: str = None, options:dict=None, collection: Optional[str] = None)-> dict:
         llm_model_name = llm_model_name or self.llm_model_name
         options = options or self.default_options
 
@@ -171,7 +171,7 @@ class LangcahinRAGPipeline(RAGPipeline):
                 "id": chat_id,
                 "name": name,
                 "description": description,
-                "vectorstore_id": vectorstore_id,
+                "collection": collection,
                 "chat": {
                     "llm_model_name": llm_model_name,
                     "options": options,
@@ -188,26 +188,26 @@ class LangcahinRAGPipeline(RAGPipeline):
             raise Exception(f"Create chats - Unexpected error: {error}") from error
     
 
-    def add_vectorstore_to_chat(self, chat_id: str, vectorstore_id: str) -> dict:
+    def add_collection_to_chat(self, chat_id: str, collection: str) -> dict:
         try:
-            print(f"[INFO] Linking vectorstore '{vectorstore_id}' to chat '{chat_id}'")
+            print(f"[INFO] Linking collection '{collection}' to chat '{chat_id}'")
 
             chat_info = next(({"index": i, "chat": chat} for i, chat in enumerate(self.chats) if chat["id"] == id), None)
             if not chat:
                 raise ValueError(f"Chat ID '{chat_id}' not found.")
 
-            vectorstore = next((v for v in self.vectorstores if v["id"] == vectorstore_id), None)
-            if not vectorstore:
-                raise ValueError(f"Vectorstore ID '{vectorstore_id}' not found.")
+            collection = next((v for v in self.collections if v["id"] == collection), None)
+            if not collection:
+                raise ValueError(f"Collection ID '{collection}' not found.")
 
-            chat_info["vectorstore_id"] = vectorstore_id
+            chat_info["collection"] = collection
 
-            print(f"[SUCCESS] Vectorstore '{vectorstore_id}' linked to chat '{chat_info['name']}'")
+            print(f"[SUCCESS] Collection '{collection}' linked to chat '{chat_info['name']}'")
             return chat_info
         
         except Exception as error:
-            print(f"[ERROR] Linking vectorstore to chat: {error}")
-            raise Exception(f"Add vectorstore to chat - Unexpected error: {error}") from error
+            print(f"[ERROR] Linking collection to chat: {error}")
+            raise Exception(f"Add collection to chat - Unexpected error: {error}") from error
         
         
     def remove_chat(self, id:str) -> List[Dict]:
@@ -313,7 +313,7 @@ class LangcahinRAGPipeline(RAGPipeline):
         
 
 
-    def generate_response(self, question: str, ollama_host: str = None, llm_model_name: str = None, id: str = None, with_retriever: bool = False, vectorstore_id: str = None, prompt_template: str = None) -> any:
+    def generate_response(self, question: str, ollama_host: str = None, llm_model_name: str = None, id: str = None, with_retriever: bool = False, collection: str = None, prompt_template: str = None) -> any:
         
         ollama_host = ollama_host or self.ollama_host
         prompt_template = prompt_template or self.prompt_template
@@ -327,23 +327,18 @@ class LangcahinRAGPipeline(RAGPipeline):
             # Ne pas utiliser le retriever
             retriever = None
         else:
-            # Utiliser un retriever par défaut ou celui spécifié par vectorstore_id
-            if vectorstore_id:
-                # Chercher le retriever associé au vectorstore_id
-                retriever = next((v["retriever"] for v in self.vectorstores if v["id"] == vectorstore_id), None)
+            if collection:
+                retriever = next((v["retriever"] for v in self.collections if v["id"] == collection), None)
             else:
-                # Si aucun vectorstore_id n'est spécifié dans la fonction, utiliser celui dans le chat
-                vectorstore_id_from_chat = chat.get("vectorstore_id")
+                collection_from_chat = chat.get("collection")
                 
-                if vectorstore_id_from_chat:
-                    # Utiliser le vectorstore_id du chat
-                    retriever = next((v["retriever"] for v in self.vectorstores if v["id"] == vectorstore_id_from_chat), None)
+                if collection_from_chat:
+                    retriever = next((v["retriever"] for v in self.collections if v["id"] == collection_from_chat), None)
                 else:
-                    # Si aucun vectorstore_id dans le chat, utiliser le premier dans self.vectorstores
-                    if self.vectorstores:
-                        retriever = self.vectorstores[0].get("retriever", None)
+                    if self.collections:
+                        retriever = self.collections[0].get("retriever", None)
                     else:
-                        raise ValueError("No vectorstore found in the system.")
+                        raise ValueError("No collection found in the system.")
 
         # Si retriever est défini, obtenir le contexte à partir des documents associés
         if with_retriever:
@@ -525,16 +520,16 @@ class LangcahinRAGPipeline(RAGPipeline):
             raise Exception(f"Create retriever - Unexpected error: {error}") from error
         
 
-    def list_vectorstore(self)-> List[Dict]:
+    def list_collection(self)-> List[Dict]:
         try:
-            print(f"[INFO] List vectorstores...")
-            return self.vectorstores
+            print(f"[INFO] List collections...")
+            return self.collections
         
         except Exception as error:
-            print(f"[ERROR] List vectorstores : {error}")
-            raise Exception(f"List vectorstores - Unexpected error: {error}") from error
+            print(f"[ERROR] List collections : {error}")
+            raise Exception(f"List collections - Unexpected error: {error}") from error
         
-    def save_vectorstore(self, persist_directory: str = None, collection_name: str = None, embedder_id:str=None) -> Dict: 
+    def save_collection(self, persist_directory: str = None, collection_name: str = None, embedder_id:str=None) -> Dict: 
         try : 
             print(f"[INFO] Save store")
             embedder_info = next(
@@ -559,7 +554,7 @@ class LangcahinRAGPipeline(RAGPipeline):
                 "embedder" : embedder['id']
             } 
 
-            self.vectorstores.append(new_store)
+            self.collections.append(new_store)
 
             print(f"[SUCCESS] Save store")
 
@@ -568,69 +563,69 @@ class LangcahinRAGPipeline(RAGPipeline):
             print(f"[ERROR] Save store : {error}")
             raise Exception(f"Save store - Unexpected error: {error}") from error
     
-    def search_vectorstores(self, id:str = None, name:str = None) -> List[Dict]:
+    def search_collections(self, id:str = None, name:str = None) -> List[Dict]:
         try : 
-            print(f"[INFO] Searching vectorstore by id: {id} or name: {name}...")
+            print(f"[INFO] Searching collection by id: {id} or name: {name}...")
 
             normalize = lambda s: "".join(s.lower().split()) if s else None
             normalized_name = normalize(name)
 
             result = [
-                vectorstore for vectorstore in self.vectorstores
-                if (id and vectorstore["id"] == id) or (normalized_name and normalize(vectorstore["name"]) == normalized_name)
+                collection for collection in self.collections
+                if (id and collection["id"] == id) or (normalized_name and normalize(collection["name"]) == normalized_name)
             ]
 
             if result:
-                print(f"[SUCCESS] Found {len(result)} vectorstore(s): {[vectorstore['name'] for vectorstore in result]}")
+                print(f"[SUCCESS] Found {len(result)} collection(s): {[collection['name'] for collection in result]}")
             else:
-                print("[INFO] No vectorstore found.")
+                print("[INFO] No collection found.")
 
             return result 
         except Exception as error:
-            print(f"[ERROR] Search vectorstore : {error}")
-            raise Exception(f"Search vectorstore - Unexpected error: {error}") from error
+            print(f"[ERROR] Search collection : {error}")
+            raise Exception(f"Search collection - Unexpected error: {error}") from error
 
-    def update_vectorstore(self, id: str, updates: Dict) -> List[Dict]:
+    def update_collection(self, id: str, updates: Dict) -> List[Dict]:
         try:
-            print(f"[INFO] Update vectorstore...")
+            print(f"[INFO] Update collection...")
 
-            vectorstore_info = next(({"index": i, "vectorstore": vs} for i, vs in enumerate(self.vectorstores) if vs["id"] == id),None)
+            collection_info = next(({"index": i, "collection": vs} for i, vs in enumerate(self.collections) if vs["id"] == id),None)
 
-            if not vectorstore_info:
-                raise Exception(f"No vectorstore found with ID: {id}")
+            if not collection_info:
+                raise Exception(f"No collection found with ID: {id}")
 
             for key, value in updates.items():
-                if key in vectorstore_info["vectorstore"]:
-                    vectorstore_info["vectorstore"][key] = value
+                if key in collection_info["collection"]:
+                    collection_info["collection"][key] = value
                 else:
-                    print(f"[WARNING] Clé '{key}' non reconnue dans le vectorstore")
+                    print(f"[WARNING] Clé '{key}' non reconnue dans le collection")
 
-            self.vectorstores[vectorstore_info["index"]] = vectorstore_info["vectorstore"]
+            self.collections[collection_info["index"]] = collection_info["collection"]
 
-            print(f"[SUCCESS] vectorstore {id} mis à jour")
-            return self.vectorstores
+            print(f"[SUCCESS] collection {id} mis à jour")
+            return self.collections
 
         except Exception as error:
-            print(f"[ERROR] Update vectorstore : {error}")
-            raise Exception(f"Update vectorstore - Unexpected error: {error}") from error
+            print(f"[ERROR] Update collection : {error}")
+            raise Exception(f"Update collection - Unexpected error: {error}") from error
         
 
-    def remove_vectorstore(self, id:str) -> List[Dict]:
+    def remove_collection(self, id:str) -> List[Dict]:
         try: 
-            print(f"[INFO] Remove vectorstore...")
+            print(f"[INFO] Remove collection...")
 
-            vectorstore_info = next(({"index": i, "vectorstore": vectorstore} for i, vectorstore in enumerate(self.vectorstores) if vectorstore["id"] == id), None)
+            collection_info = next(({"index": i, "collection": collection} for i, collection in enumerate(self.collections) if collection["id"] == id), None)
 
-            if not vectorstore_info:
-                raise Exception(f"No vectorstore found with ID: {id}")
+            if not collection_info:
+                raise Exception(f"No collection found with ID: {id}")
 
-            removed_vectorstore = self.vectorstores.pop(vectorstore_info["index"])
-            print(f"[SUCCESS] vectorstore {removed_vectorstore['id']} ({removed_vectorstore['name']}) removed")
-            return  self.vectorstores
+            removed_collection = self.collections.pop(collection_info["index"])
+            print(f"[SUCCESS] collection {removed_collection['id']} ({removed_collection['name']}) removed")
+            return  self.collections
         
         except Exception as error:
-            print(f"[ERROR] Remove vectorstores : {error}")
-            raise Exception(f"Remove vectorstores - Unexpected error: {error}") from error
+            print(f"[ERROR] Remove collections : {error}")
+            raise Exception(f"Remove collections - Unexpected error: {error}") from error
         
 
     def get_docs_from_file(self, file_path: str, supported_extensions:any) -> List[Document]:
@@ -711,7 +706,7 @@ class LangcahinRAGPipeline(RAGPipeline):
     def add_docs_store(self, store_id: str, dirs: Optional[List[str]] = None, files: Optional[List[str]] = None, chunk_size: Optional[int] = None,
     chunk_overlap: Optional[int] = None) -> Dict:
         try:
-            target_store = next((s for s in self.vectorstores if s.get("id") == store_id), None)
+            target_store = next((s for s in self.collections if s.get("id") == store_id), None)
             if not target_store:
                 raise ValueError(f"Store ID '{store_id}' not found.")
 
@@ -750,8 +745,8 @@ class LangcahinRAGPipeline(RAGPipeline):
 
     def remove_docs_store(self, store_id: str) -> Dict:
         try:
-            # Recherche du vectorstore par ID
-            target_store = next((s for s in self.vectorstores if s.get("id") == store_id), None)
+            # Recherche du collection par ID
+            target_store = next((s for s in self.collections if s.get("id") == store_id), None)
             if not target_store:
                 raise ValueError(f"Store ID '{store_id}' not found.")
 

@@ -5,7 +5,6 @@ from langchain_core.documents import Document
 from langchain_community.vectorstores import Chroma
 
 
-
 class RAGPipeline(ABC):
     @abstractmethod
     def list_llm(self, ollama_host: str = None) -> List[Dict]:
@@ -25,11 +24,11 @@ class RAGPipeline(ABC):
         pass
 
     @abstractmethod
-    def create_chat(self, name, llm_model_name: str = None, description: str = None, options:dict=None, vectorstore_id: Optional[str] = None)-> dict:
+    def create_chat(self, name, llm_model_name: str = None, description: str = None, options:dict=None, collection: Optional[str] = None)-> dict:
         pass
 
     @abstractmethod
-    def add_vectorstore_to_chat(self, chat_id: str, vectorstore_id: str) -> dict:
+    def add_collection_to_chat(self, chat_id: str, collection: str) -> dict:
         pass
 
     @abstractmethod
@@ -54,7 +53,7 @@ class RAGPipeline(ABC):
         pass
 
     @abstractmethod
-    def generate_response(self, question: str, ollama_host: str = None, llm_model_name: str = None, id: str = None, with_retriever: bool = None, vectorstore_id: str = None, prompt_template: str = None) -> any:
+    def generate_response(self, question: str, ollama_host: str = None, llm_model_name: str = None, id: str = None, with_retriever: bool = None, collection: str = None, prompt_template: str = None) -> any:
         pass
 
 
@@ -88,23 +87,23 @@ class RAGPipeline(ABC):
         pass
     
     @abstractmethod
-    def save_vectorstore(self, persist_directory:str=None, collection_name:str=None, embedder_id: str=None) -> Dict: 
+    def save_collection(self, persist_directory:str=None, collection_name:str=None, embedder_id: str=None) -> Dict: 
         pass
 
     @abstractmethod
-    def list_vectorstore(self)-> List[Dict]:
+    def list_collection(self)-> List[Dict]:
         pass
 
     @abstractmethod
-    def search_vectorstores(self, id:str = None, name:str = None) -> List[Dict]:
+    def search_collections(self, id:str = None, name:str = None) -> List[Dict]:
         pass
 
     @abstractmethod
-    def update_vectorstore(self, id: str, updates: Dict) -> List[Dict]:
+    def update_collection(self, id: str, updates: Dict) -> List[Dict]:
         pass
     
     @abstractmethod
-    def remove_vectorstore(self, id:str) -> List[Dict]:
+    def remove_collection(self, id:str) -> List[Dict]:
         pass
 
 

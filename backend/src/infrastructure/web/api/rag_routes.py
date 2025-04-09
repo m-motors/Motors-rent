@@ -91,7 +91,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("llm_model_name", "str", required=False),
             Field("description", "str", required=False),
             Field("options", "dict", required=False),
-            Field("vectorstore_id", "str", required=False),
+            Field("collection", "str", required=False),
         ]
     )
     def create_chat():
@@ -101,9 +101,9 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             llm_model_name = data.get('llm_model_name')
             description = data.get('description')
             options = data.get('options')
-            vectorstore_id = data.get('vectorstore_id')
+            collection = data.get('collection')
         
-            res = rag_service.create_chat(name, llm_model_name=llm_model_name, description=description, options=options, vectorstore_id=vectorstore_id)
+            res = rag_service.create_chat(name, llm_model_name=llm_model_name, description=description, options=options, collection=collection)
 
             return jsonify({"message": "Create chat", "content": res, "error": None}), 201
         except Exception as e:
@@ -208,20 +208,20 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             return jsonify({"message": "Create chat failed", "content": None, "error": "Internal Server Error"}), 500
     
 
-    @rag_routes.route('/rag/chats/vectorstore', methods=['PATCH'])
+    @rag_routes.route('/rag/chats/collection', methods=['PATCH'])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
-            Field("vectorstore_id", "str", required=True),
+            Field("collection", "str", required=True),
         ]
     )
-    def update_vectorstore_chat():
+    def update_collection_chat():
         try:
             data = request.json
             id = data.get('id')
-            vectorstore_id = data.get('vectorstore_id')
+            collection = data.get('collection')
 
-            res = rag_service.add_vectorstore_to_chat(id=id, vectorstore_id=vectorstore_id)
+            res = rag_service.add_collection_to_chat(id=id, collection=collection)
 
             return jsonify({"message": "Create chat", "content": res, "error": None}), 200
         except Exception as e:
@@ -238,7 +238,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("llm_model_name", "str", required=False),
             Field("id", "str", required=False),
             Field("with_retriever", "bool", required=False),
-            Field("vectorstore_id", "str", required=False),
+            Field("collection", "str", required=False),
             Field("prompt_template", "str", required=False)
         ]
     )
@@ -249,10 +249,10 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             llm_model_name = data.get('llm_model_name')
             id = data.get('id')
             with_retriever = data.get('with_retriever')
-            vectorstore_id = data.get('vectorstore_id')
+            collection = data.get('collection')
             prompt_template = data.get('prompt_template')
 
-            res = rag_service.generate_response(question, llm_model_name=llm_model_name, id=id, with_retriever=True, vectorstore_id=vectorstore_id, prompt_template=prompt_template)
+            res = rag_service.generate_response(question, llm_model_name=llm_model_name, id=id, with_retriever=True, collection=collection, prompt_template=prompt_template)
 
             return jsonify({"message": "LLM install", "content": res, "error": None}), 200
         except Exception as e:
@@ -550,10 +550,10 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
     
 
 
-    @rag_routes.route('/rag/vectorestores', methods=['GET'])
-    def list_vectorestore():
+    @rag_routes.route('/rag/collections', methods=['GET'])
+    def list_collection():
         try:
-            res = rag_service.list_vectorstore()
+            res = rag_service.list_collection()
 
             if res.count : 
                 result = [
@@ -569,13 +569,13 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
                     for store in res
                 ]
 
-            return jsonify({"message": "Search vectorestore", "content": result or res, "error": None}), 200
+            return jsonify({"message": "Search collection", "content": result or res, "error": None}), 200
         except Exception as e:
-            logger.error(f"Search vectorestore error: {str(e)}")
-            return jsonify({"message": "Search vectorestore failed", "content": None, "error": "Internal Server Error"}), 500
+            logger.error(f"Search collection error: {str(e)}")
+            return jsonify({"message": "Search collection failed", "content": None, "error": "Internal Server Error"}), 500
         
 
-    @rag_routes.route('/rag/vectorestores', methods=['POST'])
+    @rag_routes.route('/rag/collections', methods=['POST'])
     @Validator(
         json_fields=[
             Field("persist_directory", "str", required=False),
@@ -583,14 +583,14 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("embedder_id", "str", required=False),
         ]
     )
-    def create_vectorestore():
+    def create_collection():
         try:
             data = request.json
             persist_directory = data.get('persist_directory')
             collection_name = data.get('collection_name')
             embedder_id = data.get('embedder_id')
 
-            res = rag_service.save_vectorstore(persist_directory=persist_directory, collection_name=collection_name,embedder_id=embedder_id)
+            res = rag_service.save_collection(persist_directory=persist_directory, collection_name=collection_name,embedder_id=embedder_id)
 
             result = {
 
@@ -603,12 +603,12 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
                 "embedder" : res['embedder']
             }
 
-            return jsonify({"message": "Create vectorestore", "content": result or res, "error": None}), 200
+            return jsonify({"message": "Create collection", "content": result or res, "error": None}), 200
         except Exception as e:
-            logger.error(f"Create vectorestore error: {str(e)}")
-            return jsonify({"message": "Create vectorestore failed", "content": None, "error": "Internal Server Error"}), 500
+            logger.error(f"Create collection error: {str(e)}")
+            return jsonify({"message": "Create collection failed", "content": None, "error": "Internal Server Error"}), 500
         
-    @rag_routes.route('/rag/vectorestores', methods=['PATCH'])
+    @rag_routes.route('/rag/collections', methods=['PATCH'])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
@@ -618,7 +618,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("embedder", "str", required=False)
         ]
     )
-    def update_vectorstore():
+    def update_collection():
         try:
             data = request.json
             id = data.get('id')
@@ -635,7 +635,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
                 "embedder" : embedder
             }
 
-            res = rag_service.update_vectorstore(id=id, update=update)
+            res = rag_service.update_collection(id=id, update=update)
 
             if res.count :
                 result = [
@@ -651,24 +651,24 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
                     for store in res
                 ]
 
-            return jsonify({"message": "Remove vectorestore", "content": result or res, "error": None}), 200
+            return jsonify({"message": "Remove collection", "content": result or res, "error": None}), 200
         except Exception as e:
-            logger.error(f"Remove vectorestore error: {str(e)}")
-            return jsonify({"message": "Remove vectorestore failed", "content": None, "error": "Internal Server Error"}), 500
+            logger.error(f"Remove collection error: {str(e)}")
+            return jsonify({"message": "Remove collection failed", "content": None, "error": "Internal Server Error"}), 500
         
 
-    @rag_routes.route('/rag/vectorestores', methods=['DELETE'])
+    @rag_routes.route('/rag/collections', methods=['DELETE'])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
         ]
     )
-    def remove_vectorestore():
+    def remove_collection():
         try:
             data = request.json
             id = data.get('id')
 
-            res = rag_service.remove_vectorstore(id)
+            res = rag_service.remove_collection(id)
 
             if res.count : 
                 result = [
@@ -684,26 +684,26 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
                     for store in res
                 ]
 
-            return jsonify({"message": "Remove vectorestore", "content": result or res, "error": None}), 200
+            return jsonify({"message": "Remove collection", "content": result or res, "error": None}), 200
         except Exception as e:
-            logger.error(f"Remove vectorestore error: {str(e)}")
-            return jsonify({"message": "Remove vectorestore failed", "content": None, "error": "Internal Server Error"}), 500
+            logger.error(f"Remove collection error: {str(e)}")
+            return jsonify({"message": "Remove collection failed", "content": None, "error": "Internal Server Error"}), 500
     
 
-    @rag_routes.route('/rag/vectorestores/search', methods=['POST'])
+    @rag_routes.route('/rag/collections/search', methods=['POST'])
     @Validator(
         json_fields=[
             Field("id", "str", required=False),
             Field("name", "str", required=False),
         ]
     )
-    def search_vectorestore():
+    def search_collection():
         try:
             data = request.json
             id = data.get('id')
             name = data.get('name')
 
-            res = rag_service.search_vectorstores(id=id, name=name)
+            res = rag_service.search_collections(id=id, name=name)
 
             if res.count : 
                 result = [
@@ -719,10 +719,10 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
                     for store in res
                 ]
 
-            return jsonify({"message": "Search vectorestore", "content": result or res, "error": None}), 200
+            return jsonify({"message": "Search collection", "content": result or res, "error": None}), 200
         except Exception as e:
-            logger.error(f"Search vectorestore error: {str(e)}")
-            return jsonify({"message": "Search vectorestore failed", "content": None, "error": "Internal Server Error"}), 500
+            logger.error(f"Search collection error: {str(e)}")
+            return jsonify({"message": "Search collection failed", "content": None, "error": "Internal Server Error"}), 500
 
             
 
@@ -759,10 +759,10 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             }
                 
 
-            return jsonify({"message": "Search vectorestore", "content": result or res, "error": None}), 200
+            return jsonify({"message": "Search collection", "content": result or res, "error": None}), 200
         except Exception as e:
-            logger.error(f"Search vectorestore error: {str(e)}")
-            return jsonify({"message": "Search vectorestore failed", "content": None, "error": "Internal Server Error"}), 500
+            logger.error(f"Search collection error: {str(e)}")
+            return jsonify({"message": "Search collection failed", "content": None, "error": "Internal Server Error"}), 500
 
     
 
