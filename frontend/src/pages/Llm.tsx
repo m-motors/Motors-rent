@@ -1,8 +1,9 @@
 // src/AdminPage.js
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-import { FC, ReactNode, useEffect, useState } from "react";
+import { FC, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
+import './llm.css'
 
 type ModelType =  {
 	name: string,
@@ -193,8 +194,8 @@ const Llm = () => {
 			onRemove={(event, embedder) => removeEmbedder(event, embedder)}
 			renderDetails={(embedder) => (
 				<>
-					<h4>{embedder.name}</h4>
-					<RecursiveRenderer data={embedder} />
+					<h5 className="text-xl font-bold dark:text-white mb-2">{embedder.name.charAt(0).toUpperCase() + embedder.name.slice(1)}</h5>
+					<RecursiveRenderer data={embedder} keyOrder={["name", "model", "size"]}/>
 				</>
 			)}
 		/>
@@ -555,13 +556,13 @@ const Llm = () => {
 
 	const sections = [
 		{ name: "Models", node: <Models onSubmit={handleSubmitAddModel} renderList={() => displayModels(models)} /> },
-		{ name: "Embedders", node: <strong>Embedders</strong> },
+		{ name: "Embedders", node: <Embedders onSubmit={handleSubmitAddEmbedder} renderList={() => displayEmbedders(embedders)} moreAction={[handleSearchEmbedder]}/>},
 		{ name: "Collection", node: <strong>Collection</strong> },
 		{ name: "Chats", node: <strong>Chats</strong>},
 	];
 
   return (
-    <div >
+    <div className="scrollbar-custom">
         <Header />
 
 				{isModalOpen && (
@@ -1038,10 +1039,10 @@ const AsideTabs: FC<AsideTabsProps> = ({ sections }) => {
 					({ name, node }) =>
 						activeTab === name && (
               <section key={name} className="flex flex-col flex-grow overflow-hidden">
-								<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">
+								<h3 className="text-3xl font-bold dark:text-white mb-1 mt-4">
 									{name}
 								</h3>
-								<div className="overflow-y-auto">
+								<div className="flex-grow flex flex-col overflow-hidden mt-4">
 									{node}
 								</div>
 							</section>
@@ -1053,36 +1054,162 @@ const AsideTabs: FC<AsideTabsProps> = ({ sections }) => {
 };
 
 
-interface ModelsProps {
+interface SectionProps {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   renderList: () => React.ReactNode;
+  moreAction ?: ((event: React.FormEvent<HTMLFormElement>) => void)[];
 }
 
-const Models: FC<ModelsProps> = ({ onSubmit, renderList }) => {
-	return (
-		<>
-			<form onSubmit={(event)=> onSubmit(event)} className="max-w-md mx-2 mt-4 mb-8">
-				<h5 className="text-xl font-bold dark:text-white mb-4">Ajouter un model</h5>
-				<div>
-					<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
-					<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string" aria-describedby="helper-text-explanation"/>
-					<div id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-						Correspond au model de langage utiliser pour taiter les échanges
-						<div>
-							Nom du model trouvé sur : <a href="https://ollama.com/search">Ollama</a>
-						</div>
-						<div>
-							Conseiller : <span>mistral:7b</span> ou <span>llama2:7b</span>
+const Models: FC<SectionProps> = ({ onSubmit, renderList }) => {
+  const [scroll, setScroll] = useState({ scrollY: 0, close: false });
+
+  const handleScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      const scrollValue = (event.target as HTMLDivElement).scrollTop;
+
+      setScroll((prev) => {
+        if (Math.abs(prev.scrollY - scrollValue) > 5) {
+          return {
+            scrollY: scrollValue,
+            close: scrollValue > prev.scrollY, // vers le bas = repli
+          };
+        }
+        return { ...prev, scrollY: scrollValue };
+      });
+    },
+    []
+  );
+
+  return (
+    <div className="overflow-y-auto flex flex-col gap-8" onScroll={handleScroll}>
+			<div className={`bg-gray-900 sticky px-2 top-0 shadow-md transition-all duration-500 ease-in-out transform pb-4 ${scroll.close ? '-translate-y-full' : 'translate-y-0'}`}>
+				<form
+					onSubmit={onSubmit}
+					className="flex flex-col gap-4">
+					<h5 className="text-xl font-bold dark:text-white">Ajouter un model</h5>
+					<div>
+						<label htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+							Nom *
+						</label>
+						<input
+							id="modelName"
+							type="text"
+							name="modelName"
+							placeholder="Nom du model"
+							className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+							title="string"
+							aria-describedby="helper-text-explanation"
+						/>
+						<div id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+							Correspond au model de langage utilisé pour traiter les échanges
+							<p>
+								Nom du model trouvé sur : <a href="https://ollama.com/search" className="text-blue-600 underline">Ollama</a>
+							</p>
+							<p>
+								Conseillé : <span>mistral:7b</span> ou <span>llama2:7b</span>
+							</p>
 						</div>
 					</div>
-				</div>
-				<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 my-4 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
-			</form>
-			
-			{
-				renderList()
+					<button
+						className="w-auto self-end text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mx-4 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+						type="submit"
+					>
+						Ajouter le model
+					</button>
+				</form>
+			</div>
+      <div>
+        <h5 className="text-xl font-bold dark:text-white mb-4">Liste des models</h5>
+        {renderList()}
+      </div>
+    </div>
+  );
+};
+
+
+const Embedders: FC<SectionProps> = ({ onSubmit, renderList, moreAction}) => {
+  const [scroll, setScroll] = useState({ scrollY: 0, close: false });
+
+  const handleScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      const scrollValue = (event.target as HTMLDivElement).scrollTop;
+
+      setScroll((prev) => {
+        if (Math.abs(prev.scrollY - scrollValue) > 10) {
+          return {
+            scrollY: scrollValue,
+            close: scrollValue > prev.scrollY,
+          };
+        }
+        return { ...prev, scrollY: scrollValue };
+      });
+    },
+    []
+  );
+
+  return (
+    <div className="overflow-y-auto flex flex-col gap-8" onScroll={handleScroll}>
+			<div className={`flex flex-col gap-4 bg-gray-900 sticky px-2 top-0 shadow-md transition-all duration-500 ease-in-out transform pb-4 ${scroll.close ? '-translate-y-full' : 'translate-y-0'}`}>
+				<form onSubmit={onSubmit} className="flex flex-col gap-4">
+					<h5 className="text-xl font-bold dark:text-white">Ajouter un embedders</h5>
+					<div>
+						<label htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model</label>
+						<input 
+							id="modelName" 
+							type="text" 
+							name="modelName" 
+							placeholder="Nom du model" 
+							className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+							title="string"							
+							aria-describedby="helper-text-explanation"/>
+						
+						<div id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+							Conseiller : <span>all-MiniLM-L6-v2</span>
+						</div>
+					</div>
+					<div>
+						<label  htmlFor="isEncodeKwargs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Encode kwargs</label>
+						<input id="isEncodeKwargs" type="text" name="isEncodeKwargs" placeholder="Encode kwargs" title='boolean' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+					</div>
+					<button
+						className="w-auto self-end text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-4"
+						type="submit">
+						Ajouter le embedder
+					</button>
+				</form>
+
+				{
+					moreAction && (
+					<form onSubmit={event => moreAction[0](event)} className="flex flex-col gap-4">
+						<h5 className="text-xl font-bold dark:text-white">Rechercher un embedder</h5>
+						<div className="flex flex-row gap-4">
+							<div className="w-full">
+								<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
+								<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+
+							<div className="w-full">
+								<label  htmlFor="embedderName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de l'embedder</label>
+								<input id="embedderName" type="text" name="embedderName" placeholder="Nom de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+						</div>
+						
+						<button
+						className="w-auto self-end text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-4"
+						type="submit">Rechercher l'embedder</button>
+				</form>
+				)
 			}
-		</>
+
+			</div>
+			
+			<div>
+				<h5 className="text-xl font-bold dark:text-white mb-4">Liste des embedders</h5>
+				{
+					renderList()
+				}
+			</div>
+		</div>
 	)
 }
 
