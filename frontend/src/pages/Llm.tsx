@@ -296,8 +296,8 @@ const Llm = () => {
 			onRemove={(event, collection) => removeCollection(event, collection)}
 			renderDetails={(collection) => (
 				<>
-					<h4>{collection.name}</h4>
-					<RecursiveRenderer data={collection} />
+					<h5 className="text-xl font-bold dark:text-white mb-2">{collection.name.charAt(0).toUpperCase() + collection.name.slice(1)}</h5>
+					<RecursiveRenderer data={collection} keyOrder={["name", "id", "persist_directory", "vector_space", "docs", "embedder"]}/>
 				</>
 			)}
 		/>
@@ -555,10 +555,22 @@ const Llm = () => {
 	};
 
 	const sections = [
-		{ name: "Models", node: <Models onSubmit={handleSubmitAddModel} renderList={() => displayModels(models)} /> },
-		{ name: "Embedders", node: <Embedders onSubmit={handleSubmitAddEmbedder} renderList={() => displayEmbedders(embedders)} moreAction={[handleSearchEmbedder]}/>},
-		{ name: "Collection", node: <strong>Collection</strong> },
-		{ name: "Chats", node: <strong>Chats</strong>},
+		{ 
+			name: "Models", 
+			node: <Models onSubmit={handleSubmitAddModel} renderList={() => displayModels(models)} /> 
+		},
+		{ 
+			name: "Embedders", 
+			node: <Embedders onSubmit={handleSubmitAddEmbedder} renderList={() => displayEmbedders(embedders)} moreActions={[handleSearchEmbedder]}/>
+		},
+		{ 
+			name: "Collections", 
+			node: <Collections collections={collections} onSubmit={handleSubmitAddCollection} renderList={()=>displayCollections(collections)} moreActions={[handleSearchCollection, handleSubmitAddRetriver]}/> 
+		},
+		{ 
+			name: "Chats", 
+			node: <strong>Chats</strong>
+		},
 	];
 
   return (
@@ -602,7 +614,6 @@ const Llm = () => {
 							</select>
 						</div>
 							
-						
 						{currentChatId && (
 							<div className="flex-1 overflow-y-auto px-2">
 								<ChatHistory
@@ -623,173 +634,6 @@ const Llm = () => {
 					</main>
 
 					<AsideTabs sections={sections} />
-
-
-					{/* <aside>
-						<section>
-							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Models</h3>
-
-
-							<form onSubmit={event => handleSubmitAddModel(event)} className="max-w-md mx-2 mt-4 mb-8">
-							  <h5 className="text-xl font-bold dark:text-white mb-4">Ajouter un model</h5>
-								<div>
-									<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
-									<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string" aria-describedby="helper-text-explanation"/>
-									<p id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-										Correspond au model de langage utiliser pour taiter les échanges
-										<div>
-											Nom du model trouvé sur : <a href="https://ollama.com/search">Ollama</a>
-										</div>
-										<div>
-											Conseiller : <span>mistral:7b</span> ou <span>llama2:7b</span>
-										</div>
-									</p>
-								</div>
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 my-4 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
-							</form>
-							{
-								displayModels(models)
-							}
-						</section>
-
-						<section>
-							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Embedders</h3>
-							<form onSubmit={event => handleSubmitAddEmbedder(event)} className="max-w-sm mx-auto">
-								<div>
-									<label  htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model</label>
-									<input id="modelName" type="text" name="modelName" placeholder="Nom du model" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-									<p>
-										Conseiller : <span>all-MiniLM-L6-v2</span>
-									</p>
-								</div>
-								<div>
-									<label  htmlFor="isEncodeKwargs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Encode kwargs</label>
-									<input id="isEncodeKwargs" type="text" name="isEncodeKwargs" placeholder="Encode kwargs" title='boolean' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-								</div>
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le embedder</button>
-							</form>
-
-							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
-
-							<form onSubmit={event => handleSearchEmbedder(event)} className="max-w-sm mx-auto">
-								<div>
-									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
-									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-								</div>
-
-								<div>
-									<label  htmlFor="embedderName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de l'embedder</label>
-									<input id="embedderName" type="text" name="embedderName" placeholder="Nom de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-								</div>
-
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher l'embedder</button>
-							</form>
-
-							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
-						
-							{
-								displayEmbedders(embedders)
-							}
-						</section>
-
-						<section>
-							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Collection</h3>
-							
-							<form onSubmit={event => handleSubmitAddCollection(event)} className="max-w-sm mx-auto">
-								<div>
-									<label  htmlFor="persistDirectory" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Repertoire persisté</label>
-									<input id="persistDirectory" type="text" name="persistDirectory" placeholder="Repertoire persisté" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-
-									<label  htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de la collection</label>
-									<input id="collectionName" type="text" name="collectionName" placeholder="Nom de la collection" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-
-									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embdder</label>
-									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embdder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-
-								</div>
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Creer le collection</button>
-							</form>
-
-							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
-
-							<form onSubmit={event => handleSearchCollection(event)} className="max-w-sm mx-auto">
-								<div>
-									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
-									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-								</div>
-
-								<div>
-									<label  htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du collection</label>
-									<input id="collectionName" type="text" name="collectionName" placeholder="Nom du collection" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-								</div>
-
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Rechercher le collection</button>
-							</form>
-
-							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
-
-							<form onSubmit={event => handleSubmitAddRetriver(event)} className="max-w-sm mx-auto">
-								<div>
-									<label  htmlFor="storeId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Id *</label>
-
-									<select
-										id="storeId"
-										name="storeId"
-										className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-										title="Sélectionnez un Collection"
-										required
-									>
-										<option value="">Sélectionnez un collection</option>
-										{collections.map((store) => (
-											<option key={store.id} value={store.id}>
-												{store.name}
-											</option>
-										))}
-									</select>
-								</div>
-								<div>
-									<label  htmlFor="dirs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du repertoire</label>
-									<input id="dirs" type="text" name="dirs" placeholder="Nom du repertoire" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
-								</div>
-
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le model</button>
-							</form>
-
-							<hr className="h-px my-8 bg-gray-200 border-0 dark:bg-gray-700"/>
-						
-							{
-								displayCollections(collections)
-							}
-						</section>
-
-						<section>
-							<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Chats</h3>
-
-							<form onSubmit={event => handleSubmitAddChat(event)} className="max-w-sm mx-auto">
-								<div>
-									<label  htmlFor="chatName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
-									<input id="chatName" type="text" name="chatName" placeholder="Chat par defaut" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-								</div>
-								<div>
-									<label  htmlFor="llmModelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model LLM</label>
-									<input id="llmModelName" type="text" name="llmModelName" placeholder="mistral:7b" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-								</div>
-								<div>
-									<label  htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-									<textarea id="description" name="description" placeholder="Description" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-								</div>
-								<div>
-									<label  htmlFor="options" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Options</label>
-									<input disabled id="options" type="text" name="options" placeholder="..." className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-								</div>
-								<div>
-									<label  htmlFor="collectionId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Collection</label>
-									<input id="collectionId" type="text" name="collectionId" placeholder="11111111-1111-1111-1111-111111111111" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
-								</div>
-								<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le chat</button>
-							</form>
-						</section>
-					</aside> */}
         </div>
         <Footer />
     </div>
@@ -1057,21 +901,45 @@ const AsideTabs: FC<AsideTabsProps> = ({ sections }) => {
 interface SectionProps {
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
   renderList: () => React.ReactNode;
-  moreAction ?: ((event: React.FormEvent<HTMLFormElement>) => void)[];
+  moreActions ?: ((event: React.FormEvent<HTMLFormElement>) => void)[];
 }
 
 const Models: FC<SectionProps> = ({ onSubmit, renderList }) => {
   const [scroll, setScroll] = useState({ scrollY: 0, close: false });
+  const [canCollapse, setCanCollapse] = useState(true);
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const listElement = listRef.current;
+
+    if (!scrollContainer || !listElement) return;
+
+    const updateCollapseState = () => {
+      const scrollable = scrollContainer.clientHeight < listElement.clientHeight;
+      setCanCollapse(scrollable);
+    };
+
+    const resizeObserver = new ResizeObserver(updateCollapseState);
+    resizeObserver.observe(scrollContainer);
+    resizeObserver.observe(listElement);
+
+    updateCollapseState();
+
+    return () => resizeObserver.disconnect();
+  }, []);
 
   const handleScroll = useCallback(
     (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
       const scrollValue = (event.target as HTMLDivElement).scrollTop;
 
+
       setScroll((prev) => {
-        if (Math.abs(prev.scrollY - scrollValue) > 5) {
+        if (Math.abs(prev.scrollY - scrollValue) > 10) {
           return {
             scrollY: scrollValue,
-            close: scrollValue > prev.scrollY, // vers le bas = repli
+            close: scrollValue > prev.scrollY,
           };
         }
         return { ...prev, scrollY: scrollValue };
@@ -1081,8 +949,11 @@ const Models: FC<SectionProps> = ({ onSubmit, renderList }) => {
   );
 
   return (
-    <div className="overflow-y-auto flex flex-col gap-8" onScroll={handleScroll}>
-			<div className={`bg-gray-900 sticky px-2 top-0 shadow-md transition-all duration-500 ease-in-out transform pb-4 ${scroll.close ? '-translate-y-full' : 'translate-y-0'}`}>
+    <div className="overflow-y-auto flex flex-col gap-8" onScroll={canCollapse ? handleScroll: undefined}  ref={scrollContainerRef}>
+			<div className={`flex flex-col gap-4 bg-gray-900 px-2 shadow-md transition-all duration-500 ease-in-out transform pb-4
+          ${canCollapse ? 'sticky top-0' : 'relative'}
+          ${canCollapse && scroll.close ? '-translate-y-full' : 'translate-y-0'}
+        `}>
 				<form
 					onSubmit={onSubmit}
 					className="flex flex-col gap-4">
@@ -1118,7 +989,7 @@ const Models: FC<SectionProps> = ({ onSubmit, renderList }) => {
 					</button>
 				</form>
 			</div>
-      <div>
+			<div ref={listRef}>
         <h5 className="text-xl font-bold dark:text-white mb-4">Liste des models</h5>
         {renderList()}
       </div>
@@ -1127,12 +998,36 @@ const Models: FC<SectionProps> = ({ onSubmit, renderList }) => {
 };
 
 
-const Embedders: FC<SectionProps> = ({ onSubmit, renderList, moreAction}) => {
+const Embedders: FC<SectionProps> = ({ onSubmit, renderList, moreActions}) => {
   const [scroll, setScroll] = useState({ scrollY: 0, close: false });
+  const [canCollapse, setCanCollapse] = useState(true);
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const listElement = listRef.current;
+
+    if (!scrollContainer || !listElement) return;
+
+    const updateCollapseState = () => {
+      const scrollable = scrollContainer.clientHeight < listElement.clientHeight;
+      setCanCollapse(scrollable);
+    };
+
+    const resizeObserver = new ResizeObserver(updateCollapseState);
+    resizeObserver.observe(scrollContainer);
+    resizeObserver.observe(listElement);
+
+    updateCollapseState();
+
+    return () => resizeObserver.disconnect();
+  }, []);
 
   const handleScroll = useCallback(
     (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
       const scrollValue = (event.target as HTMLDivElement).scrollTop;
+
 
       setScroll((prev) => {
         if (Math.abs(prev.scrollY - scrollValue) > 10) {
@@ -1148,8 +1043,11 @@ const Embedders: FC<SectionProps> = ({ onSubmit, renderList, moreAction}) => {
   );
 
   return (
-    <div className="overflow-y-auto flex flex-col gap-8" onScroll={handleScroll}>
-			<div className={`flex flex-col gap-4 bg-gray-900 sticky px-2 top-0 shadow-md transition-all duration-500 ease-in-out transform pb-4 ${scroll.close ? '-translate-y-full' : 'translate-y-0'}`}>
+    <div className="overflow-y-auto flex flex-col gap-8" onScroll={canCollapse ? handleScroll: undefined}  ref={scrollContainerRef}>
+			<div className={`flex flex-col gap-4 bg-gray-900 px-2 shadow-md transition-all duration-500 ease-in-out transform pb-4
+          ${canCollapse ? 'sticky top-0' : 'relative'}
+          ${canCollapse && scroll.close ? '-translate-y-full' : 'translate-y-0'}
+        `}>
 				<form onSubmit={onSubmit} className="flex flex-col gap-4">
 					<h5 className="text-xl font-bold dark:text-white">Ajouter un embedders</h5>
 					<div>
@@ -1179,8 +1077,8 @@ const Embedders: FC<SectionProps> = ({ onSubmit, renderList, moreAction}) => {
 				</form>
 
 				{
-					moreAction && (
-					<form onSubmit={event => moreAction[0](event)} className="flex flex-col gap-4">
+					moreActions && (
+					<form onSubmit={event => moreActions[0](event)} className="flex flex-col gap-4">
 						<h5 className="text-xl font-bold dark:text-white">Rechercher un embedder</h5>
 						<div className="flex flex-row gap-4">
 							<div className="w-full">
@@ -1203,7 +1101,7 @@ const Embedders: FC<SectionProps> = ({ onSubmit, renderList, moreAction}) => {
 
 			</div>
 			
-			<div>
+			<div ref={listRef}>
 				<h5 className="text-xl font-bold dark:text-white mb-4">Liste des embedders</h5>
 				{
 					renderList()
@@ -1213,6 +1111,305 @@ const Embedders: FC<SectionProps> = ({ onSubmit, renderList, moreAction}) => {
 	)
 }
 
+interface CollectionsProps extends SectionProps {
+  collections: CollectionType[];
+}
+
+const Collections: FC<CollectionsProps> = ({ onSubmit, renderList, moreActions, collections}) => {
+  const [scroll, setScroll] = useState({ scrollY: 0, close: false });
+  const [canCollapse, setCanCollapse] = useState(true);
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const listElement = listRef.current;
+
+    if (!scrollContainer || !listElement) return;
+
+    const updateCollapseState = () => {
+      const scrollable = scrollContainer.clientHeight < listElement.clientHeight;
+      setCanCollapse(scrollable);
+    };
+
+    const resizeObserver = new ResizeObserver(updateCollapseState);
+    resizeObserver.observe(scrollContainer);
+    resizeObserver.observe(listElement);
+
+    updateCollapseState();
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const handleScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      const scrollValue = (event.target as HTMLDivElement).scrollTop;
+
+
+      setScroll((prev) => {
+        if (Math.abs(prev.scrollY - scrollValue) > 10) {
+          return {
+            scrollY: scrollValue,
+            close: scrollValue > prev.scrollY,
+          };
+        }
+        return { ...prev, scrollY: scrollValue };
+      });
+    },
+    []
+  );
+
+  return (
+    <div className="overflow-y-auto flex flex-col gap-8" onScroll={canCollapse ? handleScroll: undefined}  ref={scrollContainerRef}>
+			<div className={`flex flex-col gap-4 bg-gray-900 px-2 shadow-md transition-all duration-500 ease-in-out transform pb-4
+          ${canCollapse ? 'sticky top-0' : 'relative'}
+          ${canCollapse && scroll.close ? '-translate-y-full' : 'translate-y-0'}
+        `}>
+
+				<form onSubmit={onSubmit} className="flex flex-col gap-4">
+					<h5 className="text-xl font-bold dark:text-white">Ajouter une collection</h5>
+					<div>
+						<label htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de la collection</label>
+						<input 
+							id="collectionName" 
+							type="text" 
+							name="collectionName" 
+							placeholder="Nom de la collection"
+							className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+							title="string"							
+							aria-describedby="helper-text-explanation"/>
+						<div id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+						</div>
+					</div>
+					<div>
+						<label htmlFor="persistDirectory" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Repertoire persisté</label>
+						<input 
+							id="persistDirectory" 
+							type="text" 
+							name="persistDirectory" 
+							placeholder="Repertoire persisté"
+							className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+							title="string"							
+							aria-describedby="helper-text-explanation"/>
+						<div id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+						</div>
+					</div>
+					<button
+						className="w-auto self-end text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-4"
+						type="submit">
+						Creer le collection
+					</button>
+				</form>
+
+				{
+					moreActions && (
+					<>
+						<form onSubmit={event => moreActions[0](event)} className="flex flex-col gap-4">
+							<h5 className="text-xl font-bold dark:text-white">Rechercher une collection</h5>
+							<div className="flex flex-row gap-4">
+								<div className="w-full">
+									<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
+									<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+
+								<div className="w-full">
+									<label  htmlFor="collectionName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de la collection</label>
+									<input id="collectionName" type="text" name="collectionName" placeholder="Nom de la collection" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+								</div>
+							</div>
+							
+							<button
+							className="w-auto self-end text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-4"
+							type="submit">Rechercher la collection</button>
+					</form>
+
+					<form onSubmit={event => moreActions[1](event)} className="flex flex-col gap-4">
+						<h5 className="text-xl font-bold dark:text-white">Ajouter des éléments à la collection</h5>
+						<div className="flex flex-row gap-4">
+							<div className="w-full">
+								<label  htmlFor="storeId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Store Id *</label>
+								<select
+								id="storeId"
+								name="storeId"
+								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+								title="Sélectionnez un Collection"
+								required
+							>
+								<option value="">Sélectionnez une collection</option>
+								{collections.map((collection: CollectionType) => (
+									<option key={collection.id} value={collection.id}>
+										{collection.name}
+									</option>
+								))}
+							</select>
+							</div>
+
+							<div className="w-full">
+								<label  htmlFor="dirs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du repertoire</label>
+								<input id="dirs" type="text" name="dirs" placeholder="Nom du repertoire" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+						</div>
+						
+						<button
+						className="w-auto self-end text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-4"
+						type="submit">Ajouter à la collection</button>
+					</form>
+				</>
+				)
+			}
+			</div>
+			
+			<div ref={listRef}>
+				<h5 className="text-xl font-bold dark:text-white mb-4">Liste des collections</h5>
+				{
+					renderList()
+				}
+			</div>
+		</div>
+	)
+}
+
+{/* <section>
+<h3 className="text-3xl font-bold dark:text-white mb-4 mt-8">Chats</h3>
+
+<form onSubmit={event => handleSubmitAddChat(event)} className="max-w-sm mx-auto">
+	<div>
+		<label  htmlFor="chatName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom *</label>
+		<input id="chatName" type="text" name="chatName" placeholder="Chat par defaut" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+	</div>
+	<div>
+		<label  htmlFor="llmModelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model LLM</label>
+		<input id="llmModelName" type="text" name="llmModelName" placeholder="mistral:7b" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+	</div>
+	<div>
+		<label  htmlFor="description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+		<textarea id="description" name="description" placeholder="Description" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+	</div>
+	<div>
+		<label  htmlFor="options" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Options</label>
+		<input disabled id="options" type="text" name="options" placeholder="..." className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+	</div>
+	<div>
+		<label  htmlFor="collectionId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Collection</label>
+		<input id="collectionId" type="text" name="collectionId" placeholder="11111111-1111-1111-1111-111111111111" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+	</div>
+	<button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" type="submit">Ajouter le chat</button>
+</form>
+</section> */}
+
+
+const Chats: FC<SectionProps> = ({ onSubmit, renderList, moreActions}) => {
+  const [scroll, setScroll] = useState({ scrollY: 0, close: false });
+  const [canCollapse, setCanCollapse] = useState(true);
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    const listElement = listRef.current;
+
+    if (!scrollContainer || !listElement) return;
+
+    const updateCollapseState = () => {
+      const scrollable = scrollContainer.clientHeight < listElement.clientHeight;
+      setCanCollapse(scrollable);
+    };
+
+    const resizeObserver = new ResizeObserver(updateCollapseState);
+    resizeObserver.observe(scrollContainer);
+    resizeObserver.observe(listElement);
+
+    updateCollapseState();
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const handleScroll = useCallback(
+    (event: React.UIEvent<HTMLDivElement, UIEvent>) => {
+      const scrollValue = (event.target as HTMLDivElement).scrollTop;
+
+
+      setScroll((prev) => {
+        if (Math.abs(prev.scrollY - scrollValue) > 10) {
+          return {
+            scrollY: scrollValue,
+            close: scrollValue > prev.scrollY,
+          };
+        }
+        return { ...prev, scrollY: scrollValue };
+      });
+    },
+    []
+  );
+
+  return (
+    <div className="overflow-y-auto flex flex-col gap-8" onScroll={canCollapse ? handleScroll: undefined}  ref={scrollContainerRef}>
+			<div className={`flex flex-col gap-4 bg-gray-900 px-2 shadow-md transition-all duration-500 ease-in-out transform pb-4
+          ${canCollapse ? 'sticky top-0' : 'relative'}
+          ${canCollapse && scroll.close ? '-translate-y-full' : 'translate-y-0'}
+        `}>
+				<form onSubmit={onSubmit} className="flex flex-col gap-4">
+					<h5 className="text-xl font-bold dark:text-white">Ajouter un embedders</h5>
+					<div>
+						<label htmlFor="modelName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom du model</label>
+						<input 
+							id="modelName" 
+							type="text" 
+							name="modelName" 
+							placeholder="Nom du model" 
+							className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" 
+							title="string"							
+							aria-describedby="helper-text-explanation"/>
+						
+						<div id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+							Conseiller : <span>all-MiniLM-L6-v2</span>
+						</div>
+					</div>
+					<div>
+						<label  htmlFor="isEncodeKwargs" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Encode kwargs</label>
+						<input id="isEncodeKwargs" type="text" name="isEncodeKwargs" placeholder="Encode kwargs" title='boolean' className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+					</div>
+					<button
+						className="w-auto self-end text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-4"
+						type="submit">
+						Ajouter le embedder
+					</button>
+				</form>
+
+				{
+					moreActions && (
+					<form onSubmit={event => moreActions[0](event)} className="flex flex-col gap-4">
+						<h5 className="text-xl font-bold dark:text-white">Rechercher un embedder</h5>
+						<div className="flex flex-row gap-4">
+							<div className="w-full">
+								<label  htmlFor="embedderId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Id de l'embedder</label>
+								<input id="embedderId" type="text" name="embedderId" placeholder="Id de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+
+							<div className="w-full">
+								<label  htmlFor="embedderName" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nom de l'embedder</label>
+								<input id="embedderName" type="text" name="embedderName" placeholder="Nom de l'embedder" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" title="string"/>
+							</div>
+						</div>
+						
+						<button
+						className="w-auto self-end text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800 mx-4"
+						type="submit">Rechercher l'embedder</button>
+				</form>
+				)
+			}
+
+			</div>
+			
+			<div ref={listRef}>
+				<h5 className="text-xl font-bold dark:text-white mb-4">Liste des embedders</h5>
+				{
+					renderList()
+				}
+			</div>
+		</div>
+	)
+}
 
 
 
