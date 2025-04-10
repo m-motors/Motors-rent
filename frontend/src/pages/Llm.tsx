@@ -287,7 +287,7 @@ const Llm = () => {
 	};
 
 	const displayCollections = (collections: CollectionType[]) => {
-		const sortedCollections: CollectionType[] =  collections.sort((a, b) => a.name.localeCompare(b.name));
+		const sortedCollections = [...collections].sort((a, b) => a.name.localeCompare(b.name));
 
 		return (
 		<CardList<CollectionType>
