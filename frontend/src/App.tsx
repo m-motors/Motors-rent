@@ -3,20 +3,16 @@ import { useEffect } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Home from "./pages/Home";
-import Login from "./pages/Login";
 import Folder from "./pages/Folder";
 import Error from "./pages/Error.tsx"
 import AuthPage from "./pages/AuthPage.tsx";
-import Folder from "./pages/Folder";
 import ApplicationForm from "./pages/ApplicationForm.tsx";
 import Profile from "./pages/Profile.tsx";
-import AddUser from "./pages/AddUser.tsx";
+import User from "./pages/UserDetail.tsx";
 import Admin from "./pages/AdminDetail.tsx"
 import VehicleDetail from "./pages/VehicleDetail.tsx";
-import ApplicationForm from "./pages/ApplicationForm.tsx";
 import UserApplications from "./pages/UserApplication.tsx";
 import AddVehicle from "./components/vehicles/AddVehicle.tsx";
-import UserApplications from "./pages/UserApplication.tsx";
 import ModifyUser from "./pages/ModifyUser.tsx"
 
 const router = createBrowserRouter([
