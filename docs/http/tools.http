@@ -26,6 +26,7 @@ Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
 ###
-GET {{protocol}}://{{host}}:{{port}}/api/tools/identity/all
+GET {{protocol}}://{{host}}:{{port}}/api/tools/identity
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
+

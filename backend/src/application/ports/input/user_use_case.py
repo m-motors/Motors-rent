@@ -17,7 +17,7 @@ class UserUseCase(ABC):
         pass
     
     @abstractmethod
-    def update_user(self, user: User) -> User:
+    def update_user(self, user: User, id: int, upadate_data: List) -> User:
         pass
     
     @abstractmethod

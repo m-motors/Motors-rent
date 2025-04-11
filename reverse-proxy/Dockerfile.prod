@@ -1,0 +1,26 @@
+FROM nginx:1.27.4-alpine3.21-slim AS production
+LABEL stage=production
+
+RUN apk --no-cache add \
+    bash \
+    && rm -rf /var/cache/apk/*
+
+ARG NGINX_HTTPS_PORT
+ARG NGINX_HTTP_PORT
+ARG ENV_MODE
+
+RUN echo "###"
+RUN echo "Image: nginx:1.27.4-alpine3.21-slim"
+RUN echo "PORT: ${NGINX_HTTPS_PORT}, ${NGINX_HTTP_PORT}"
+RUN echo "ENV_MODE: ${ENV_MODE}"
+RUN echo "###"
+
+COPY ./nginx/nginx.template /etc/nginx/nginx.template
+COPY ./ssl/ /etc/nginx/ssl/
+
+EXPOSE 80 443
+
+CMD envsubst '$FLASK_ADDRESS $FLASK_INTERNAL_PORT' < /etc/nginx/nginx.template > /etc/nginx/nginx.conf && nginx -g 'daemon off;'
+
+
+

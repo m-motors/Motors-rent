@@ -38,7 +38,8 @@ def create_client_folder_routes(client_folder_service: ClientFolderService, auth
 
             return jsonify({"message": "Client folder created", "content": res.to_dict(), "error": None}), 201
         except Exception as e:
-            return jsonify({"message": "Error creating client folder", "content": None, "error": str(e)}), 400
+            logger.error(f"Create client folder error: {str(e)}")
+            return jsonify({"message": "Create client folder failed", "content": None, "error": "Internal Server Error"}), 500
 
 
     @client_folder_routes.route('/clientfolders', methods=['GET'])
@@ -48,7 +49,8 @@ def create_client_folder_routes(client_folder_service: ClientFolderService, auth
             res = client_folder_service.list_client_folder()
             return jsonify({"message": "Client folder retrieved", "content": {"client_folders" : [client_folder.to_dict() for client_folder in res]} , "error": None}), 200
         except Exception as e:
-            return jsonify({"message": "Error retrieving client folder", "content": None, "error": str(e)}), 500
+            logger.error(f"List client folder error: {str(e)}")
+            return jsonify({"message": "List client folder failed", "content": None, "error": "Internal Server Error"}), 500
             
 
     @client_folder_routes.route('/clientfolders/<int:id>', methods=['GET'])
@@ -58,7 +60,8 @@ def create_client_folder_routes(client_folder_service: ClientFolderService, auth
             client_folder = client_folder_service.get_client_folder(user, id)
             return jsonify({"message": "Client folder retrieved", "content": {"client_folder" : client_folder.to_dict()}, "error": None}), 200
         except Exception as e:
-            return jsonify({"message": "Error retrieving client folder", "content": None, "error": str(e)}), 500
+            logger.error(f"Get client folder error: {str(e)}")
+            return jsonify({"message": "Get client folder failed", "content": None, "error": "Internal Server Error"}), 500
         
 
     @client_folder_routes.route('/clientfolders/client', defaults={'client_id': None}, methods=['GET'])
@@ -72,9 +75,10 @@ def create_client_folder_routes(client_folder_service: ClientFolderService, auth
             res = client_folder_service.get_list_client_folder_by_client_id(client_id)
             return jsonify({"message": "Client folders retrieved", "content": {"client_folders" : [client_folder.to_dict() for client_folder in res]} , "error": None}), 200
         except Exception as e:
-            return jsonify({"message": "Error retrieving client folders", "content": None, "error": str(e)}), 500
+            logger.error(f"Get client folder by client id login error: {str(e)}")
+            return jsonify({"message": "Get client folder by client id failed", "content": None, "error": "Internal Server Error"}), 500
 
-    @client_folder_routes.route('/clientfolders/<int:id>', methods=['PUT'])
+    @client_folder_routes.route('/clientfolders/<int:id>', methods=['PATCH'])
     @authorize([UserRole.CLIENT, UserRole.ADMIN])
     @Validator(json_fields=[
         Field("vehicule_id", "int", required=False),
@@ -90,7 +94,8 @@ def create_client_folder_routes(client_folder_service: ClientFolderService, auth
             updated_client_folder = client_folder_service.update_client_folder(user, id, update_data)
             return jsonify({"message": "Client folder updated", "content": updated_client_folder.to_dict(), "error": None}), 200
         except Exception as e:
-            return jsonify({"message": "Error updating client folder", "content": None, "error": str(e)}), 500
+            logger.error(f"Update client folder error: {str(e)}")
+            return jsonify({"message": "Update client folder failed", "content": None, "error": "Internal Server Error"}), 500
 
 
     @client_folder_routes.route('/clientfolders/<int:id>', methods=['DELETE'])
@@ -103,7 +108,8 @@ def create_client_folder_routes(client_folder_service: ClientFolderService, auth
         
             raise ValueError(success)
         except Exception as e:
-            return jsonify({"message": "Error deleting client folder", "error": str(e)}), 500
+            logger.error(f"Delete client folder error: {str(e)}")
+            return jsonify({"message": "Delete client folder failed", "content": None, "error": "Internal Server Error"}), 500
 
     
     @client_folder_routes.route('/clientfolders/info', methods=['GET']) 
@@ -116,7 +122,8 @@ def create_client_folder_routes(client_folder_service: ClientFolderService, auth
             return jsonify({ "message": "Client folder information retrieved", "content": { "statuses": status_values, "types": type_values }, "error": None}), 200 
 
         except Exception as e:
-            return jsonify({"message": "Error retrieving client folder information", "error": str(e)}), 500
+            logger.error(f"Get info on client folder error: {str(e)}")
+            return jsonify({"message": "Get info on client folder failed", "content": None, "error": "Internal Server Error"}), 500
 
 
     return client_folder_routes

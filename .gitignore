@@ -48,11 +48,10 @@ eggs/
 # Python eggs
 *.egg
 
+
 # Logs
 *.log
 
-# VSCode settings (or any editor-specific)
-.vscode/
 
 # MacOS system files
 .DS_Store
@@ -65,3 +64,4 @@ coverage/
 
 # Ollama modules
 ollama/
+llm/

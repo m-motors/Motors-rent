@@ -1,13 +1,20 @@
+import axios from "axios";
+import { useEffect } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
 import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Folder from "./pages/Folder";
 import Error from "./pages/Error.tsx"
 import AuthPage from "./pages/AuthPage.tsx";
 import Folder from "./pages/Folder";
 import ApplicationForm from "./pages/ApplicationForm.tsx";
 import Profile from "./pages/Profile.tsx";
-import VehicleDetail from "./pages/VehicleDetail.tsx";
-import User from "./pages/UserDetail.tsx"
+import AddUser from "./pages/AddUser.tsx";
 import Admin from "./pages/AdminDetail.tsx"
+import VehicleDetail from "./pages/VehicleDetail.tsx";
+import ApplicationForm from "./pages/ApplicationForm.tsx";
+import UserApplications from "./pages/UserApplication.tsx";
 import AddVehicle from "./components/vehicles/AddVehicle.tsx";
 import UserApplications from "./pages/UserApplication.tsx";
 import ModifyUser from "./pages/ModifyUser.tsx"
@@ -73,6 +80,22 @@ const router = createBrowserRouter([
 ]);
 
 const App: React.FC = () => {
+  const host = import.meta.env.VITE_API_HOST;
+
+  useEffect(() => {
+    const fetchHealth = async () => {
+      try {
+        const result: any = await axios.get(`${host}/`);
+        console.log(result);
+        alert(`✅ API accessible\n🔗 Hôte : ${host}\n🎉 Résultat : ${result.data}`);
+      } catch (error: any) {
+        alert(`❌ Erreur API\n🔗 Hôte : ${host}\n🚨 Erreur : ${error.message || error}\n📌 Contacter l'administrateur.`);
+      }
+    };
+
+    fetchHealth();
+  }, [host]);
+
   return <RouterProvider router={router} />;
 };
 

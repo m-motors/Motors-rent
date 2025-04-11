@@ -186,7 +186,7 @@
 				{
 					"name": "Update Option",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
@@ -325,7 +325,7 @@
 				{
 					"name": "Update Client Folder",
 					"request": {
-						"method": "PUT",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",

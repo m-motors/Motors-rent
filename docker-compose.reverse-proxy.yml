@@ -1,0 +1,25 @@
+services:
+  reverse-proxy:
+    container_name: reverse-proxy
+    build:
+      context: ./reverse-proxy
+      dockerfile: ./Dockerfile.prod
+      target: ${ENV_MODE}
+      args:
+        NGINX_HTTP_PORT: ${NGINX_HTTP_PORT}
+        NGINX_HTTPS_PORT: ${NGINX_HTTPS_PORT}
+        ENV_MODE: ${ENV_MODE}
+    ports:
+      - ${NGINX_HTTP_PORT}:80
+      - ${NGINX_HTTPS_PORT}:443
+    environment:
+      - FLASK_ADDRESS=${FLASK_ADDRESS}
+    env_file:
+      - .env
+      - .env.local
+    networks:
+      - backend_net
+
+networks:
+  backend_net:
+    external: true
