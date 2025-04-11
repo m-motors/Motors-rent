@@ -13,3 +13,8 @@
   border-radius: 8px;
   background-color: #1C398E;
 }
+
+.card-list-1-col .card-list{
+  flex-direction: column;
+  flex-wrap: nowrap;
+}

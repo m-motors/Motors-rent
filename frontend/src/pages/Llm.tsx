@@ -619,7 +619,7 @@ const Llm = () => {
 								<h3 className="text-3xl font-bold dark:text-white mb-1 mt-4">
 									Conversations
 								</h3>
-								<div className="flex-grow flex flex-col overflow-auto mt-4 w-auto px-2">
+								<div className="flex-grow flex flex-col overflow-auto mt-4 w-auto px-2 card-list-1-col">
 									{displayChats(chats)}
 								</div>
 						</section>
@@ -675,7 +675,7 @@ const CardList = <T,>({
 	selectLabel = "Selectionner"
 }: CardListProps<T>) => {
 	return (
-		<ul className="flex flex-col gap-10">
+		<ul className="flex wrap gap-10 card-list">
 			{items.map((item, index) => (
 				<li key={getKey(item, index)} className="max-w-full">
 					<div className="w-full max-w-sm overflow-hidden text-ellipsis break-words p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
