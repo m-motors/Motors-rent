@@ -83,9 +83,9 @@ const App: React.FC = () => {
       try {
         const result: any = await axios.get(`${host}/`);
         console.log(result);
-        alert(`✅ API accessible\n🔗 Hôte : ${host}\n🎉 Résultat : ${result.data}`);
+        console.log(`✅ API accessible\n🔗 Hôte : ${host}\n🎉 Résultat : ${result.data}`);
       } catch (error: any) {
-        alert(`❌ Erreur API\n🔗 Hôte : ${host}\n🚨 Erreur : ${error.message || error}\n📌 Contacter l'administrateur.`);
+        console.log(`❌ Erreur API\n🔗 Hôte : ${host}\n🚨 Erreur : ${error.message || error}\n📌 Contacter l'administrateur.`);
       }
     };
 
