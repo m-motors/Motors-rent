@@ -4,6 +4,7 @@ import Footer from "../components/layout/Footer";
 import { FC, ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import './llm.css'
+import CodeBlock from "../components/common/CodeBlock";
 
 type ModelType =  {
 	name: string,
@@ -506,16 +507,25 @@ const Llm = () => {
 
 	const handleGenerateResponse = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		const formData = new FormData(event.currentTarget);
+		const form = event.currentTarget;
+		const formData = new FormData(form);
 		const question = formData.get("prompt") as string;
 	
 		if (!currentChatId || !question.trim()) return;
+
+		const currentCollection = chats.find((chat) => chat.id === currentChatId)?.collection
+		const currentCollectionId = typeof currentCollection === "string" ? currentCollection : currentCollection?.id;
+
+		if (!currentCollectionId) {
+			console.error("Aucune collection associée à la discussion actuelle.");
+			return;
+		}
 	
 		try {
 			const res = await axios.post(`${host}/api/rag`, {
 				question: question,
 				id: currentChatId,
-				collection: chats.find((chat) => chat.id === currentChatId)?.collection
+				collection: currentCollectionId
 			}, {
 				headers: {
 					"Content-Type": "application/json",
@@ -542,8 +552,7 @@ const Llm = () => {
 				})
 			);
 
-			event.currentTarget.reset();
-	
+			form.reset();
 		} catch (error) {
 			console.error(error);
 		}
@@ -582,6 +591,10 @@ const Llm = () => {
 			name: "Chats", 
 			node: <Chats models={models} collections={collections} onSubmit={handleSubmitAddChat} renderList={()=>displayChats(chats)}/>
 		},
+		{ 
+			name: "Guide", 
+			node: <Guide />
+		},
 	];
 
   return (
@@ -606,10 +619,11 @@ const Llm = () => {
 								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 								title="string"
 								onChange={event => handleChangeCurrentChat(event)}
+								value={currentChatId ?? ""}
 							>
 								<option value="">Sélectionnez un chat</option>
 								{chats.map((chat) => (
-									<option key={chat.id} value={chat.id} selected={chat.id === currentChatId}>
+									<option key={chat.id} value={chat.id}>
 										{chat.name}
 									</option>
 								))}
@@ -675,7 +689,7 @@ const CardList = <T,>({
 	selectLabel = "Selectionner"
 }: CardListProps<T>) => {
 	return (
-		<ul className="flex wrap gap-10 card-list">
+		<ul className="flex flex-wrap gap-10 card-list">
 			{items.map((item, index) => (
 				<li key={getKey(item, index)} className="max-w-full">
 					<div className="w-full max-w-sm overflow-hidden text-ellipsis break-words p-4 bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
@@ -1246,6 +1260,7 @@ const Collections: FC<CollectionsProps> = ({ onSubmit, renderList, moreActions, 
 								className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 								title="Sélectionnez un Collection"
 								required
+								defaultValue=""
 							>
 								<option value="">Sélectionnez une collection</option>
 								{collections.map((collection: CollectionType) => (
@@ -1358,10 +1373,11 @@ const Chats: FC<ChatsProps> = ({ onSubmit, renderList, models, collections}) => 
 						className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 						title="Sélectionnez un Collection"
 						required
+						defaultValue=""
 					>
 						<option value="">Nom du model LLM</option>
 						{models.map((model: ModelType) => (
-							<option key={model.digest} value={model.digest}>
+							<option key={model.name} value={model.name}>
 								{model.name}
 							</option>
 						))}
@@ -1386,6 +1402,7 @@ const Chats: FC<ChatsProps> = ({ onSubmit, renderList, models, collections}) => 
 						className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
 						title="Sélectionnez un Collection"
 						required
+						defaultValue=""
 					>
 						<option value="">Collection</option>
 						{collections.map((collection: CollectionType) => (
@@ -1426,3 +1443,86 @@ const Chats: FC<ChatsProps> = ({ onSubmit, renderList, models, collections}) => 
 		</div>
 	)
 }
+
+
+const Guide: FC = () => {
+  const [scroll, setScroll] = useState({ scrollY: 0, close: false });
+  const [canCollapse, setCanCollapse] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="overflow-y-auto flex flex-col gap-8" ref={scrollContainerRef}>
+      <div
+        className={`flex flex-col gap-4 bg-gray-900 px-2 shadow-md transition-all duration-500 ease-in-out transform pb-4
+          ${canCollapse ? 'sticky top-0' : 'relative'}
+          ${canCollapse && scroll.close ? '-translate-y-full' : 'translate-y-0'}
+        `}
+      >
+        <h5 className="text-xl font-bold dark:text-white">Guide d’utilisation du système RAG</h5>
+        <p className="text-sm text-gray-400">
+          Ce guide présente les étapes essentielles pour configurer et utiliser un système de génération augmentée par récupération (RAG),
+          c’est-à-dire un assistant capable de formuler des réponses à partir de documents que vous avez préalablement indexés.
+        </p>
+      </div>
+
+      <div ref={listRef} className="flex flex-col gap-6 p-2">
+        {[
+          {
+            title: "1. Installer un modèle LLM",
+            description:
+              "Choisissez un modèle de langage tel que Mistral, LLaMA ou tout autre compatible, puis installez-le. " +
+              "Ce modèle générera les réponses. L’installation peut déclencher le téléchargement du modèle si nécessaire.",
+          },
+          {
+            title: "2. Créer un embedder",
+            description:
+              "Un embedder transforme le texte brut de vos documents en vecteurs numériques exploitables. " +
+              "Vous devez choisir un modèle (par exemple Sentence Transformers) qui sera utilisé pour l’indexation vectorielle.",
+          },
+          {
+            title: "3. Créer une collection vectorielle",
+            description:
+              "Une collection est un espace de stockage logique pour les vecteurs générés. " +
+              "Elle est liée à un embedder et servira de base de données contextuelle pour les réponses du LLM.",
+          },
+          {
+            title: "4. Uploader un fichier",
+            description:
+              "Importez un ou plusieurs fichiers (PDF, DOCX, TXT...) contenant les données que vous souhaitez rendre accessibles au système. " +
+              "Ces fichiers sont stockés avant d’être indexés.",
+          },
+          {
+            title: "5. Ajouter des éléments à la collection",
+            description:
+              "Une fois le fichier uploadé, vous devez l’indexer. Cette opération découpe le contenu en morceaux (chunks), " +
+              "les transforme en vecteurs à l’aide de l’embedder, et les enregistre dans la collection sélectionnée.",
+          },
+          {
+            title: "6. Créer une session de chat",
+            description:
+              "Vous pouvez ensuite créer une session de chat liée à un modèle LLM et à une collection. " +
+              "Chaque session représente un contexte conversationnel et peut être personnalisée avec une description et des options.",
+          },
+          {
+            title: "7. Sélectionner un chat",
+            description:
+              "Si vous souhaitez reprendre une session existante, recherchez-la par son nom ou identifiant. " +
+              "Cela permet de garder le fil d’une conversation ou de poser plusieurs questions dans un même contexte.",
+          },
+          {
+            title: "8. Générer une réponse enrichie",
+            description:
+              "Enfin, posez une question. Le système utilisera la collection vectorielle liée au chat pour retrouver les documents pertinents, " +
+              "et formulera une réponse enrichie avec le modèle LLM, en se basant à la fois sur vos documents et les capacités du modèle.",
+          },
+        ].map((step, index) => (
+          <div key={index} className="border-l-4 border-blue-600 pl-4">
+            <h6 className="text-lg font-semibold text-white">{step.title}</h6>
+            <p className="text-sm text-gray-300 whitespace-pre-line">{step.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

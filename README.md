@@ -177,7 +177,7 @@ pip freeze > requirements.txt
 
 ## LLM 
 
-#### Etape 1 : Setup llm  100%
+#### Etape 1 : Setup llm 100%
 #### Etape 2 : Enregistrer des documents 70%  - Manque la synchro entre s3 et postgres 
 #### Etape 3 : Creer embedder + vectorstore store avec retriever 100%
 #### Etape 4 : Charger les documents 90%  
@@ -190,358 +190,92 @@ pip freeze > requirements.txt
 - Vérifier la protabilité du storage chromadb
 
 
-generate_response
-POST /rag
-question", "str", required=True
-llm_model_name", "str", required=False
-id", "str", required=False
-with_retriever", "bool", required=False
-vectorstore_id", "str", required=False
-prompt_template", "str", required=False
+
+### Détail des routes avec paramètres
+
+#### **LLM Models (`/rag/llm`)**
+
+| Méthode | Route      | Description                | Paramètres attendus                                  |
+|---------|------------|----------------------------|-------------------------------------------------------|
+| GET     | `/rag/llm` | Lister les LLM disponibles | Aucun                                                 |
+| POST    | `/rag/llm` | Installer un LLM           | `llm_model_name: str` *(optionnel, JSON)*            |
+| DELETE  | `/rag/llm` | Désinstaller un LLM        | `llm_model_name: str` *(optionnel, JSON)*            |
 
 ---
 
-### **1. Storage - S3** :  
+#### **Chats (`/rag/chats`)**
 
-list_storage_files
-GET /rag/storage
-
-
-upload_storage_file
-POST /rag/storage
-file "file", required=True
-filename "str", required=False
-folder_name "str", required=False
-
-download_storage_file
-GET /rag/storage/download
-label="file_name", field_type="str", required=True
-label="folder_name", field_type="str", required=False
-label="local_path", field_type="str", required=False
-
-delete_storage_file
-DELETE /rag/storage
-label="file_name", field_type="str", required=True
-label="folder_name", field_type="str", required=False
+| Méthode | Route                       | Description                         | Paramètres attendus                                                                 |
+|---------|-----------------------------|-------------------------------------|--------------------------------------------------------------------------------------|
+| GET     | `/rag/chats`                | Lister les chats                    | Aucun                                                                               |
+| POST    | `/rag/chats`                | Créer un chat                       | `name: str` (obligatoire), `llm_model_name`, `description`, `options: dict`, `collection` *(JSON)* |
+| DELETE  | `/rag/chats`                | Supprimer un chat                   | `id: str` *(obligatoire, JSON)*                                                    |
+| POST    | `/rag/chats/search`         | Rechercher un chat                  | `id: str` *(optionnel)*, `name: str` *(optionnel)* *(JSON)*                        |
+| POST    | `/rag/chats/deepsearch`     | Recherche avancée                   | `partial: dict` *(obligatoire, JSON)*                                              |
+| POST    | `/rag/chats/options`        | Lister options                      | `id: str` *(obligatoire, JSON)*                                                    |
+| PATCH   | `/rag/chats/options`        | Mettre à jour options               | `id: str`, `options: dict` *(obligatoire, JSON)*                                   |
+| PATCH   | `/rag/chats/collection`     | Modifier la collection du chat      | `id: str`, `collection: str` *(obligatoire, JSON)*                                 |
 
 ---
 
-### **2. Documents** :  
+#### **RAG Inference**
 
-list_documents
-GET /rag/documents
-
-get_document
-GET /rag/documents/<int:doc_id>
-
-save_document
-POST /rag/documents
-"name", "str", required=True
-"doc_format", "str", required=True
-"status", "str", required=False
-
-update_document
-PATCH /rag/documents/<int:doc_id>
-name", "str", required=False
-doc_format", "str", required=False
-link", "str", required=False
-e_tag", "str", required=False
-status", "str", required=False
-
-delete_document
-DELETE /rag/documents/<int:doc_id>
----
-
-### **3. Embedders** :  
-
-list_embedders
-GET /rag/embedders
-
-create_embedder
-POST /rag/embedders
-model_name", "str", required=False
-is_encode_kwargs", "bool", required=False
-
-remove_embedder
-DELETE /rag/embedders
-"id", "str", required=True
-
-search_embedder
-POST /rag/embedders/search
-id", "str", required=False
-name", "str", required=False
----
-
-### **4. Vectorestores** : 
-list_vectorestores
-GET /rag/vectorestores
-
-create_vectorestore
-POST /rag/vectorestores
-persist_directory", "str", required=False
-collection_name", "str", required=False
-
-remove_vectorestore
-DELETE /rag/vectorestores
-"id", "str", required=True
-
-search_embedder
-POST /rag/vectorestores/search
-id", "str", required=False
-name", "str", required=False
-
-
-### **5. Retrievers** :  
-add_docs_store
-POST /rag/retriver
-store_id", "str", required=True
-dirs", "list", required=False
-files", "list", required=False
-chunk_size", "int", required=False
-chunk_overlap", "int", required=False
+| Méthode | Route     | Description                       | Paramètres attendus                                                                                      |
+|---------|-----------|-----------------------------------|-----------------------------------------------------------------------------------------------------------|
+| POST    | `/rag`    | Générer réponse avec LLM + RAG    | `question: str` (obligatoire), `llm_model_name`, `id`, `with_retriever`, `collection`, `prompt_template` *(JSON)* |
 
 ---
 
-### **6. LLM (Large Language Models)** :  
+#### **Stockage (`/rag/storage`)**
 
-list_llm
-GET /rag/llm
-
-install_llm
-POST /rag/llm
-"llm_model_name", "str", required=False
-
-uninstall_llm
-DELETE /rag/llm
-"llm_model_name", "str", required=False
+| Méthode | Route                        | Description            | Paramètres attendus                                                                 |
+|---------|------------------------------|------------------------|--------------------------------------------------------------------------------------|
+| GET     | `/rag/storage`               | Lister les fichiers    | Aucun                                                                               |
+| POST    | `/rag/storage`               | Upload fichier         | Form-data : `file: File`, `file_name: str` *(optionnel)*, `folder_name: str` *(optionnel)* |
+| GET     | `/rag/storage/download`      | Télécharger un fichier | Query : `file_name: str`, `folder_name: str` *(optionnel)*, `local_path: str` *(optionnel)* |
+| DELETE  | `/rag/storage`               | Supprimer un fichier   | Query : `file_name: str`, `folder_name: str` *(optionnel)*                         |
 
 ---
 
-### **7. Chats** :  
+#### **Documents RAG (`/rag/documents`)**
 
-list_chats
-GET /rag/chats
-
-create_chat
-POST /rag/chats
-name", "str", required=True
-llm_model_name", "str", required=False
-description", "str", required=False
-options", "dict", required=False
-vectorstore_id", "dict", required=False
-
-remove_chat 
-DELETE /rag/chats
-"id", "str", required=True
-
-search_chat
-POST /rag/chats/search
-"id", "str", required=False
-"name", "str", required=False
-
-deepsearch_chat
-POST /rag/chats/deepsearch
-"partial", "dict", required=True
-
-
-list_chat_options
-POST /rag/chats/options
-id", "str", required=True
-
-list_chat_options
-PATCH /rag/chats/options
-id", "str", required=True
-"options", "dict", required=True
-
-update_vectorstore_chat
-PATCH /rag/chats/vectorstore 
-id", "str", required=True
-vectorstore_id", "str", required=True
-
----  
-
-Cette structure permet une gestion claire et fluide des fichiers, documents, embedders, vectorestores, retrievers, LLM et chats dans votre application.
-
-
-### **Résumé de la demande**  
-Vous avez partagé la structure actuelle de votre API REST dédiée au système RAG (Retrieval-Augmented Generation) avec les endpoints liés à la gestion de fichiers, documents, embedders, vectorstores, retrievers, modèles LLM et chats. Vous souhaitez maintenant une version mise au propre, bien structurée et lisible pour la documentation ou la maintenance.
+| Méthode | Route                            | Description                 | Paramètres attendus                                                              |
+|---------|----------------------------------|-----------------------------|-----------------------------------------------------------------------------------|
+| GET     | `/rag/documents`                | Lister tous les documents   | Aucun                                                                            |
+| GET     | `/rag/documents/<doc_id>`       | Obtenir un document         | `doc_id: int` dans l’URL                                                         |
+| POST    | `/rag/documents`                | Sauvegarder un document     | `name: str`, `doc_format: str`, `status: str` *(optionnel, JSON)*               |
+| PATCH   | `/rag/documents/<doc_id>`       | Mettre à jour un document   | `name`, `doc_format`, `link`, `e_tag`, `status` *(tous optionnels, JSON)*       |
+| DELETE  | `/rag/documents/<doc_id>`       | Supprimer un document       | `doc_id: int` dans l’URL                                                         |
 
 ---
 
-## 📘 **API RAG – Structure des Endpoints**
+#### **Embedders (`/rag/embedders`)**
+
+| Méthode | Route                        | Description             | Paramètres attendus                                           |
+|---------|------------------------------|-------------------------|----------------------------------------------------------------|
+| GET     | `/rag/embedders`            | Lister les embedders    | Aucun                                                         |
+| POST    | `/rag/embedders`            | Créer un embedder       | `model_name: str` *(optionnel)*, `is_encode_kwargs: bool` *(optionnel, JSON)* |
+| DELETE  | `/rag/embedders`            | Supprimer un embedder   | `id: str` *(obligatoire, JSON)*                               |
+| POST    | `/rag/embedders/search`     | Rechercher un embedder  | `id: str`, `name: str` *(optionnels, JSON)*                   |
 
 ---
 
-### 🔍 **1. Génération de réponse**
+#### **Collections (`/rag/collections`)**
 
-**POST /rag**  
-_Génère une réponse basée sur une question, avec ou sans récupération contextuelle._
-- `question`: `str` (requis) – Question posée à l’IA.
-- `llm_model_name`: `str` – Nom du modèle LLM à utiliser.
-- `id`: `str` – ID de la conversation ou session.
-- `with_retriever`: `bool` – Active ou non la recherche dans le vecteur store.
-- `vectorstore_id`: `str` – ID du vecteur store.
-- `prompt_template`: `str` – Template du prompt.
-
----
-
-### 📁 **2. Storage (S3)**
-
-#### 🔸 Lister les fichiers
-**GET /rag/storage**
-
-#### 🔸 Uploader un fichier
-**POST /rag/storage**
-- `file`: `file` (requis) – Fichier à stocker.
-- `filename`: `str` – Nom du fichier (facultatif).
-- `folder_name`: `str` – Dossier cible (facultatif).
-
-#### 🔸 Télécharger un fichier
-**GET /rag/storage/download**
-- `file_name`: `str` (requis)
-- `folder_name`: `str` – Nom du dossier (facultatif).
-- `local_path`: `str` – Chemin local de téléchargement (facultatif).
-
-#### 🔸 Supprimer un fichier
-**DELETE /rag/storage**
-- `file_name`: `str` (requis)
-- `folder_name`: `str` – Nom du dossier (facultatif).
+| Méthode | Route                          | Description                 | Paramètres attendus                                                                        |
+|---------|--------------------------------|-----------------------------|---------------------------------------------------------------------------------------------|
+| GET     | `/rag/collections`            | Lister les collections      | Aucun                                                                                      |
+| POST    | `/rag/collections`            | Créer une collection        | `persist_directory`, `collection_name`, `embedder_id` *(tous optionnels, JSON)*            |
+| PATCH   | `/rag/collections`            | Mettre à jour une collection| `id: str` (obligatoire), `name`, `persist_directory`, `docs`, `embedder` *(optionnels, JSON)* |
+| DELETE  | `/rag/collections`            | Supprimer une collection    | `id: str` *(obligatoire, JSON)*                                                            |
+| POST    | `/rag/collections/search`     | Rechercher une collection   | `id: str`, `name: str` *(optionnels, JSON)*                                                |
 
 ---
 
-### 📄 **3. Documents**
+#### **Retriever & Indexation (`/rag/retriver`)**
 
-#### 🔸 Lister les documents
-**GET /rag/documents**
+| Méthode | Route             | Description                         | Paramètres attendus                                                                 |
+|---------|-------------------|-------------------------------------|--------------------------------------------------------------------------------------|
+| POST    | `/rag/retriver`   | Ajouter docs dans store (vector DB) | `store_id: str` (obligatoire), `dirs: list`, `files: list`, `chunk_size: int`, `chunk_overlap: int` *(JSON)* |
 
-#### 🔸 Obtenir un document
-**GET /rag/documents/<int:doc_id>**
 
-#### 🔸 Enregistrer un document
-**POST /rag/documents**
-- `name`: `str` (requis)
-- `doc_format`: `str` (requis)
-- `status`: `str` – État du document (facultatif)
-
-#### 🔸 Mettre à jour un document
-**PATCH /rag/documents/<int:doc_id>**
-- `name`, `doc_format`, `link`, `e_tag`, `status`: `str` – Champs modifiables (tous facultatifs)
-
-#### 🔸 Supprimer un document
-**DELETE /rag/documents/<int:doc_id>**
-
----
-
-### 🧠 **4. Embedders**
-
-#### 🔸 Lister les embedders
-**GET /rag/embedders**
-
-#### 🔸 Créer un embedder
-**POST /rag/embedders**
-- `model_name`: `str`
-- `is_encode_kwargs`: `bool`
-
-#### 🔸 Supprimer un embedder
-**DELETE /rag/embedders**
-- `id`: `str` (requis)
-
-#### 🔸 Rechercher un embedder
-**POST /rag/embedders/search**
-- `id`: `str`
-- `name`: `str`
-
----
-
-### 🧱 **5. Vectorstores**
-
-#### 🔸 Lister les vectorstores
-**GET /rag/vectorestores**
-
-#### 🔸 Créer un vectorstore
-**POST /rag/vectorestores**
-- `persist_directory`: `str`
-- `collection_name`: `str`
-
-#### 🔸 Supprimer un vectorstore
-**DELETE /rag/vectorestores**
-- `id`: `str` (requis)
-
-#### 🔸 Rechercher un vectorstore
-**POST /rag/vectorestores/search**
-- `id`: `str`
-- `name`: `str`
-
----
-
-### 📦 **6. Retrievers**
-
-#### 🔸 Ajouter des documents à un store
-**POST /rag/retriver**
-- `store_id`: `str` (requis)
-- `dirs`: `list` – Répertoires à inclure
-- `files`: `list` – Fichiers à indexer
-- `chunk_size`: `int`
-- `chunk_overlap`: `int`
-
----
-
-### 🧠 **7. LLMs (modèles de langage)**
-
-#### 🔸 Lister les LLM installés
-**GET /rag/llm**
-
-#### 🔸 Installer un LLM
-**POST /rag/llm**
-- `llm_model_name`: `str`
-
-#### 🔸 Désinstaller un LLM
-**DELETE /rag/llm**
-- `llm_model_name`: `str`
-
----
-
-### 💬 **8. Chats**
-
-#### 🔸 Lister les chats
-**GET /rag/chats**
-
-#### 🔸 Créer un chat
-**POST /rag/chats**
-- `name`: `str` (requis)
-- `llm_model_name`: `str`
-- `description`: `str`
-- `options`: `dict`
-- `vectorstore_id`: `dict`
-
-#### 🔸 Supprimer un chat
-**DELETE /rag/chats**
-- `id`: `str` (requis)
-
-#### 🔸 Rechercher un chat
-**POST /rag/chats/search**
-- `id`: `str`
-- `name`: `str`
-
-#### 🔸 Recherche approfondie
-**POST /rag/chats/deepsearch**
-- `partial`: `dict` (requis)
-
-#### 🔸 Obtenir les options d’un chat
-**POST /rag/chats/options**
-- `id`: `str` (requis)
-
-#### 🔸 Modifier les options d’un chat
-**PATCH /rag/chats/options**
-- `id`: `str` (requis)
-- `options`: `dict` (requis)
-
-#### 🔸 Mettre à jour le vectorstore d’un chat
-**PATCH /rag/chats/vectorstore**
-- `id`: `str` (requis)
-- `vectorstore_id`: `str` (requis)
-
----
-
-### **Résumé**  
-Cette API REST couvre l’ensemble des fonctionnalités nécessaires à un système RAG : gestion des fichiers, des documents, des embedders, des vectorstores, des retrievers, des LLMs et des chats. Elle permet une flexibilité dans la configuration du contexte, du modèle, et des sources pour un système de génération augmentée fiable et extensible.
