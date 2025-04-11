@@ -46,9 +46,6 @@ export default function Header() {
         {isLogged && user?.role === "admin" && (
           <Link to="/admin" className="hover:text-gray-400">Admin</Link>
         )}
-        {!isLogged && (
-          <Link to="/authpage" className="hover:text-gray-400">Connexion</Link>
-        )}
         <Link to="/users/:id/applications" className="hover:text-gray-400">Mes dossiers</Link>
         <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
         {isLogged && (

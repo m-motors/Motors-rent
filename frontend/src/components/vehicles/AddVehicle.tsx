@@ -1,12 +1,23 @@
-// src/CreateAdPage.js
-import { useState } from "react";
-
+// src/CreateAdPage.tsx
+import { useState, ChangeEvent, FormEvent } from "react";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
-import "../../styles/AddPages.css"
+import "../../styles/AddPages.css";
 
-const AddVehicle = () => {
-  const [vehicleData, setVehicleData] = useState({
+interface VehicleData {
+  brand: string;
+  model: string;
+  year: string;
+  horsepower: string;
+  price: string;
+  category: string;
+  motor: string;
+  color: string;
+  mileage: string;
+}
+
+const AddVehicle: React.FC = () => {
+  const [vehicleData, setVehicleData] = useState<VehicleData>({
     brand: '',
     model: '',
     year: '',
@@ -18,7 +29,10 @@ const AddVehicle = () => {
     mileage: '',
   });
 
-  const handleChange = (e: any) => {
+  const [message, setMessage] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setVehicleData({
       ...vehicleData,
@@ -26,83 +40,105 @@ const AddVehicle = () => {
     });
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log('Annonce créée :', vehicleData);
+
+    if (Number(vehicleData.year) < 1900 || Number(vehicleData.year) > new Date().getFullYear()) {
+      setMessage("Année invalide.");
+      return;
+    }
+
+    setLoading(true);
+    setMessage('');
+
+    try {
+      const response = await fetch('/api/vehicles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(vehicleData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la création de l'annonce.");
+      }
+
+      setMessage("Annonce créée avec succès !");
+      handleReset();
+
+    } catch (error) {
+      setMessage("Erreur lors de la création de l'annonce.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+      console.log(vehicleData);
+    }
+  };
+
+  const handleReset = () => {
+    setVehicleData({
+      brand: '',
+      model: '',
+      year: '',
+      horsepower: '',
+      price: '',
+      category: '',
+      motor: '',
+      color: '',
+      mileage: '',
+    });
   };
 
   return (
     <div>
-        <Header />
-        <div className="add_page">
+      <Header />
+      <div className="add_page">
         <div className="add_page_card shadow-2xl max-w-2xl">
-            <h2>Nouvelle Annonce</h2>
-            <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-                <label className="add_user_label" htmlFor="brand">
-                  Marque
+          <h2>Nouvelle Annonce</h2>
+
+          {message && (
+            <p className="text-center mb-4 text-lg font-semibold text-red-600">{message}</p>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            {Object.keys(vehicleData).map((field) => (
+              <div className="mb-4" key={field}>
+                <label className="add_user_label" htmlFor={field}>
+                  {field.charAt(0).toUpperCase() + field.slice(1)}
                 </label>
-                <input name="brand" value={vehicleData.brand} onChange={handleChange} className="shadow focus:outline-none focus:shadow-outline" required/>
-            </div>
-            <div className="mb-4">
-                <label className="add_user_label" htmlFor="model">
-                Modèle
-                </label>
-                <input name="model" value={vehicleData.model} onChange={handleChange} className="shadow focus:outline-none focus:shadow-outline" required/>
-            </div>
-            <div className="mb-4">
-                <label className="add_user_label" htmlFor="year">
-                Année
-                </label>
-                <input name="year" value={vehicleData.year} onChange={handleChange} className="shadow focus:outline-none focus:shadow-outline" required/>
-            </div>
-            <div className="mb-4">
-                <label className="add_user_label" htmlFor="horsepower">
-                Puissance (CV)
-                </label>
-                <input name="horsepower" value={vehicleData.horsepower} onChange={handleChange} className="shadow focus:outline-none focus:shadow-outline" required/>
-            </div>
-            <div className="mb-4">
-                <label className="add_user_label" htmlFor="price">
-                Prix (€)
-                </label>
-                <input name="price" value={vehicleData.price} onChange={handleChange} className="shadow focus:outline-none focus:shadow-outline" required/>
-            </div>
-            <div className="mb-4">
-                <label className="add_user_label" htmlFor="category">
-                Catégorie
-                </label>
-                <input name="category" value={vehicleData.category} onChange={handleChange} className="shadow focus:outline-none focus:shadow-outline" required/>
-            </div>
-            <div className="mb-4">
-                <label className="add_user_label" htmlFor="motor">
-                Moteur
-                </label>
-                <input name="motor" value={vehicleData.motor} onChange={handleChange} className="shadow focus:outline-none focus:shadow-outline" required/>
-            </div>
-            <div className="mb-4">
-                <label className="add_user_label" htmlFor="color">
-                Couleur
-                </label>
-                <input name="color" value={vehicleData.color} onChange={handleChange} className="shadow focus:outline-none focus:shadow-outline" required/>
-            </div>
-            <div className="mb-4">
-                <label className="add_user_label" htmlFor="mileage">
-                Kilométrage (km)
-                </label>
-                <input name="mileage" value={vehicleData.mileage} onChange={handleChange} className="shadow focus:outline-none focus:shadow-outline" required/>
-            </div>
+                <input
+                  id={field}
+                  name={field}
+                  value={vehicleData[field as keyof VehicleData]}
+                  onChange={handleChange}
+                  className="shadow focus:outline-none focus:shadow-outline p-2 border border-gray-300 rounded-lg"
+                  />
+                  {/* required */}
+              </div>
+            ))}
+
             <div className="div_button">
-                <button
+              <button
                 type="submit"
-                className="hover:bg-blue-700 focus:outline-none focus:shadow-outline">
-                Créer l'Annonce
-                </button>
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline cursor-pointer text-white font-bold py-2 px-4 rounded-lg mx-2"
+              >
+                {loading ? 'Création...' : 'Créer l\'Annonce'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleReset}
+                className="bg-red-600 hover:bg-red-700 focus:outline-none focus:shadow-outline cursor-pointer text-white font-bold py-2 px-4 rounded-lg mx-2"
+              >
+                Réinitialiser
+              </button>
             </div>
-            </form>
+          </form>
         </div>
-        </div>
-        <Footer />
+      </div>
+      <Footer />
     </div>
   );
 };

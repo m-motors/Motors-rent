@@ -1,10 +1,10 @@
-// src/components/Register.tsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
 import "../styles/Register.css";
 
-function Register() {
+const Register: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     first_name: '',
@@ -12,16 +12,18 @@ function Register() {
     email: '',
     password: '',
   });
+
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === 'confirmPassword') {
       setConfirmPassword(value);
     } else {
-      setFormData((prevData) => ({
-        ...prevData,
+      setFormData((prev) => ({
+        ...prev,
         [name]: value,
       }));
     }
@@ -29,84 +31,51 @@ function Register() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError(null);
+
     if (formData.password !== confirmPassword) {
       setError("Les mots de passe ne correspondent pas.");
       return;
     }
 
+    setLoading(true);
     const host = import.meta.env.VITE_API_HOST;
     const url = `${host}/api/users`;
 
     try {
       const response = await axios.post(url, formData);
       if (response.status === 201) {
-        alert("Inscription réussie !");
-
         navigate("/");
       } else {
         setError(response.data.message);
       }
     } catch (error) {
-      console.error("Erreur :", error);
+      console.error(error);
       setError("Problème de connexion au serveur.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div>
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Prénom"
-          required
-          id="first_name"
-          name="first_name"
-          value={formData.first_name}
-          onChange={handleChange}
-        />
-        <input
-          type="text"
-          placeholder="Nom"
-          required
-          id="last_name"
-          name="last_name"
-          value={formData.last_name}
-          onChange={handleChange}
-        />
-        <input
-          type="email"
-          placeholder="Email"
-          required
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          required
-          id="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-        />
-        <input
-          type="password"
-          placeholder="Confirmer le mot de passe"
-          required
-          id="confirmPassword"
-          name="confirmPassword"
-          value={confirmPassword}
-          onChange={handleChange}
-        />
-        <button className="auth-button" type="submit">
-          S'inscrire
+      <form className="auth-form auth-box" onSubmit={handleSubmit}>
+        <h2 className="auth-title">Créer un compte</h2>
+
+        <input type="text" placeholder="Prénom" name="first_name" required value={formData.first_name} onChange={handleChange} />
+        <input type="text" placeholder="Nom" name="last_name" required value={formData.last_name} onChange={handleChange} />
+        <input type="email" placeholder="Email" name="email" required value={formData.email} onChange={handleChange} />
+        <input type="password" placeholder="Mot de passe" name="password" required value={formData.password} onChange={handleChange} />
+        <input type="password" placeholder="Confirmer le mot de passe" name="confirmPassword" required value={confirmPassword} onChange={handleChange} />
+
+        <button className="auth-button" type="submit" disabled={loading}>
+          {loading ? "Création..." : "S'inscrire"}
         </button>
+
+        {error && <p className="auth-error">{error}</p>}
       </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
-}
+};
 
 export default Register;
