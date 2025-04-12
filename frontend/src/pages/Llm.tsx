@@ -15,7 +15,7 @@ import Collections from "../components/llm/Collection";
 import RecursiveRenderer from "../components/llm/RecursiveRenderer";
 import ChatHistory, { Message } from "../components/llm/ChatHistory";
 
-import './llm.css'
+import '../styles/llm.css'
 
 export type ModelType =  {
 	name: string,
@@ -587,6 +587,10 @@ const Llm = () => {
 
 	const sections = [
 		{ 
+			name: "Guide", 
+			node: <Guide />
+		},
+		{ 
 			name: "Models", 
 			node: <Models onSubmit={handleSubmitAddModel} renderList={() => displayModels(models)} /> 
 		},
@@ -602,10 +606,6 @@ const Llm = () => {
 			name: "Chats", 
 			node: <Chats models={models} collections={collections} onSubmit={handleSubmitAddChat} renderList={()=>displayChats(chats)}/>
 		},
-		{ 
-			name: "Guide", 
-			node: <Guide />
-		},
 	];
 
   return (
@@ -620,7 +620,7 @@ const Llm = () => {
 					</Modal>
 				)}
 
-				<div style={{ height: "calc(100vh - 60px - 112px)", gridTemplateColumns: 'auto 1fr 1.5fr'}} className="bg-gray-900 px-6 text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+				<div style={{ height: "calc(100vh - 64px - 112px)", gridTemplateColumns: 'auto 1fr 1.5fr'}} className="bg-gray-900 px-6 text-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 					<aside  className="p-4 h-full flex flex-col overflow-hidden">
 						<div >
 							<label  htmlFor="chatId" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Chat *</label>

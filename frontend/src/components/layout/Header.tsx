@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import ChatBot from "../llm/ChatBot";
 
 export default function Header() {
   const [isLogged, setIsLogged] = useState(false);
@@ -48,6 +49,7 @@ export default function Header() {
         )}
         <Link to="/users/:id/applications" className="hover:text-gray-400">Mes dossiers</Link>
         <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
+        <Link to="/llm" className="hover:text-gray-400">LLM</Link>
         {isLogged && (
           <button onClick={handleLogout} className="hover:text-gray-400">Déconnexion</button>
         )}
@@ -72,6 +74,9 @@ export default function Header() {
         ) : (
           <Link to="/authpage" className="bg-blue-500 px-3 py-1 rounded">Connexion</Link>
         )}
+      </div>
+      <div className="fixed bottom-8 right-8 bg-blue-500 z-10">
+        <ChatBot/>
       </div>
     </header>
   );
