@@ -63,6 +63,7 @@ services:
     volumes:
       - ./database/postgres:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
+      - ./database/backup:/backup
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "admin", "-d", "groupe11"]
       interval: 5s
@@ -80,15 +81,35 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
       - ./database/pgadmin/servers.json:/pgadmin4/servers.json
+      - ./database/backup:/var/lib/pgadmin/storage  
     networks:
       postgres_net:
     depends_on:
       - postgres
-      
+
+  ollama:
+    container_name: ollama
+    image: ollama/ollama:latest
+    ports:
+      - ${OLLAMA_PORT}:11434
+    volumes:
+      - ./llm:/root/.ollama
+    tty: true
+    restart: unless-stopped
+    pull_policy: always
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - ollama_net
+      - backend_net
+
 networks:
   postgres_net:
     driver: bridge
   backend_net:
+    driver: bridge
+  ollama_net:
     driver: bridge
 
 volumes:

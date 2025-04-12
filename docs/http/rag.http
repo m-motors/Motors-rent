@@ -1,0 +1,334 @@
+###
+# @name login
+POST {{protocol}}://{{host}}:{{port}}/api/authentication/login
+Content-Type: application/json
+
+{
+  "identification" : "user39@example.com",
+  "password": "ChangeMe45/*"
+}
+
+###
+@access_token = {{login.response.body.content.access_token}}
+@refresh_token = {{login.response.body.content.refresh_token}}
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/tools/version
+
+
+@protocol = http
+@host = localhost
+@port = 3000
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/llm
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/llm
+Content-Type: application/json
+
+{
+  "llm_model_name": "llama2:7b"
+}
+
+###
+DELETE {{protocol}}://{{host}}:{{port}}/api/rag/llm
+Content-Type: application/json
+
+{
+  "llm_model_name": "smollm2:135m"
+}
+
+
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/chats
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/chats
+Content-Type: application/json
+
+{
+  "name" : "start1",
+  "description" : "first",
+  "llm_model_name": "llama2:7b"
+}
+
+###
+DELETE {{protocol}}://{{host}}:{{port}}/api/rag/chats
+Content-Type: application/json
+
+{
+  "id" : "11111111-1111-1111-1111-111111111111"
+}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/chats/search
+Content-Type: application/json
+
+{
+  "id" : "11111111-1111-1111-1111-111111111111",
+  "name" : "start1"
+}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/chats/deepsearch
+Content-Type: application/json
+
+{
+  "partial": {
+    "id" : "f5423a2a-88e7-460f-84f2-3647d057a1aa",
+    "name" : "start1",
+    "chat" :{
+      "llm_model_name": "test"
+    }
+  }
+}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/chats/options
+Content-Type: application/json
+
+{
+  "id" : "11111111-1111-1111-1111-111111111111"
+}
+
+###
+PATCH {{protocol}}://{{host}}:{{port}}/api/rag/chats/options
+Content-Type: application/json
+
+{
+  "id" : "aff4f2dc-6a19-4970-87b2-4d06792b24d2",
+  "options" : {
+     "temperature": 0.2
+  }
+}
+
+
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/storage
+Content-Type: application/json
+
+###
+@file_name = test.pdf
+@file_path = C:/Users/rapha/Desktop/Hetic/web3/python/Motors-rent/docs/http/test.pdf
+@folder_name = llm
+@local_path = tmp
+
+### 
+POST {{protocol}}://{{host}}:{{port}}/api/rag/storage
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="file"; filename={{file_name}}
+Content-Type: application/pdf
+
+< {{file_path}}
+--boundary123
+Content-Disposition: form-data; name="file_name"
+
+{{file_name}}
+--boundary123--
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/storage/download?file_name={{file_name}}&folder_name={{folder_name}}&local_path={{local_path}}
+
+###
+DELETE {{protocol}}://{{host}}:{{port}}/api/rag/storage?file_name={{file_name}}&folder_name={{folder_name}}
+
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/documents
+Content-Type: application/json
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/documents
+Content-Type: application/json
+
+{
+  "name" : "test",
+  "doc_format" : "test",
+  "status" : "ADD"
+}
+
+###
+PATCH {{protocol}}://{{host}}:{{port}}/api/rag/documents/1
+Content-Type: application/json
+
+{
+  "doc_format": "pdf",
+  "e_tag": "89234152",
+  "link": "http://gogle.com",
+  "name": "test1",
+  "status": "REMOVE"
+}
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/documents/3
+
+###
+DELETE {{protocol}}://{{host}}:{{port}}/api/rag/documents/3
+
+
+
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/embedders
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/embedders
+Content-Type: application/json
+
+{
+  "model_name": "all-MiniLM-L6-v2"
+}
+
+###
+DELETE {{protocol}}://{{host}}:{{port}}/api/rag/embedders
+Content-Type: application/json
+
+{
+  "id" : "f08716af-c296-475c-b0fb-d12c2c0b525a"
+}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/embedders/search
+Content-Type: application/json
+
+{
+  "id" : "f08716af-c296-475c-b0fb-d12c2c0b525a"
+}
+
+
+###
+GET {{protocol}}://{{host}}:{{port}}/api/rag/vectorestores
+Content-Type: application/json
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/vectorestores
+Content-Type: application/json
+
+{}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/vectorestores/search
+Content-Type: application/json
+
+{
+  "name" : "default"
+}
+
+###
+DELETE {{protocol}}://{{host}}:{{port}}/api/rag/vectorestores
+Content-Type: application/json
+
+{
+  "id" : "33ba733d-838e-4aa6-91a3-346f72062cb4"
+}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/embedders
+Content-Type: application/json
+
+{
+  "model_name": "all-MiniLM-L6-v2"
+}
+
+###
+# @name vectorestores
+POST {{protocol}}://{{host}}:{{port}}/api/rag/vectorestores
+Content-Type: application/json
+
+{}
+
+### Capture l'ID du vectorestore dans une variable
+@store_id = {{vectorestores.response.body.content.id}}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag/retriver
+Content-Type: application/json
+
+{
+  "store_id": "afe23dad-b017-4a56-aece-a35db8c5a39a"
+}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag
+Content-Type: application/json
+
+{
+  "question": "When was found M-Motors?",
+  "id": "11111111-1111-1111-1111-111111111111",
+  "vectorstore_id" : "{{store_id}}"
+}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag
+Content-Type: application/json
+
+{
+  "question":"When was found M-Motors?",
+  "id":"a4c9f591-4b57-4b9f-9177-4eb0e3c90ef4",
+  "vectorstore_id":"fcfbbd84-9d79-4b34-aa83-8debcc569647"
+}
+
+###
+
+Who is joachim Renevier
+
+
+### 
+pip install -U accelerate
+pip install -U langchain-huggingface
+pip freeze > requirements.txt`pip install -U langchain-community`
+
+
+
+
+
+
+
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag
+Content-Type: application/json
+
+{
+  "question": "What is my name?",
+  "id": "11111111-1111-1111-1111-111111111111"
+}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag
+Content-Type: application/json
+
+{
+  "question": "What is my name?",
+  "id": "11111111-1111-1111-1111-111111111111",
+  "llm_model_name": "smollm2:135m"
+}
+
+###
+POST {{protocol}}://{{host}}:{{port}}/api/rag
+Content-Type: application/json
+
+{
+  "question": "What is my name?",
+  "id": "11111111-1111-1111-1111-111111111111"
+}
+
+
+
+###
+GET http://localhost:11434/api/tags
+
+###
+POST http://localhost:11434/api/pull
+
+{"name": "mistral:7b"}
+
+###
+DELETE http://localhost:11434/api/delete
+
+{"name": "smollm2:135m"}

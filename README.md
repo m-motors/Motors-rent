@@ -164,3 +164,118 @@ If you don’t have the PGAdmin application installed, you can access it directl
 2. When prompted for a password, use: **`ChangeMe`**.
 3. To view tables:
    - **Servers** → **Databases** → **groupe11** → **Schemas** → **Tables**.
+
+
+Mettre a jour le data, la version de postgres sur rds est trop veille pas de retrocompatibilité sur backup/restore. 
+Pour setup la base, supprime l'existant, execute le init comme requete sql 
+
+
+pip install ollama chromadb langchain langchain-core langchain_community
+
+pip freeze > requirements.txt
+
+
+## LLM 
+
+#### Etape 1 : Setup llm 100%
+#### Etape 2 : Enregistrer des documents 70%  - Manque la synchro entre s3 et postgres 
+#### Etape 3 : Creer embedder + vectorstore store avec retriever 100%
+#### Etape 4 : Charger les documents 90%  
+#### Etape 5 : Creation d'un chat 80%  
+#### Etape 6 : Generer une reponse 70% - Il faut ameliorer la generation de la reponse 
+
+### Reste à faire 
+- Tester le setup from scratch
+- Fonction pour setup en une seule fois 
+- Vérifier la protabilité du storage chromadb
+
+
+
+### Détail des routes avec paramètres
+
+#### **LLM Models (`/rag/llm`)**
+
+| Méthode | Route      | Description                | Paramètres attendus                                  |
+|---------|------------|----------------------------|-------------------------------------------------------|
+| GET     | `/rag/llm` | Lister les LLM disponibles | Aucun                                                 |
+| POST    | `/rag/llm` | Installer un LLM           | `llm_model_name: str` *(optionnel, JSON)*            |
+| DELETE  | `/rag/llm` | Désinstaller un LLM        | `llm_model_name: str` *(optionnel, JSON)*            |
+
+---
+
+#### **Chats (`/rag/chats`)**
+
+| Méthode | Route                       | Description                         | Paramètres attendus                                                                 |
+|---------|-----------------------------|-------------------------------------|--------------------------------------------------------------------------------------|
+| GET     | `/rag/chats`                | Lister les chats                    | Aucun                                                                               |
+| POST    | `/rag/chats`                | Créer un chat                       | `name: str` (obligatoire), `llm_model_name`, `description`, `options: dict`, `collection` *(JSON)* |
+| DELETE  | `/rag/chats`                | Supprimer un chat                   | `id: str` *(obligatoire, JSON)*                                                    |
+| POST    | `/rag/chats/search`         | Rechercher un chat                  | `id: str` *(optionnel)*, `name: str` *(optionnel)* *(JSON)*                        |
+| POST    | `/rag/chats/deepsearch`     | Recherche avancée                   | `partial: dict` *(obligatoire, JSON)*                                              |
+| POST    | `/rag/chats/options`        | Lister options                      | `id: str` *(obligatoire, JSON)*                                                    |
+| PATCH   | `/rag/chats/options`        | Mettre à jour options               | `id: str`, `options: dict` *(obligatoire, JSON)*                                   |
+| PATCH   | `/rag/chats/collection`     | Modifier la collection du chat      | `id: str`, `collection: str` *(obligatoire, JSON)*                                 |
+
+---
+
+#### **RAG Inference**
+
+| Méthode | Route     | Description                       | Paramètres attendus                                                                                      |
+|---------|-----------|-----------------------------------|-----------------------------------------------------------------------------------------------------------|
+| POST    | `/rag`    | Générer réponse avec LLM + RAG    | `question: str` (obligatoire), `llm_model_name`, `id`, `with_retriever`, `collection`, `prompt_template` *(JSON)* |
+
+---
+
+#### **Stockage (`/rag/storage`)**
+
+| Méthode | Route                        | Description            | Paramètres attendus                                                                 |
+|---------|------------------------------|------------------------|--------------------------------------------------------------------------------------|
+| GET     | `/rag/storage`               | Lister les fichiers    | Aucun                                                                               |
+| POST    | `/rag/storage`               | Upload fichier         | Form-data : `file: File`, `file_name: str` *(optionnel)*, `folder_name: str` *(optionnel)* |
+| GET     | `/rag/storage/download`      | Télécharger un fichier | Query : `file_name: str`, `folder_name: str` *(optionnel)*, `local_path: str` *(optionnel)* |
+| DELETE  | `/rag/storage`               | Supprimer un fichier   | Query : `file_name: str`, `folder_name: str` *(optionnel)*                         |
+
+---
+
+#### **Documents RAG (`/rag/documents`)**
+
+| Méthode | Route                            | Description                 | Paramètres attendus                                                              |
+|---------|----------------------------------|-----------------------------|-----------------------------------------------------------------------------------|
+| GET     | `/rag/documents`                | Lister tous les documents   | Aucun                                                                            |
+| GET     | `/rag/documents/<doc_id>`       | Obtenir un document         | `doc_id: int` dans l’URL                                                         |
+| POST    | `/rag/documents`                | Sauvegarder un document     | `name: str`, `doc_format: str`, `status: str` *(optionnel, JSON)*               |
+| PATCH   | `/rag/documents/<doc_id>`       | Mettre à jour un document   | `name`, `doc_format`, `link`, `e_tag`, `status` *(tous optionnels, JSON)*       |
+| DELETE  | `/rag/documents/<doc_id>`       | Supprimer un document       | `doc_id: int` dans l’URL                                                         |
+
+---
+
+#### **Embedders (`/rag/embedders`)**
+
+| Méthode | Route                        | Description             | Paramètres attendus                                           |
+|---------|------------------------------|-------------------------|----------------------------------------------------------------|
+| GET     | `/rag/embedders`            | Lister les embedders    | Aucun                                                         |
+| POST    | `/rag/embedders`            | Créer un embedder       | `model_name: str` *(optionnel)*, `is_encode_kwargs: bool` *(optionnel, JSON)* |
+| DELETE  | `/rag/embedders`            | Supprimer un embedder   | `id: str` *(obligatoire, JSON)*                               |
+| POST    | `/rag/embedders/search`     | Rechercher un embedder  | `id: str`, `name: str` *(optionnels, JSON)*                   |
+
+---
+
+#### **Collections (`/rag/collections`)**
+
+| Méthode | Route                          | Description                 | Paramètres attendus                                                                        |
+|---------|--------------------------------|-----------------------------|---------------------------------------------------------------------------------------------|
+| GET     | `/rag/collections`            | Lister les collections      | Aucun                                                                                      |
+| POST    | `/rag/collections`            | Créer une collection        | `persist_directory`, `collection_name`, `embedder_id` *(tous optionnels, JSON)*            |
+| PATCH   | `/rag/collections`            | Mettre à jour une collection| `id: str` (obligatoire), `name`, `persist_directory`, `docs`, `embedder` *(optionnels, JSON)* |
+| DELETE  | `/rag/collections`            | Supprimer une collection    | `id: str` *(obligatoire, JSON)*                                                            |
+| POST    | `/rag/collections/search`     | Rechercher une collection   | `id: str`, `name: str` *(optionnels, JSON)*                                                |
+
+---
+
+#### **Retriever & Indexation (`/rag/retriver`)**
+
+| Méthode | Route             | Description                         | Paramètres attendus                                                                 |
+|---------|-------------------|-------------------------------------|--------------------------------------------------------------------------------------|
+| POST    | `/rag/retriver`   | Ajouter docs dans store (vector DB) | `store_id: str` (obligatoire), `dirs: list`, `files: list`, `chunk_size: int`, `chunk_overlap: int` *(JSON)* |
+
+
