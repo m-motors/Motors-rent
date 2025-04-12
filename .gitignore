@@ -64,5 +64,8 @@ coverage/
 
 # Ollama modules
 ollama/
-llm/
 chroma/
+/llm/
+
+# Ne pas ignorer les composants RAG dans le frontend
+!/frontend/src/components/llm/
