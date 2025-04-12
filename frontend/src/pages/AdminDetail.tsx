@@ -2,7 +2,6 @@
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import users from "../components/data/userData.json"
 import vehicle from "../components/data/vehicleData.json"
 import application from "../components/data/userApplication.json"

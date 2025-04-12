@@ -5,7 +5,6 @@ import "../styles/Register.css";
 import axios from 'axios';
 
 function ModifyUser() {
-  const [isRegister, setIsRegister] = useState(true);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     firstname: '',
@@ -14,8 +13,8 @@ function ModifyUser() {
     password: '',
     confirmPassword: '',
   });
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState<null|string>(null);
+  const [success, setSuccess] = useState<null|string>(null);
 
   const handleChange = (e: any) => {
     const { name, value } = e.target;
@@ -33,7 +32,7 @@ function ModifyUser() {
     }
 
     try {
-      const response = await axios.put('/api/users/me', formData);
+      await axios.put('/api/tools/identity', formData);
       setSuccess("Informations mises à jour avec succès !");
       setTimeout(() => {
         navigate('/');

@@ -4,9 +4,19 @@ import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import axios from 'axios';
 
+interface UserData {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  birthdate: string;
+  registrationDate: string;
+  status: string;
+}
+
 const UserPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState<null | UserData>(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -15,7 +25,7 @@ const UserPage = () => {
         const response = await axios.get(`/api/users/${id}`);
         console.log("response: ", response)
         setUserData(response.data.content);
-      } catch (err) {
+      } catch (err:any) {
         setError(err.message);
       }
     };
@@ -27,9 +37,9 @@ const UserPage = () => {
     return <div>Erreur : {error}</div>;
   }
 
-  // if (!userData) {
-  //   return <div>Chargement en cours...</div>;
-  // }
+  if (!userData) {
+    return <div>Chargement en cours...</div>;
+  }
 
   return (
     <div>
@@ -41,15 +51,21 @@ const UserPage = () => {
             <div className="bg-gray-100 p-4 rounded-lg shadow">
                 <h3 className="text-lg font-semibold mb-2">Informations du Profil</h3>
                 <div className="flex items-center mb-2">
-                <div>
-                  <p><strong>Nom et Prénom:</strong> {userData.first_name} {userData.last_name}</p>
-                  <p><strong>Email:</strong> {userData.email}</p>
-                  <p><strong>Date d'anniversaire:</strong> {userData.birthdate}</p>
-                  <p><strong>Date d’inscription:</strong> {userData.registrationDate}</p>
-                  <p><strong>Statut:</strong> {userData.status}</p>
-                  <Link to={`/modifyUser/${userData.id}`}><button className="mt-2 text-blue-500 hover:underline cursor-pointer">Modifier les informations</button></Link>
-                </div>
-                </div>
+                {userData && (
+                  <div>
+                    <p><strong>Nom et Prénom :</strong> {userData.first_name} {userData.last_name}</p>
+                    <p><strong>Email :</strong> {userData.email}</p>
+                    <p><strong>Date d'anniversaire :</strong> {userData.birthdate}</p>
+                    <p><strong>Date d’inscription :</strong> {userData.registrationDate}</p>
+                    <p><strong>Statut :</strong> {userData.status}</p>
+                    <Link to={`/modifyUser/${userData.id}`}>
+                      <button className="mt-2 text-blue-500 hover:underline cursor-pointer">
+                        Modifier les informations
+                      </button>
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
             </div>
         </div>

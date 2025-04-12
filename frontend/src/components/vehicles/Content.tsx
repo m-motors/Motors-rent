@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FiPlus, FiRefreshCcw, FiX } from "react-icons/fi";
+import { FiPlus, FiRefreshCcw } from "react-icons/fi";
 import vehicleData from "../data/vehicleData.json";
 import "../../styles/Filters.css";
 import "../../styles/VehicleCard.css"
