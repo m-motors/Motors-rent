@@ -2,12 +2,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 
+import Header from "../components/layout/Header";
+import Footer from "../components/layout/Footer";
 import Guide from "../components/llm/Guide";
 import Modal from "../components/llm/Modal";
 import Chats from "../components/llm/Chats";
 import Models from "../components/llm/Models";
-import Header from "../components/layout/Header";
-import Footer from "../components/layout/Footer";
 import CardList from "../components/llm/CardList";
 import AsideTabs from "../components/llm/AsideTabs";
 import Embedders from "../components/llm/Embedders";
@@ -140,9 +140,9 @@ const Llm = () => {
 		return (
 			<CardList<ModelType>
 				items={sortedmodels}
-				getKey={(model, index) => model.name || index}
-				onRemove={(event, model) => removeModel(event, model)}
-				renderDetails={(model) => (
+				getKey={(model: ModelType, index: number) => model.name || index}
+				onRemove={(event: React.MouseEvent<HTMLButtonElement>, model: ModelType) => removeModel(event, model)}
+				renderDetails={(model: ModelType) => (
 					<>
 						<h5 className="text-xl font-bold dark:text-white mb-2">{model.name.charAt(0).toUpperCase() + model.name.slice(1)}</h5>
 						<RecursiveRenderer data={model} keyOrder={["name", "model", "size"]}/>
@@ -209,9 +209,9 @@ const Llm = () => {
 		return (
 			<CardList<EmbedderType>
 				items={sortedembedders}
-				getKey={(embedder, index) => embedder.id || index}
-				onRemove={(event, embedder) => removeEmbedder(event, embedder)}
-				renderDetails={(embedder) => (
+				getKey={(embedder: EmbedderType, index: number) => embedder.id || index}
+				onRemove={(event: React.MouseEvent<HTMLButtonElement>, embedder: EmbedderType) => removeEmbedder(event, embedder)}
+				renderDetails={(embedder:EmbedderType) => (
 					<>
 						<h5 className="text-xl font-bold dark:text-white mb-2">{embedder.name.charAt(0).toUpperCase() + embedder.name.slice(1)}</h5>
 						<RecursiveRenderer data={embedder} keyOrder={["name", "model", "size"]}/>
@@ -312,9 +312,9 @@ const Llm = () => {
 		return (
 		<CardList<CollectionType>
 			items={sortedCollections}
-			getKey={(collection, index) => collection.id || index}
-			onRemove={(event, collection) => removeCollection(event, collection)}
-			renderDetails={(collection) => (
+			getKey={(collection : CollectionType, index: number) => collection.id || index}
+			onRemove={(event: React.MouseEvent<HTMLButtonElement>, collection: CollectionType) => removeCollection(event, collection)}
+			renderDetails={(collection: CollectionType) => (
 				<>
 					<h5 className="text-xl font-bold dark:text-white mb-2">{collection.name.charAt(0).toUpperCase() + collection.name.slice(1)}</h5>
 					<RecursiveRenderer data={collection} keyOrder={["name", "id", "persist_directory", "vector_space", "docs", "embedder"]}/>
@@ -452,10 +452,10 @@ const Llm = () => {
 		return (
 			<CardList<ChatType>
 				items={sortedChats}
-				getKey={(chat, index) => chat.name || index}
-				onRemove={(event, chat) => removeChat(event, chat)}
-				onSelect={(event, chat) => handleChangeCurrentChat(event, chat)}
-				renderDetails={(chat) => (
+				getKey={(chat: ChatType, index: number) => chat.name || index}
+				onRemove={(event: React.MouseEvent<HTMLButtonElement>, chat:ChatType) => removeChat(event, chat)}
+				onSelect={(event: React.MouseEvent<HTMLButtonElement>, chat : ChatType) => handleChangeCurrentChat(event, chat)}
+				renderDetails={(chat: ChatType) => (
 					<>
 						<h5 className="text-xl font-bold dark:text-white mb-2">{chat.name.charAt(0).toUpperCase() + chat.name.slice(1)}</h5>
 						<RecursiveRenderer data={chat} keyOrder={["name", "id", "persist_directory", "vector_space", "docs", "embedder"]}/>
