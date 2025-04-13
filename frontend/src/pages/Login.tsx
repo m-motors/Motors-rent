@@ -85,8 +85,8 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div>
-      <form className="auth-form auth-box" onSubmit={handleSubmit}>
+    <>
+      <form className="auth-form" onSubmit={handleSubmit}>
         <h2 className="auth-title">Connexion</h2>
 
         <input
@@ -110,7 +110,7 @@ const Login: React.FC = () => {
 
         {qry.error && <p className="auth-error">{qry.error}</p>}
       </form>
-    </div>
+    </>
   );
 };
 

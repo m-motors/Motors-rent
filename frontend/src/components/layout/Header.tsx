@@ -11,7 +11,7 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     dispatch({ type: "LOGOUT"});
-    navigate("/authpage");
+    navigate("/auth?isregister=true");
   };
 
   return (
@@ -29,7 +29,7 @@ export default function Header() {
           </>
         )}
 
-        {state.role !== "admin" && (
+        {state.role === "client" && (
           <Link to="/user" className="hover:text-gray-400">Mon compte</Link>
         )}
 
@@ -56,7 +56,10 @@ export default function Header() {
             Déconnexion
           </button>
         ) : (
-          <Link to="/authpage" className="bg-blue-500 px-3 py-1 rounded">Connexion</Link>
+          <>
+            <Link to="/auth?isregister=false" className="bg-blue-500 px-3 py-1 rounded">Inscription</Link>
+            <Link to="/auth?isregister=true" className="bg-blue-500 px-3 py-1 rounded">Connexion</Link>
+          </>
         )}
       </div>
 
