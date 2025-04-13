@@ -4,8 +4,8 @@ POST {{protocol}}://{{host}}:{{port}}/api/authentication/login
 Content-Type: application/json
 
 {
-  "identification" : "user39@example.com",
-  "password": "ChangeMe45/*"
+  "identification" : "admin@admin.fr",
+  "password": "admin"
 }
 
 ###

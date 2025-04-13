@@ -1,5 +1,3 @@
-// src/AdminPage.js
-import axios from "axios";
 import { useEffect, useState } from "react";
 
 import Header from "../components/layout/Header";
@@ -16,6 +14,7 @@ import RecursiveRenderer from "../components/llm/RecursiveRenderer";
 import ChatHistory, { Message } from "../components/llm/ChatHistory";
 
 import '../styles/llm.css'
+import { useApi } from "../hooks/useApi";
 
 export type ModelType =  {
 	name: string,
@@ -92,6 +91,9 @@ const Llm = () => {
 	const [isModalOpen, setModalOpen] = useState(false);
 	const [modalContent, setModalContent] = useState<React.ReactNode>(null);
 
+	const api = useApi();  
+	
+
 	const displayModal = (content: React.ReactNode) => {
 		setModalContent(content);
 		setModalOpen(true);
@@ -127,7 +129,7 @@ const Llm = () => {
 
 	const fetchModels = async () => {
 		try {
-			const res: any = await axios.get(`${host}/api/rag/llm`);
+			const res: any = await api.get(`/api/rag/llm`);
 			setModels(() => [...res.data.content]);
 		} catch (error: any) {
 			console.error(error)
@@ -158,14 +160,9 @@ const Llm = () => {
 		const model = formData.get("modelName") as string
 
 		try {
-			await axios.post(`${host}/api/rag/llm`,
+			await api.post(`/api/rag/llm`,
 				{ 
 					llm_model_name: model 
-				},
-				{
-					headers: {
-						"Content-Type": "application/json"
-					}
 				}
 			);
 			
@@ -178,10 +175,7 @@ const Llm = () => {
 	const removeModel = async (event:React.MouseEvent<HTMLButtonElement>, model: ModelType) => {
 		event.preventDefault()
 		try {
-			await axios.delete(`${host}/api/rag/llm`, {
-				headers: {
-					"Content-Type": "application/json"
-				},
+			await api.delete(`/api/rag/llm`, {
 				data: {
 					llm_model_name: model.name
 				}
@@ -196,7 +190,7 @@ const Llm = () => {
 
 	const fetchEmbedders = async () => {
 		try {
-			const res: any = await axios.get(`${host}/api/rag/embedders`);
+			const res: any = await api.get(`/api/rag/embedders`);
 			setEmbedders([...res.data.content]);
 		} catch (error: any) {
 			console.error(error)
@@ -228,15 +222,10 @@ const Llm = () => {
 		const is_encode_kwargs = formData.get("isEncodeKwargs") as string;		
 
 		try {
-			const res = await axios.post(`${host}/api/rag/embedders`,
+			const res = await api.post(`/api/rag/embedders`,
 				{ 
 					model_name: model_name,
 					is_encode_kwargs: !!is_encode_kwargs
-				},
-				{
-					headers: {
-						"Content-Type": "application/json"
-					}
 				}
 			);
 			
@@ -249,10 +238,7 @@ const Llm = () => {
 	const removeEmbedder 	= async (event:React.MouseEvent<HTMLButtonElement>, embedder: EmbedderType) => {
 		event.preventDefault()
 		try {
-			await axios.delete(`${host}/api/rag/embedders`, {
-				headers: {
-					"Content-Type": "application/json"
-				},
+			await api.delete(`/api/rag/embedders`, {
 				data: {
 					id: embedder.id
 				}
@@ -271,16 +257,11 @@ const Llm = () => {
 		const name = formData.get("embedderName") as string;		
 
 		try {
-			const res = await axios.post(`${host}/api/rag/embedders/search`,
+			const res = await api.post(`/api/rag/embedders/search`,
 				{ 
 					id: id,
 					name: name
 				},
-				{
-					headers: {
-						"Content-Type": "application/json"
-					}
-				}
 			);
 
 			displayModal(displayEmbedders(res.data.content))
@@ -292,7 +273,7 @@ const Llm = () => {
 
 	const fetchCollections = async () => {
 		try {
-			const res: any = await axios.get(`${host}/api/rag/collections`);
+			const res: any = await api.get(`/api/rag/collections`);
 			const collections = res.data.content;
 
 			const enriched = collections.map((vs: CollectionType) => ({
@@ -331,16 +312,11 @@ const Llm = () => {
 		const embedder_id = formData.get("embedderId") as string;		
 
 		try {
-			const res = await axios.post(`${host}/api/rag/collections`,
+			const res = await api.post(`/api/rag/collections`,
 				{ 
 					persist_directory: persist_directory,
 					collection_name: collection_name,
 					embedder_id: embedder_id
-				},
-				{
-					headers: {
-						"Content-Type": "application/json"
-					}
 				}
 			);
 
@@ -355,10 +331,7 @@ const Llm = () => {
 	const removeCollection 	= async (event:React.MouseEvent<HTMLButtonElement>, collection: CollectionType) => {
 		event.preventDefault()
 		try {
-			await axios.delete(`${host}/api/rag/collections`, {
-				headers: {
-					"Content-Type": "application/json"
-				},
+			await api.delete(`/api/rag/collections`, {
 				data: {
 					id: collection.id
 				}
@@ -377,15 +350,10 @@ const Llm = () => {
 		const name = formData.get("collectionName") as string;		
 
 		try {
-			const res = await axios.post(`${host}/api/rag/collections/search`,
+			const res = await api.post(`/api/rag/collections/search`,
 				{ 
 					id: id,
 					name: name
-				},
-				{
-					headers: {
-						"Content-Type": "application/json"
-					}
 				}
 			);
 
@@ -405,14 +373,9 @@ const Llm = () => {
 		// const chunk_overlap = formData.get("chunkOverlap") as string;	
 
 		try {
-			const res = await axios.post(`${host}/api/rag/retriver`,
+			const res = await api.post(`/api/rag/retriver`,
 				{ 	
 					store_id:store_id
-				},
-				{
-					headers: {
-						"Content-Type": "application/json"
-					}
 				}
 			);
 
@@ -430,7 +393,7 @@ const Llm = () => {
 
 	const fetchChats = async () => {
 		try {
-			const res: any = await axios.get(`${host}/api/rag/chats`);
+			const res: any = await api.get(`/api/rag/chats`);
 			const chats = res.data.content;
 
 			const enriched = chats.map((chat: ChatType) => ({
@@ -468,10 +431,7 @@ const Llm = () => {
 	const removeChat = async (event:React.MouseEvent<HTMLButtonElement>, chat: ChatType) => {
 		event.preventDefault()
 		try {
-			await axios.delete(`${host}/api/rag/chats`, {
-				headers: {
-					"Content-Type": "application/json"
-				},
+			await api.delete(`/api/rag/chats`, {
 				data: {
 					id: chat.id
 				}
@@ -493,18 +453,13 @@ const Llm = () => {
 		const collection = formData.get("collectionId") as string;		
 
 		try {
-			const res = await axios.post(`${host}/api/rag/chats`,
+			const res = await api.post(`/api/rag/chats`,
 				{ 
 					name: name,
 					description: description,
 					llm_model_name: llm_model_name,
 					options: options,
 					collection: collection 
-				},
-				{
-					headers: {
-						"Content-Type": "application/json"
-					}
 				}
 			);
 
@@ -533,7 +488,7 @@ const Llm = () => {
 		}
 	
 		try {
-			const res = await axios.post(`${host}/api/rag`, {
+			const res = await api.post(`${host}/api/rag`, {
 				question: question,
 				id: currentChatId,
 				collection: currentCollectionId

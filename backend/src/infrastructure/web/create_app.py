@@ -46,7 +46,7 @@ def create_app(config_class=Config):
     jwt = JWTManager(app)
     db.init_app(app)
 
-    CORS(app, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     # Repositories
     user_repository = SQLUserRepository(db)
@@ -84,6 +84,7 @@ def create_app(config_class=Config):
     document_storage = S3DocumentStorage(app)
     document_RAG_repository =  SQLDocumentRAGRepository(db)
     rag_service = RAGService(document_RAG_repository, document_storage, rag_pipeline, app.config.get('RAG_FILE_STORAGE_FOLDER_NAME', 'llm'), 'tmp')
+    
     rag_routes = create_rag_routes(rag_service, authorize)
     app.register_blueprint(rag_routes, url_prefix='/api')
     

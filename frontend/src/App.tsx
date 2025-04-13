@@ -16,6 +16,7 @@ import AddVehicle from "./components/vehicles/AddVehicle.tsx";
 import ModifyUser from "./pages/ModifyUser.tsx"
 import Llm from "./pages/Llm.tsx";
 import { UserProvider } from "./store/UserContext.tsx";
+import Login from "./pages/Login.tsx";
 
 const router = createBrowserRouter([
   {
@@ -25,7 +26,12 @@ const router = createBrowserRouter([
   },
   {
     path: "/AuthPage",
-    element: <AuthPage />,
+    element: <AuthPage register={false} />,
+    errorElement: <Error />
+  },
+  {
+    path: "/login",
+    element: <Login />,
     errorElement: <Error />
   },
   {

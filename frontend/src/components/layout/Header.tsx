@@ -1,10 +1,11 @@
+import { useContext } from "react"; 
 import { Link, useNavigate } from "react-router-dom";
-import { useContext } from "react";  // Importation de useContext
-import { UserContext } from "../../store/UserContext";  // Importation du contexte
+
 import ChatBot from "../llm/ChatBot";
+import { UserContext } from "../../store/UserContext"; 
 
 export default function Header() {
-  const { state, dispatch } = useContext(UserContext);  // Récupérer l'état et le dispatch du contexte
+  const { state, dispatch } = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleLogout = () => {

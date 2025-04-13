@@ -1,24 +1,42 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MdAssistant, MdClose } from "react-icons/md";
+
 import ChatHistory from "./ChatHistory";
 import { ChatType } from "../../pages/Llm";
+import { useApi } from "../../hooks/useApi";
 
 const ChatBot = () => {
-  const host = import.meta.env.VITE_API_HOST;
   const [chats, setChats] = useState<ChatType[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const chatModalRef = useRef<HTMLDivElement | null>(null);
+
+  const api = useApi();  
 
   useEffect(() => {
     fetchChats();
   }, []);
 
+  useEffect(() => {
+    if (isChatOpen) {
+      const handleOutsideClick = (event: MouseEvent) => {
+        if (chatModalRef.current && !chatModalRef.current.contains(event.target as Node)) {
+          setIsChatOpen(false);
+        }
+      };
+      document.addEventListener("mousedown", handleOutsideClick);
+      return () => {
+        document.removeEventListener("mousedown", handleOutsideClick);
+      };
+    }
+  }, [isChatOpen]);
+  
+
   const toggleChat = () => setIsChatOpen(prev => !prev);
 
   const fetchChats = async () => {
     try {
-      const res = await axios.get(`${host}/api/rag/chats`);
+      const res = await api.get(`/api/rag/chats`);
       const chats = res.data.content;
       setChats(chats);
     } catch (error) {
@@ -54,13 +72,12 @@ const ChatBot = () => {
     if (!currentCollectionId) return console.error("Aucune collection associée à la discussion actuelle.");
 
     try {
-      const res = await axios.post(`${host}/api/rag`, {
-        question,
-        id: currentChatId,
-        collection: currentCollectionId
-      }, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await api.post(`/api/rag`, {
+          question,
+          id: currentChatId,
+          collection: currentCollectionId
+        }
+      );
 
       const response = res.data.content;
 
@@ -97,7 +114,7 @@ const ChatBot = () => {
       </button>
 
       {isChatOpen && (
-        <div className="fixed bottom-28 right-8 z-50 max-w-full w-auto">
+        <div className="fixed bottom-28 right-8 z-50 max-w-full w-auto" ref={chatModalRef}>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-h-[calc(100vh-2rem)] flex flex-col overflow-hidden">
 
             <div className="flex justify-between items-center p-4">
@@ -136,7 +153,7 @@ const ChatBot = () => {
                   name="prompt"
                   rows={3}
                   placeholder="Tapez votre question ici..."
-                  className="w-full p-2 rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white text-sm border-none focus:outline-none"
+                  className="w-full p-2 rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white text-sm border-none focus:outline-none resize-none"
                   style={{ height: '100px' }}
                 />
                 <button

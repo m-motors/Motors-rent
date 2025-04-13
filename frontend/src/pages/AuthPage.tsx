@@ -5,8 +5,8 @@ import Login from "./Login";
 
 import "../styles/Register.css";
 
-const AuthPage: React.FC = () => {
-  const [isRegister, setIsRegister] = useState(true);
+const AuthPage: React.FC<{register?: boolean}> = ({register}) => {
+  const [isRegister, setIsRegister] = useState(register);
 
   return (
     <div>

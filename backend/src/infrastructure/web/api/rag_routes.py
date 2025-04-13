@@ -13,8 +13,9 @@ from src.infrastructure.web.middleware.validator import Validator, Field
 rag_routes = Blueprint('rag_routes', __name__)
 
 def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprint:
-    @authorize([UserRole.ADMIN])
+
     @rag_routes.route('/rag/llm', methods=['GET'])
+    @authorize([UserRole.ADMIN])
     def list_llm(user):
         try:
             res = rag_service.list_llm()
