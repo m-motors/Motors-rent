@@ -1,35 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect } from "react";
+import { useContext } from "react";  // Importation de useContext
+import { UserContext } from "../../store/UserContext";  // Importation du contexte
 import ChatBot from "../llm/ChatBot";
 
 export default function Header() {
-  const [isLogged, setIsLogged] = useState(false);
-  const [user, setUser] = useState<{ name: string; role: string } | null>(null);
+  const { state, dispatch } = useContext(UserContext);  // Récupérer l'état et le dispatch du contexte
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      axios
-        .get(`${import.meta.env.VITE_API_HOST}/api/tools/all`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => {
-          setUser(response.data.user);
-          setIsLogged(true);
-        })
-        .catch(() => {
-          localStorage.removeItem("token");
-          setIsLogged(false);
-        });
-    }
-  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setIsLogged(false);
+    dispatch({ type: "LOGOUT"});
     navigate("/authpage");
   };
 
@@ -41,32 +22,35 @@ export default function Header() {
 
       <nav className="hidden md:flex gap-6 text-sm uppercase">
         <Link to="/" className="hover:text-gray-400">Accueil</Link>
-        {isLogged && user?.role !== "admin" && (
+
+        {state.role && (
+          <>
+            <Link to="/users/:id/applications" className="hover:text-gray-400">Dossiers</Link>
+          </>
+        )}
+
+        {state.role !== "admin" && (
           <Link to="/user" className="hover:text-gray-400">Mon compte</Link>
         )}
-        {isLogged && user?.role === "admin" && (
-          <Link to="/admin" className="hover:text-gray-400">Admin</Link>
-        )}
-        <Link to="/users/:id/applications" className="hover:text-gray-400">Mes dossiers</Link>
-        <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
-        <Link to="/llm" className="hover:text-gray-400">LLM</Link>
-        {isLogged && (
-          <button onClick={handleLogout} className="hover:text-gray-400">Déconnexion</button>
+
+        {state.role === "admin" && (
+          <>
+            <Link to="/admin" className="hover:text-gray-400">Admin</Link>
+            <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
+            <Link to="/llm" className="hover:text-gray-400">LLM</Link>
+          </>
         )}
       </nav>
 
       <div className="flex items-center gap-2">
-        {isLogged && (
+        {state.role && (
           <span className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-sm">
-            {user?.name}
+            {state.firstName} {state.lastName} | {state.email} | {state.role} 
           </span>
         )}
-        {isLogged ? (
+        {state.role ? (
           <button
-            onClick={() => {
-              localStorage.removeItem("token");
-              setIsLogged(false);
-            }}
+            onClick={handleLogout}
             className="bg-red-500 px-3 py-1 rounded"
           >
             Déconnexion
@@ -75,8 +59,9 @@ export default function Header() {
           <Link to="/authpage" className="bg-blue-500 px-3 py-1 rounded">Connexion</Link>
         )}
       </div>
+
       <div className="fixed bottom-8 right-8 bg-blue-500 z-10">
-        <ChatBot/>
+        <ChatBot />
       </div>
     </header>
   );

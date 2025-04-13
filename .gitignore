@@ -63,9 +63,11 @@ eggs/
 coverage/
 
 # Ollama modules
-ollama/
 chroma/
-/llm/
+
+/llm/ollama/*
+!/llm/ollama/.gitkeep
+
 
 # Ne pas ignorer les composants RAG dans le frontend
 !/frontend/src/components/llm/

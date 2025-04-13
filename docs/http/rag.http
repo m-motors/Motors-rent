@@ -273,19 +273,6 @@ Content-Type: application/json
   "vectorstore_id":"fcfbbd84-9d79-4b34-aa83-8debcc569647"
 }
 
-###
-
-Who is joachim Renevier
-
-
-### 
-pip install -U accelerate
-pip install -U langchain-huggingface
-pip freeze > requirements.txt`pip install -U langchain-community`
-
-
-
-
 
 
 
@@ -319,14 +306,26 @@ Content-Type: application/json
 }
 
 
-
 ###
 GET http://localhost:11434/api/tags
 
 ###
+POST http://localhost:11434/api/generate
+Content-Type: application/json
+
+{
+  "model": "llama2:7b",
+  "prompt": "Quelle est la capitale de la France ?",
+  "stream": false
+}
+
+###
 POST http://localhost:11434/api/pull
 
-{"name": "mistral:7b"}
+{"name": "llama2:7b"}
+
+
+
 
 ###
 DELETE http://localhost:11434/api/delete

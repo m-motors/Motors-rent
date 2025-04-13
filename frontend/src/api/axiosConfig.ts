@@ -2,9 +2,11 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_HOST,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// Intercepteur pour ajouter le token dans chaque requête
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -17,4 +19,3 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-export default api;

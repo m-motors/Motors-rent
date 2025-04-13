@@ -15,6 +15,7 @@ import UserApplications from "./pages/UserApplication.tsx";
 import AddVehicle from "./components/vehicles/AddVehicle.tsx";
 import ModifyUser from "./pages/ModifyUser.tsx"
 import Llm from "./pages/Llm.tsx";
+import { UserProvider } from "./store/UserContext.tsx";
 
 const router = createBrowserRouter([
   {
@@ -97,7 +98,11 @@ const App: React.FC = () => {
     fetchHealth();
   }, [host]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <UserProvider>
+      <RouterProvider router={router} />
+    </UserProvider>
+  );
 };
 
 export default App;

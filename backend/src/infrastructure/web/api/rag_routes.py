@@ -13,8 +13,9 @@ from src.infrastructure.web.middleware.validator import Validator, Field
 rag_routes = Blueprint('rag_routes', __name__)
 
 def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprint:
+    @authorize([UserRole.ADMIN])
     @rag_routes.route('/rag/llm', methods=['GET'])
-    def list_llm():
+    def list_llm(user):
         try:
             res = rag_service.list_llm()
 
@@ -30,12 +31,13 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         
 
     @rag_routes.route('/rag/llm', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("llm_model_name", "str", required=False),
         ]
     )
-    def install_llm():
+    def install_llm(user):
         try:
             data = request.json
             llm_model_name = data.get('llm_model_name')
@@ -54,12 +56,13 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         
 
     @rag_routes.route('/rag/llm', methods=['DELETE'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("llm_model_name", "str", required=False),
         ]
     )
-    def uninstall_llm(llm_model_name=None):
+    def uninstall_llm(user):
         try:
             data = request.json
             llm_model_name = data.get('llm_model_name')
@@ -85,6 +88,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         
 
     @rag_routes.route('/rag/chats', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("name", "str", required=True),
@@ -94,7 +98,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("collection", "str", required=False),
         ]
     )
-    def create_chat():
+    def create_chat(user):
         try:
             data = request.json
             name = data.get('name')
@@ -112,12 +116,13 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         
 
     @rag_routes.route('/rag/chats', methods=['DELETE'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
         ]
     )
-    def remove_chat():
+    def remove_chat(user):
         try:
             data = request.json
             id = data.get('id')
@@ -131,13 +136,14 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
     
 
     @rag_routes.route('/rag/chats/search', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=False),
             Field("name", "str", required=False),
         ]
     )
-    def search_chat():
+    def search_chat(user):
         try:
             data = request.json
             id = data.get('id')
@@ -152,12 +158,13 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         
         
     @rag_routes.route('/rag/chats/deepsearch', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("partial", "dict", required=True),
         ]
     )
-    def deepsearch_chat():
+    def deepsearch_chat(user):
         try:
             data = request.json
             partial = data.get('partial')
@@ -172,12 +179,13 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         
 
     @rag_routes.route('/rag/chats/options', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
         ]
     )
-    def list_chat_options():
+    def list_chat_options(user):
         try:
             data = request.json
             id = data.get('id')
@@ -189,13 +197,14 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
     
 
     @rag_routes.route('/rag/chats/options', methods=['PATCH'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
             Field("options", "dict", required=True)
         ]
     )
-    def update_options_chat():
+    def update_options_chat(user):
         try:
             data = request.json
             id = data.get('id')
@@ -209,13 +218,14 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
     
 
     @rag_routes.route('/rag/chats/collection', methods=['PATCH'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
             Field("collection", "str", required=True),
         ]
     )
-    def update_collection_chat():
+    def update_collection_chat(user):
         try:
             data = request.json
             id = data.get('id')
@@ -232,6 +242,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag', methods=['POST'])
+    @authorize([UserRole.CLIENT, UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("question", "str", required=True),
@@ -242,7 +253,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("prompt_template", "str", required=False)
         ]
     )
-    def generate_response():
+    def generate_response(user):
         try:
             data = request.json
             question = data.get('question')
@@ -263,7 +274,8 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/storage', methods=['GET'])
-    def list_storage_files():
+    @authorize([UserRole.ADMIN])
+    def list_storage_files(user):
         try:
             res = rag_service.list_storage_files()
             return jsonify({"message": "List files", "content": res, "error": None}), 200
@@ -273,7 +285,8 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/storage', methods=['POST'])
-    def upload_storage_file():
+    @authorize([UserRole.ADMIN])
+    def upload_storage_file(user):
         try:
             file = request.files['file']
 
@@ -293,6 +306,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/storage/download', methods=['GET'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         query_fields=[
             Field(label="file_name", field_type="str", required=True),
@@ -300,7 +314,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field(label="local_path", field_type="str", required=False)
         ]
     )
-    def download_storage_file():
+    def download_storage_file(user):
         try:
             file_name = request.args.get("file_name")
             folder_name = request.args.get("folder_name", None)
@@ -314,13 +328,14 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
     
     @rag_routes.route('/rag/storage', methods=['DELETE'])
+    @authorize([UserRole.ADMIN])
     @Validator(
     query_fields=[
             Field(label="file_name", field_type="str", required=True),
             Field(label="folder_name", field_type="str", required=False)
         ]
     )
-    def delete_storage_file():
+    def delete_storage_file(user):
         try:
             file_name = request.args.get("file_name")
             folder_name = request.args.get("folder_name", None)
@@ -335,7 +350,8 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/documents', methods=['GET'])
-    def list_documents():
+    @authorize([UserRole.ADMIN])
+    def list_documents(user):
         try:
             res = rag_service.list_document_rag()
             return jsonify({"message": "List documents", "content": [doc.to_dict() for doc in res], "error": None}), 200
@@ -345,7 +361,8 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
     
     @rag_routes.route('/rag/documents/<int:doc_id>', methods=['GET'])
-    def get_document(doc_id):
+    @authorize([UserRole.ADMIN])
+    def get_document(user, doc_id):
         try:
             res = rag_service.get_document_rag(doc_id)
             if not res:
@@ -357,6 +374,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/documents', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("name", "str", required=True),
@@ -364,7 +382,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("status", "str", required=False),
         ]
     )
-    def save_document():
+    def save_document(user):
         try:
             data = request.json
             status = DocumentRAGStatus(data["status"].lower()) if "status" in data else DocumentRAGStatus.ADD
@@ -381,6 +399,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/documents/<int:doc_id>', methods=['PATCH'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("name", "str", required=False),
@@ -390,7 +409,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("status", "str", required=False),
         ]
     )
-    def update_document(doc_id):
+    def update_document(user, doc_id):
         try:
             data = request.json
             status = DocumentRAGStatus(data["status"].lower()) if "status" in data else DocumentRAGStatus.ADD
@@ -411,7 +430,8 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/documents/<int:doc_id>', methods=['DELETE'])
-    def delete_document(doc_id):
+    @authorize([UserRole.ADMIN])
+    def delete_document(user, doc_id):
         try:
             res = rag_service.delete_document_rag(doc_id)
             return jsonify({"message": "Document deleted", "content": [doc.to_dict() for doc in res], "error": None}), 200
@@ -425,7 +445,8 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/embedders', methods=['GET'])
-    def list_embedders():
+    @authorize([UserRole.ADMIN])
+    def list_embedders(user):
         try:
             res = rag_service.list_embedders()
 
@@ -449,13 +470,14 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/embedders', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("model_name", "str", required=False),
             Field("is_encode_kwargs", "bool", required=False),
         ]
     )
-    def create_embedder():
+    def create_embedder(user):
         try:
             data = request.json
             model_name = data.get('model_name')
@@ -483,12 +505,13 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         
 
     @rag_routes.route('/rag/embedders', methods=['DELETE'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
         ]
     )
-    def remove_embedder():
+    def remove_embedder(user):
         try:
             data = request.json
             id = data.get('id')
@@ -515,13 +538,14 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
     
 
     @rag_routes.route('/rag/embedders/search', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=False),
             Field("name", "str", required=False),
         ]
     )
-    def search_embedder():
+    def search_embedder(user):
         try:
             data = request.json
             id = data.get('id')
@@ -551,7 +575,8 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/collections', methods=['GET'])
-    def list_collection():
+    @authorize([UserRole.ADMIN])
+    def list_collection(user):
         try:
             res = rag_service.list_collection()
 
@@ -576,6 +601,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         
 
     @rag_routes.route('/rag/collections', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("persist_directory", "str", required=False),
@@ -583,7 +609,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("embedder_id", "str", required=False),
         ]
     )
-    def create_collection():
+    def create_collection(user):
         try:
             data = request.json
             persist_directory = data.get('persist_directory')
@@ -609,6 +635,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             return jsonify({"message": "Create collection failed", "content": None, "error": "Internal Server Error"}), 500
         
     @rag_routes.route('/rag/collections', methods=['PATCH'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
@@ -618,7 +645,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("embedder", "str", required=False)
         ]
     )
-    def update_collection():
+    def update_collection(user):
         try:
             data = request.json
             id = data.get('id')
@@ -658,12 +685,13 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         
 
     @rag_routes.route('/rag/collections', methods=['DELETE'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=True),
         ]
     )
-    def remove_collection():
+    def remove_collection(user):
         try:
             data = request.json
             id = data.get('id')
@@ -691,13 +719,14 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
     
 
     @rag_routes.route('/rag/collections/search', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("id", "str", required=False),
             Field("name", "str", required=False),
         ]
     )
-    def search_collection():
+    def search_collection(user):
         try:
             data = request.json
             id = data.get('id')
@@ -728,6 +757,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
 
 
     @rag_routes.route('/rag/retriver', methods=['POST'])
+    @authorize([UserRole.ADMIN])
     @Validator(
         json_fields=[
             Field("store_id", "str", required=True),
@@ -737,7 +767,7 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
             Field("chunk_overlap", "int", required=False),
         ]
     )
-    def add_docs_store():
+    def add_docs_store(user):
         try:
             data = request.json
             store_id = data.get('store_id')
@@ -763,10 +793,6 @@ def create_rag_routes(rag_service: RAGService, authorize: authorize) -> Blueprin
         except Exception as e:
             logger.error(f"Search collection error: {str(e)}")
             return jsonify({"message": "Search collection failed", "content": None, "error": "Internal Server Error"}), 500
-
-    
-
-
 
     return rag_routes
 

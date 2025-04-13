@@ -4,11 +4,14 @@ LABEL stage=base
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
+# Mise à jour des paquets système et installation des dépendances système
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Ajout de variables d'environnement pour debug
 ARG FLASK_INTERNAL_PORT
 ARG ENV_MODE
 
@@ -18,12 +21,23 @@ RUN echo "PORT: 5000"
 RUN echo "ENV_MODE: ${ENV_MODE}"
 RUN echo "###"
 
+# Répertoire de travail
 WORKDIR /app
+
+# Copie et installation des dépendances Python
 COPY ./requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+
+# Mise à jour de pip pour bénéficier des derniers correctifs de téléchargement
+RUN pip install --upgrade pip
+
+# Installation des dépendances avec timeout étendu et fallback vers un miroir PyPI
+RUN pip install --default-timeout=60 --no-cache-dir -r requirements.txt
+
+# Installation séparée de gunicorn
 RUN pip install --no-cache-dir gunicorn
 
 
+# --- STAGE: production ---
 FROM base AS production
 LABEL stage=production
 
