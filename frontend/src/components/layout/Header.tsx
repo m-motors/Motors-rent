@@ -1,5 +1,4 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import { useContext } from "react";  // Importation de useContext
 import { UserContext } from "../../store/UserContext";  // Importation du contexte
 import ChatBot from "../llm/ChatBot";
