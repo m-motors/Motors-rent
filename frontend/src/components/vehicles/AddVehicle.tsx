@@ -26,7 +26,7 @@ const defaultVehicle: VehicleType = {
 
 const AddVehicle: React.FC = () => {
   const [vehicleData, setVehicleData] = useState<VehicleType>(defaultVehicle);
-  const [qry, setQry] = useState({ error: null as string | null, loading: false });
+  const [qry] = useState({ error: null as string | null, loading: false });
   const [qrySubmit, setQrySubmit] = useState({ error: null as string | null, loading: false });
 
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ const AddVehicle: React.FC = () => {
     }));
   };
 
-  
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setQrySubmit({ error: null, loading: true });
