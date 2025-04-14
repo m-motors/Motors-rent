@@ -1,0 +1,17 @@
+FROM ollama/ollama:latest AS base
+LABEL stage=base
+
+# Installer curl (et nettoyer après)
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Variables d'environnement
+ENV OLLAMA_KEEP_ALIVE=24h \
+    OLLAMA_HOST=0.0.0.0
+
+WORKDIR /root
+
+COPY ./entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
+ENTRYPOINT []
+CMD ["./entrypoint.sh"]

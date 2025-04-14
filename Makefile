@@ -109,7 +109,7 @@ restartd:
 prodstartd: 
 	docker compose down -v
 	docker compose -f docker-compose.prod.yml down -v
-	docker compose -f docker-compose.prod.yml --env-file .env --env-file .env.local --build-arg ENV_MODE=production up --build -d
+	docker compose -f docker-compose.prod.yml --env-file .env --env-file .env.local up --build -d
 	docker compose -f docker-compose.prod.yml logs -f
 
 
@@ -141,7 +141,6 @@ pushback :
 
 buildproxy :
 	docker build --build-arg NGINX_HTTPS_PORT=$(NGINX_HTTPS_PORT) --build-arg NGINX_HTTP_PORT=$(NGINX_HTTP_PORT) --build-arg ENV_MODE=$(ENV_MODE) -t ghcr.io/j-renevier/$(REVERSE_PROXY_PACKAGE_NAME):v$(REVERSE_PROXY_PACKAGE_VERSION) -f ./reverse-proxy/Dockerfile.prod ./reverse-proxy
-	docker build --build-arg NGINX_HTTPS_PORT=$(NGINX_HTTPS_PORT) --build-arg NGINX_HTTP_PORT=$(NGINX_HTTP_PORT) --build-arg ENV_MODE=$(ENV_MODE) -t ghcr.io/j-renevier/nginx:v$(NGINX_VERSION) -f ./reverse-proxy/Dockerfile.prod ./reverse-proxy
 
 runproxy :
 	docker run --env-file .env --env-file .env.local -p 80:$(NGINX_HTTP_PORT) -p 443:$(NGINX_HTTPS_PORT) -d  ghcr.io/j-renevier/$(REVERSE_PROXY_PACKAGE_NAME):v$(REVERSE_PROXY_PACKAGE_VERSION)
