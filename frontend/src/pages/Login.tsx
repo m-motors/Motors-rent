@@ -53,6 +53,7 @@ const Login: React.FC = () => {
         lastName: identityResponse.data.content.last_name,
         email: identityResponse.data.content.email,
         role: identityResponse.data.content.user_role,
+        id: identityResponse.data.content.id,
       }
 
       setQry((prev) => ({
@@ -68,6 +69,7 @@ const Login: React.FC = () => {
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.role,
+          id: user.id,
         },
       });
 

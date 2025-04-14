@@ -17,6 +17,7 @@ import ModifyUser from "./pages/ModifyUser.tsx"
 import Llm from "./pages/Llm.tsx";
 import { UserProvider } from "./store/UserContext.tsx";
 import Login from "./pages/Login.tsx";
+import UpdateVehicle from "./components/vehicles/UpdateVehicle.tsx";
 
 const router = createBrowserRouter([
   {
@@ -45,14 +46,24 @@ const router = createBrowserRouter([
     errorElement: <Error />
   },
   {
-    path: "/profile",
-    element: <Profile />,
-    errorElement: <Error />
-  },
-  {
     path: "voitures/:id",
     element: <VehicleDetail />,
     errorElement: < Error />
+  },
+  {
+    path: "/voitures/add",
+    element: <AddVehicle />,
+    errorElement: < Error />
+  },
+  {
+    path: "/voitures/update/:id",
+    element: <UpdateVehicle />,
+    errorElement: < Error />
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
+    errorElement: <Error />
   },
   {
     // path: "user/:id",
@@ -64,11 +75,6 @@ const router = createBrowserRouter([
     // path: "/admin/:id"
     path: "/admin",
     element: <Admin />,
-    errorElement: < Error />
-  },
-  {
-    path: "/addVehicle",
-    element: <AddVehicle />,
     errorElement: < Error />
   },
   {

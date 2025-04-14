@@ -3,9 +3,11 @@ import Footer from "../components/layout/Footer"
 import Content from "../components/vehicles/Content";
 const Home: React.FC = () => {
   return (
-    <div className="home" style={{ height: '100vh' }}>
+    <div className="home min-h-screen flex flex-col">
       <Header />
-      <Content />
+      <div className="flex-1">
+        <Content />
+      </div>
       <Footer />
     </div>
   );

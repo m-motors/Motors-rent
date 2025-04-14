@@ -2,6 +2,8 @@
     min-height: 100%;
     background-color: #f3f4f6;
     padding: 1.5rem;
+    display: flex;
+    justify-content: center;
 }
 .add_page_card {
     background-color: white;

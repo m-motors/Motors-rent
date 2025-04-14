@@ -7,6 +7,7 @@ interface UserState {
   token: string
   email:string
   role: string
+  id: number
 }
 
 // Actions du reducer
@@ -28,6 +29,7 @@ const initialState: UserState = {
   email:"",
   role: "",
   token: "",
+  id: 0,
 };
 
 // Lecture des données depuis localStorage

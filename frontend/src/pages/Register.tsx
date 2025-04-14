@@ -61,6 +61,7 @@ const Register: React.FC = () => {
         lastName: response.data.content.last_name,
         email: response.data.content.email,
         role: response.data.content.user_role,
+        id: response.data.content.id,
       }
       
       setQry((prev) => ({
@@ -76,6 +77,7 @@ const Register: React.FC = () => {
           firstName: user.firstName,
           lastName: user.lastName,
           role: user.role,
+          id: user.id,
         },
       });
 

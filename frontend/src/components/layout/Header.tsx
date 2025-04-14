@@ -36,7 +36,7 @@ export default function Header() {
         {state.role === "admin" && (
           <>
             <Link to="/admin" className="hover:text-gray-400">Admin</Link>
-            <Link to="/addVehicle" className="hover:text-gray-400">Nouvelle offre</Link>
+            <Link to="/voitures/add" className="hover:text-gray-400">Nouvelle offre</Link>
             <Link to="/llm" className="hover:text-gray-400">LLM</Link>
           </>
         )}
