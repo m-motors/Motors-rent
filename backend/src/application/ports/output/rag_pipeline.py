@@ -7,6 +7,10 @@ from langchain_community.vectorstores import Chroma
 
 class RAGPipeline(ABC):
     @abstractmethod
+    def __init__(self, host: str):
+        pass
+
+    @abstractmethod
     def list_llm(self, ollama_host: str = None) -> List[Dict]:
         pass
 

@@ -44,6 +44,11 @@ class Config:
     AWS_REGION=os.getenv("AWS_REGION", "ChangeMe") 
     RAG_FILE_STORAGE_FOLDER_NAME = os.getenv("RAG_FILE_STORAGE_FOLDER_NAME", "llm") 
 
+    ### LLM ###
+    OLLAMA_PROTOCOLE = os.getenv("OLLAMA_PROTOCOLE", "http") 
+    OLLAMA_HOST = os.getenv("OLLAMA_HOST", "ollama") 
+    OLLAMA_PORT = os.getenv("OLLAMA_PORT", "11434") 
+
     def __setitem__(self, key, item):
         self.__dict__[key] = item
 

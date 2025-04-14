@@ -17,8 +17,8 @@ from src.domain.models.document_rag import DocumentRAG, DocumentRAGStatus
 
 
 class LangcahinRAGPipeline(RAGPipeline):
-    def __init__(self):
-        self.ollama_host = "http://ollama:11434"
+    def __init__(self, host):
+        self.ollama_host = host if host else "http://ollama:11434"
         self.llm_model_name="mistral:7b"  # Alternative :  'llama2:7b
 
         self.default_options = {

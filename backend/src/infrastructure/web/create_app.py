@@ -80,7 +80,8 @@ def create_app(config_class=Config):
     app.register_blueprint(authentication_routes, url_prefix='/api')
 
 
-    rag_pipeline = LangcahinRAGPipeline()
+
+    rag_pipeline = LangcahinRAGPipeline(host=f"{app.config.get('OLLAMA_PROTOCOLE', 'http')}://{app.config.get('OLLAMA_HOST', 'ollama')}:{app.config.get('OLLAMA_PORT', '11434')}")
     document_storage = S3DocumentStorage(app)
     document_RAG_repository =  SQLDocumentRAGRepository(db)
     rag_service = RAGService(document_RAG_repository, document_storage, rag_pipeline, app.config.get('RAG_FILE_STORAGE_FOLDER_NAME', 'llm'), 'tmp')
